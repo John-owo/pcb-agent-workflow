@@ -275,6 +275,15 @@ class RenderTests(unittest.TestCase):
             self.out = self.root / f"badnumber{i}"
             self.assertEqual(self.run_render(extra)[1]["status"], "ERROR")
 
+    def test_unwritable_output_target_returns_error_code(self):
+        target = self.root / "output-file"
+        target.write_bytes(b"preserve this file")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(render.main(["--original", str(self.orig), "--factory", str(self.fact),
+                                          "--out", str(target)]), 2)
+            self.assertEqual(pixel.main(["--renders", str(self.out), "--out", str(target)]), 2)
+        self.assertEqual(target.read_bytes(), b"preserve this file")
+
     def test_fixed_release_read_only_self_comparison(self):
         import hashlib
         archive = SCRIPTS.parents[1] / "examples/max-m10s-breakout-revc/manufacturing/gerbers-board.zip"

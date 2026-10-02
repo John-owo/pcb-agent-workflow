@@ -228,7 +228,11 @@ def run(args, result):
 def main(argv=None):
     args = parse_args(argv)
     out = Path(args.out or args.renders)
-    out.mkdir(parents=True, exist_ok=True)
+    try:
+        out.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        print(f"error: cannot prepare output: {e}")
+        return 2
     result = {"tool": "pixel_compare.py", "schema_version": 1,
               "scope": "raster difference detection; not netlist or production approval",
               "tolerance_px": args.tolerance_px, "layers": {}, "issues": []}
@@ -239,7 +243,11 @@ def main(argv=None):
         print(f"error: {e}")
     priority = {"PASS": 0, "WARNING": 1, "INCOMPLETE": 2, "ERROR": 3}
     result["status"] = max((i["status"] for i in result["issues"]), key=priority.get, default="PASS")
-    (out / "pixel-summary.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    try:
+        (out / "pixel-summary.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    except OSError as e:
+        print(f"error: cannot write report: {e}")
+        return 2
     return 0 if result["status"] == "PASS" else 1 if result["status"] == "WARNING" else 2
 
 

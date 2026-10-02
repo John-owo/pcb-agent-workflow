@@ -791,8 +791,13 @@ def main(argv=None):
                                                  Path(source).resolve() in out.resolve().parents):
             print("error: output must be outside source folders")
             return 2
-    out.mkdir(parents=True, exist_ok=True)
-    if any(out.iterdir()):
+    try:
+        out.mkdir(parents=True, exist_ok=True)
+        occupied = any(out.iterdir())
+    except OSError as e:
+        print(f"error: cannot prepare output: {e}")
+        return 2
+    if occupied:
         print("error: output directory must be empty; use a new run directory")
         return 2
     try:
@@ -801,7 +806,11 @@ def main(argv=None):
         # Parser exceptions may contain private local paths; keep shared reports path-free.
         issue(summary, "ERROR", f"analysis failed ({type(e).__name__})")
         print(f"error: {e}")
-    return finish_report(summary, out / "layer-summary.json")
+    try:
+        return finish_report(summary, out / "layer-summary.json")
+    except OSError as e:
+        print(f"error: cannot write report: {e}")
+        return 2
 
 
 if __name__ == "__main__":
