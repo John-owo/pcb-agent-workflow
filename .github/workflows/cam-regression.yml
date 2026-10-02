@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
+          cache-dependency-path: requirements-cam.txt
       - name: Install pinned CAM dependencies
         run: python -m pip install -r requirements-cam.txt
       - name: Run regression tests
