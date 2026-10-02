@@ -62,7 +62,7 @@
 ## 已驗證
 
 - **原生 ERC／DRC**（KiCad 10.0.6，發行時 2026-09-21）：ERC 0 項違規；DRC 0 項違規、0 個未連線項目、0 個原理圖／PCB 一致性問題。報告含 error、warning、exclusion 三種等級，見 `verification/`。
-- **本副本重跑**（2026-10-02，KiCad 10.0.6 `kicad-cli`，`--severity-all`，DRC 加 `--schematic-parity`）：結果相同。元件庫經 `${KIPRJMOD}` 正常載入，沒有缺 symbol 或 footprint 的警告。
+- **本副本重跑**（2026-10-02，KiCad 10.0.6 `kicad-cli`，`--severity-all`，DRC 加 `--schematic-parity`）：結果相同。元件庫經 `${KIPRJMOD}` 正常載入，沒有缺 symbol 或 footprint 的警告。這次重跑的輸出沒有放進套件，以免改動發行時的 `verification/`；可以用 [kicad-tools.md](../../docs/workflow/kicad-tools.md) 第 5 節的命令自行重現。
 - **發行差異核對**（`release-checks.json`）：與前一版 Rev C 相比，PCB 幾何、走線、焊盤與網路不變。這一版只改了 D1 料號文字、資料表連結、OSP 製造屬性與組裝清單。Gerber ZIP 與當時上傳板廠的檔案逐位元相同。
 - **獨立審查**（`independent-release-review.md`）：由唯讀的審查 agent 檢查發行檔案（README、BOM、CPL、裝配表、ERC／DRC 報告等）彼此是否一致，沒有發現致命的不一致或遺漏。審查範圍只到這些檔案的一致性；審查的是原始發行版的 README，本 README 為公開範例重寫，不在審查範圍內。審查者沒有重新開啟或重算 Gerber ZIP，也沒有核對網站狀態、疊構實作、PDF 呈現、電氣／RF／EMC／DFM 行為或實板。
 
@@ -83,6 +83,7 @@
 - **J1 座標**：CPL 用的是連接器的機構中心 (15.800, 33.700)，和 RF 接點焊盤 (15.800, 32.175) 位置不同。須確認外殼和中心接點的方向。
 - **極性**：元件頂面的標記不一定代表極性。D2、D3、Q1、U1 都要依 `assembly-orientation.pdf` 的 pin 1 和極性端，比對板廠的貼片預覽。
 - **design.json 的元件數**：備註寫 19 個元件，這個數字包含自行焊接的 J2、J3；板廠組裝是 17 個。
+- 設計時曾和 SparkFun 公開的 MAX-M10S breakout 原理圖逐項比較差異與取捨。本設計的電路與檔案是重新繪製的，沒有複製 SparkFun 的檔案。
 - U1 與 J1 的 footprint 依原廠資料建立：MAX-M10S Integration Manual UBX-20053088 R05（焊盤、鋼網開口），I-PEX 20279 圖面 rev.29。這些原廠資料沒有附在本套件內。
 
 ## 原廠資料表

@@ -8,6 +8,11 @@ _autosave-*
 fp-info-cache
 *.kicad_prl
 
+# Local tool config and outputs that contain absolute paths (see docs/workflow/kicad-tools.md)
+.mcp.json
+tools/konnect/config.toml
+response.json
+
 # Python / Node
 __pycache__/
 *.pyc

@@ -35,13 +35,23 @@ footprints/PassiveGNSS.pretty/
     Fiducial_1mm                 <- Fiducial:Fiducial_1mm_Mask3mm
     ToolingHole_2mm              <- MountingHole:MountingHole_2mm
     TestPoint                    <- TestPoint:TestPoint_Pad_D1.0mm
-  Renamed, silkscreen lines moved to F.Fab:
+  Renamed, 3D model reference removed, silkscreen lines, reference text and
+  KiLib_Generator property moved to F.Fab:
     Header_1x06                  <- Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical
 
 Made for this project (MIT): symbols MAX_M10S, BAS116, Q_NMOS_GSD; footprints
 MAX_M10S, PESD3V3C1BSF, ADCM_S05R5SA, CPH3225A, MHF_I. The vendor-specific
 footprints were drawn from the manufacturers' published land patterns, which
 are not included here.
+
+------------------------------------------------------------------------------
+mattpocock/skills (MIT)
+https://github.com/mattpocock/skills
+------------------------------------------------------------------------------
+
+docs/agents/issue-tracker.md, docs/agents/triage-labels.md and
+docs/agents/domain.md are based on the setup templates of mattpocock/skills,
+MIT License, Copyright (c) Matt Pocock.
 
 ------------------------------------------------------------------------------
 Referenced, not included

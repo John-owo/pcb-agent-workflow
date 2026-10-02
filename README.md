@@ -38,7 +38,7 @@ flowchart LR
 
 ### 新專案
 
-把 `templates/` 裡的四個檔案複製到 PCB 專案根目錄，把 `<...>` 換成自己的內容。之後每次接手，agent 會從 `README.md` 和 `WORKLOG.md` 讀起。
+把 `templates/` 裡的四個檔案複製到 PCB 專案根目錄，把 `<...>` 換成自己的內容。專案已經有 `README.md` 的話，不要直接覆蓋，把範本的段落合併進去。之後每次接手，agent 會從 `README.md` 和 `WORKLOG.md` 讀起。
 
 ### 安裝 jlc-support skill
 
@@ -48,12 +48,23 @@ Claude Code 與 Codex 共用同一份 `SKILL.md`：
 git clone https://github.com/John-owo/pcb-agent-workflow.git
 ```
 
+Claude Code（macOS／Linux／Git Bash）：
+
 ```bash
 cp -r pcb-agent-workflow/skills/jlc-support ~/.claude/skills/
 ```
 
+Codex：
+
 ```bash
 cp -r pcb-agent-workflow/skills/jlc-support ~/.codex/skills/
+```
+
+Windows PowerShell：
+
+```powershell
+Copy-Item -Recurse pcb-agent-workflow\skills\jlc-support "$HOME\.claude\skills\"
+Copy-Item -Recurse pcb-agent-workflow\skills\jlc-support "$HOME\.codex\skills\"
 ```
 
 只想在單一專案使用，就放到該專案的 `.claude/skills/`。安裝後跟 agent 說「幫我寫信催 JLC 的 DFM」或「訂單被取消了，幫我追問」，就會套用這個 skill。
@@ -61,6 +72,10 @@ cp -r pcb-agent-workflow/skills/jlc-support ~/.codex/skills/
 ### 搭配的 KiCad 分析 skill
 
 原理圖分析、BOM、DRC 審查、EMC、SPICE 等 skill 使用 [aklofas/kicad-happy](https://github.com/aklofas/kicad-happy)（MIT）。本 repo 不附副本，請依該 repo 的說明安裝。這套流程實際用到的有 `kicad`、`bom`、`jlcpcb`、`lcsc`、`datasheets`、`emc`、`spice`。
+
+### docs/agents 是什麼
+
+`docs/agents/` 是給 [mattpocock/skills](https://github.com/mattpocock/skills) 那套工程類 skill（`triage`、`to-tickets`、`to-spec` 等）讀的設定：issue 記在哪裡、triage 標籤叫什麼。沒安裝那套 skill 就用不到，可以忽略。
 
 ### Codex 與 Claude Code 交接
 
@@ -71,7 +86,7 @@ cp -r pcb-agent-workflow/skills/jlc-support ~/.codex/skills/
 - **一個工作目錄同時只有一位寫入者。** 換手時在 WORKLOG 記錄 owner 與停止點。
 - **改 PCB 前先保全完整備份。** 雜湊清單只能識別檔案，不能還原。
 - **ERC／DRC 通過，不等於電氣正確、板廠接受或實板能動。**
-- **付款、送單、寄信、確認生產稿，每一次都等使用者同意。** agent 做到起草和準備為止。
+- **付款、送單、寄信、確認生產稿，每一次都等使用者同意。** agent 做到起草和準備為止。唯一的例外是催辦與純技術澄清：使用者可以說明範圍和期限，事先授權。
 - **固定發行包與動態進度分開。** 交給工廠的版本不再改；訂單進度另外記。
 
 ## 限制
