@@ -1,0 +1,25 @@
+# KiCad autosave / backup / lock / per-user UI state
+*-backups/
+*.kicad_pcb-bak
+*.kicad_sch-bak
+_autosave-*
+*.lck
+~*.lck
+fp-info-cache
+*.kicad_prl
+
+# Python / Node
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+
+# Local outputs
+build/
+out/
+tmp/
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,60 @@
+pcb-agent-workflow
+Copyright (c) 2026 John-owo
+Licensed under the MIT License (see LICENSE), except for the third-party material
+listed below, which keeps its original license.
+
+------------------------------------------------------------------------------
+KiCad official libraries (CC-BY-SA 4.0 with the KiCad libraries exception)
+https://gitlab.com/kicad/libraries
+https://www.kicad.org/libraries/license/
+------------------------------------------------------------------------------
+
+The following items in examples/max-m10s-breakout-revc/ are copied from, or
+derived from, the KiCad official symbol and footprint libraries (KiCad 10.0.6).
+They remain under CC-BY-SA 4.0 with the KiCad libraries exception. The exception
+means designs that use these parts (schematics, boards, fabrication outputs) are
+not bound by CC-BY-SA; the library files themselves are.
+
+symbols/PassiveGNSS.kicad_sym
+  Identical to the official symbol:
+    R, C, D, LED                 <- Device:R, Device:C, Device:D, Device:LED
+    TestPoint                    <- Connector:TestPoint
+    PWR_FLAG                     <- power:PWR_FLAG
+  Same graphics, footprint filters changed:
+    C_Polarized, D_TVS           <- Device:C_Polarized, Device:D_TVS
+    Conn_01x06                   <- Connector_Generic:Conn_01x06
+    Conn_Coaxial                 <- Connector:Conn_Coaxial
+
+footprints/PassiveGNSS.pretty/
+  Renamed, 3D model reference removed, pads unchanged:
+    C_0603                       <- Capacitor_SMD:C_0603_1608Metric
+    R_0603                       <- Resistor_SMD:R_0603_1608Metric
+    LED_0603                     <- LED_SMD:LED_0603_1608Metric
+    SOT23                        <- Package_TO_SOT_SMD:SOT-23
+  Renamed, otherwise identical:
+    Fiducial_1mm                 <- Fiducial:Fiducial_1mm_Mask3mm
+    ToolingHole_2mm              <- MountingHole:MountingHole_2mm
+    TestPoint                    <- TestPoint:TestPoint_Pad_D1.0mm
+  Renamed, silkscreen lines moved to F.Fab:
+    Header_1x06                  <- Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical
+
+Made for this project (MIT): symbols MAX_M10S, BAS116, Q_NMOS_GSD; footprints
+MAX_M10S, PESD3V3C1BSF, ADCM_S05R5SA, CPH3225A, MHF_I. The vendor-specific
+footprints were drawn from the manufacturers' published land patterns, which
+are not included here.
+
+------------------------------------------------------------------------------
+Referenced, not included
+------------------------------------------------------------------------------
+
+- kicad-happy (KiCad analysis skills), MIT, Andrew Klofas
+  https://github.com/aklofas/kicad-happy
+- Konnect (KiCad MCP server), AGPL-3.0, mixelpixx
+  https://github.com/mixelpixx/Konnect
+  scripts/konnect-call.mjs only launches a separately installed Konnect
+  executable over stdio; no Konnect code is included.
+- kicad-copilot, MIT, biosshot
+  https://github.com/biosshot/kicad-copilot
+- Vendor datasheets, integration manuals and drawings (u-blox, Nexperia, onsemi,
+  I-PEX and others) are copyrighted by their owners and are not redistributed.
+  The example README links to the official sources.

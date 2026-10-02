@@ -1,0 +1,20 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-09-21T22:33:42",
+    "ignored_checks": [],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/39c6fe9a-237d-55c0-a68c-622c9b13efbf",
+            "violations": []
+        }
+    ],
+    "source": "MAX-M10S-Passive.kicad_sch"
+}

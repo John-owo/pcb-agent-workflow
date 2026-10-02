@@ -1,0 +1,9 @@
+* text=auto
+
+# Example design packages are fixed releases with SHA-256 manifests.
+# Never convert line endings inside them, or the hashes stop matching.
+examples/** -text
+
+*.zip binary
+*.pdf binary
+*.png binary

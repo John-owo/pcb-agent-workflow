@@ -1,0 +1,23 @@
+# Konnect config example. Copy into your project (for example tools/konnect/config.toml),
+# replace every <...> placeholder, and always start Konnect with an explicit --config.
+# Checked against Konnect <KONNECT_VERSION>; key names can change between releases.
+# TOML single-quoted strings keep Windows backslashes literal.
+
+# Explicit paths avoid picking up another KiCad install from PATH.
+kicad_cli = '<KICAD_INSTALL_DIR>/bin/kicad-cli'      # Windows: '<KICAD_INSTALL_DIR>\bin\kicad-cli.exe'
+kicad_binary = '<KICAD_INSTALL_DIR>/bin/kicad'       # Windows: '<KICAD_INSTALL_DIR>\bin\kicad.exe'
+
+# KiCad IPC endpoint. When omitted, Konnect uses KICAD_API_SOCKET, then its platform default.
+# Set it only if auto-detection picks the wrong socket.
+# ipc_address = 'ipc://<KICAD_IPC_SOCKET_PATH>'
+
+transport = 'stdio'
+log_level = 'warn'
+
+# Keep toolsets explicit: load_toolset per task, then re-read tools/list.
+# eager_toolsets = true preloads everything (much larger tool list) for clients
+# that never refresh their tool list; not needed when using scripts/konnect-call.mjs.
+auto_load_toolsets = false
+eager_toolsets = false
+
+# No project_dir on purpose: pass an exact absolute path in every tool call.

@@ -1,0 +1,15 @@
+(version 1)
+# RF repair 2026-09-10: retain the manufacturer's D1 pad and entry-neck spacing.
+# Only track-to-D1-pad pairs involving /RF receive the local 0.15 mm exception.
+(rule "RF launch clearance"
+ (condition "(A.Type == 'Track' && B.Type == 'Pad' && B.memberOfFootprint('D1') && (A.NetName == '/RF' || B.NetName == '/RF')) || (B.Type == 'Track' && A.Type == 'Pad' && A.memberOfFootprint('D1') && (A.NetName == '/RF' || B.NetName == '/RF'))")
+ (constraint clearance (min 0.15mm)))
+# Enforce the documented side-pour setback, rather than relying on precedence.
+# Clearance is checked on the copper layers shared by the two objects.
+(rule "RF ground pour setback"
+ (condition "(A.NetName == '/RF' && B.Type == 'Zone' && B.NetName == '/GND') || (B.NetName == '/RF' && A.Type == 'Zone' && A.NetName == '/GND')")
+ (constraint clearance (min 1.0mm)))
+# Nexperia Fig.14: 0.40 mm pitch - 0.256 mm pad = 0.144 mm actual gap.
+(rule "D1 manufacturer land spacing"
+ (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint('D1') && B.memberOfFootprint('D1')")
+ (constraint clearance (min 0.13mm)))

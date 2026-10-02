@@ -1,0 +1,675 @@
+{
+  "name": "MAX-M10S-Passive",
+  "revision": "C",
+  "outline": [
+    47.66,
+    50,
+    72.66,
+    86.5
+  ],
+  "components": [
+    {
+      "ref": "U1",
+      "symbol": "MAX_M10S",
+      "value": "MAX-M10S-00B",
+      "footprint": "MAX_M10S",
+      "nets": {
+        "1": "GND",
+        "2": "TX_RAW",
+        "3": "RX_RAW",
+        "4": "PPS_RAW",
+        "5": "EXTINT",
+        "6": null,
+        "7": "3V3",
+        "8": "3V3",
+        "9": "RESET_N",
+        "10": "GND",
+        "11": "RF",
+        "12": "GND",
+        "13": null,
+        "14": null,
+        "15": null,
+        "16": "SDA",
+        "17": "SCL",
+        "18": "SAFEBOOT_N"
+      },
+      "sch": [
+        175.26,
+        101.6,
+        0
+      ],
+      "pcb": [
+        60.16,
+        64.6,
+        90
+      ],
+      "mpn": "MAX-M10S-00B",
+      "manufacturer": "u-blox",
+      "lcsc": "C4153167",
+      "datasheet": "https://content.u-blox.com/sites/default/files/MAX-M10S_DataSheet_UBX-20035208.pdf",
+      "purpose": "3.3V GNSS receiver; passive antenna; internal LNA default low gain"
+    },
+    {
+      "ref": "J1",
+      "symbol": "Conn_Coaxial",
+      "value": "MHF I PASSIVE ANT",
+      "footprint": "MHF_I",
+      "nets": {
+        "1": "RF",
+        "2": "GND"
+      },
+      "sch": [
+        287.02,
+        78.74,
+        0
+      ],
+      "pcb": [
+        63.46,
+        52.8,
+        0
+      ],
+      "mpn": "20279-001E-03",
+      "manufacturer": "I-PEX",
+      "lcsc": "C3173448",
+      "purpose": "I-PEX 20279-001E-03 MHF I receptacle, passive RF, no DC bias"
+    },
+    {
+      "ref": "D1",
+      "symbol": "D_TVS",
+      "value": "PESD3V3Z1BSFYL",
+      "footprint": "PESD3V3C1BSF",
+      "nets": {
+        "1": "RF",
+        "2": "GND"
+      },
+      "sch": [
+        246.38,
+        99.06,
+        90
+      ],
+      "pcb": [
+        63.66,
+        55.8,
+        0
+      ],
+      "mpn": "PESD3V3Z1BSFYL",
+      "manufacturer": "Nexperia",
+      "lcsc": "C2908830",
+      "purpose": "Ultra-low-C connector ESD protection",
+      "datasheet": "https://assets.nexperia.com/documents/data-sheet/PESD3V3Z1BSF.pdf",
+      "assembly": "Standard SMT only"
+    },
+    {
+      "ref": "J2",
+      "symbol": "Conn_01x06",
+      "value": "POWER / UART / PPS",
+      "footprint": "Header_1x06",
+      "nets": {
+        "1": "3V3",
+        "2": "GND",
+        "3": "TX",
+        "4": "RX",
+        "5": "PPS",
+        "6": "EXTINT"
+      },
+      "sch": [
+        353.06,
+        76.2,
+        0
+      ],
+      "pcb": [
+        51.27,
+        70.54,
+        0
+      ],
+      "mpn": "HX PH254-01-06-Z-L11.5",
+      "manufacturer": "hanxia",
+      "lcsc": "C52016393",
+      "bottom": true,
+      "assembly": "Standard THT; body on bottom, 6mm mating end down"
+    },
+    {
+      "ref": "J3",
+      "symbol": "Conn_01x06",
+      "value": "I2C / CONTROL",
+      "footprint": "Header_1x06",
+      "nets": {
+        "1": "GND",
+        "2": "SCL",
+        "3": "SDA",
+        "4": "RESET_N",
+        "5": "SAFEBOOT_N",
+        "6": "GND"
+      },
+      "sch": [
+        353.06,
+        114.3,
+        0
+      ],
+      "pcb": [
+        69.05,
+        70.54,
+        0
+      ],
+      "mpn": "HX PH254-01-06-Z-L11.5",
+      "manufacturer": "hanxia",
+      "lcsc": "C52016393",
+      "bottom": true,
+      "assembly": "Standard THT; body on bottom, 6mm mating end down"
+    },
+    {
+      "ref": "C1",
+      "symbol": "C",
+      "value": "100nF",
+      "footprint": "C_0603",
+      "nets": {
+        "1": "3V3",
+        "2": "GND"
+      },
+      "sch": [
+        45.72,
+        68.58,
+        0
+      ],
+      "pcb": [
+        62.5,
+        72.8,
+        270
+      ],
+      "mpn": "CC0603KRX7R9BB104",
+      "manufacturer": "YAGEO",
+      "lcsc": "C14663",
+      "purpose": "Local bypass; see BOM voltage/dielectric requirements"
+    },
+    {
+      "ref": "C2",
+      "symbol": "C",
+      "value": "100nF",
+      "footprint": "C_0603",
+      "nets": {
+        "1": "3V3",
+        "2": "GND"
+      },
+      "sch": [
+        73.66,
+        68.58,
+        0
+      ],
+      "pcb": [
+        64.3,
+        72.8,
+        270
+      ],
+      "mpn": "CC0603KRX7R9BB104",
+      "manufacturer": "YAGEO",
+      "lcsc": "C14663",
+      "purpose": "Local bypass; see BOM voltage/dielectric requirements"
+    },
+    {
+      "ref": "C3",
+      "symbol": "C",
+      "value": "10uF",
+      "footprint": "C_0603",
+      "nets": {
+        "1": "3V3",
+        "2": "GND"
+      },
+      "sch": [
+        101.6,
+        68.58,
+        0
+      ],
+      "pcb": [
+        65.7,
+        76.3,
+        270
+      ],
+      "mpn": "CL10A106KP8NNNC",
+      "manufacturer": "Samsung Electro-Mechanics",
+      "lcsc": "C19702",
+      "purpose": "Local bypass; see BOM voltage/dielectric requirements"
+    },
+    {
+      "ref": "R1",
+      "symbol": "R",
+      "value": "33R",
+      "footprint": "R_0603",
+      "nets": {
+        "1": "TX_RAW",
+        "2": "TX"
+      },
+      "sch": [
+        66.04,
+        111.76,
+        90
+      ],
+      "pcb": [
+        55.5,
+        72.8,
+        270
+      ],
+      "mpn": "0603WAF330JT5E",
+      "manufacturer": "UNI-ROYAL",
+      "lcsc": "C23140"
+    },
+    {
+      "ref": "R2",
+      "symbol": "R",
+      "value": "33R",
+      "footprint": "R_0603",
+      "nets": {
+        "1": "RX",
+        "2": "RX_RAW"
+      },
+      "sch": [
+        66.04,
+        129.54,
+        90
+      ],
+      "pcb": [
+        57.2,
+        72.8,
+        270
+      ],
+      "mpn": "0603WAF330JT5E",
+      "manufacturer": "UNI-ROYAL",
+      "lcsc": "C23140"
+    },
+    {
+      "ref": "R3",
+      "symbol": "R",
+      "value": "33R",
+      "footprint": "R_0603",
+      "nets": {
+        "1": "PPS_RAW",
+        "2": "PPS"
+      },
+      "sch": [
+        66.04,
+        147.32,
+        90
+      ],
+      "pcb": [
+        58.9,
+        72.8,
+        270
+      ],
+      "mpn": "0603WAF330JT5E",
+      "manufacturer": "UNI-ROYAL",
+      "lcsc": "C23140"
+    },
+    {
+      "ref": "R4",
+      "symbol": "R",
+      "value": "4.7k",
+      "footprint": "R_0603",
+      "nets": {
+        "1": "3V3",
+        "2": "SCL"
+      },
+      "sch": [
+        269.24,
+        134.62,
+        0
+      ],
+      "pcb": [
+        52.9,
+        60,
+        90
+      ],
+      "mpn": "0603WAF4701T5E",
+      "manufacturer": "UNI-ROYAL",
+      "lcsc": "C23162"
+    },
+    {
+      "ref": "R5",
+      "symbol": "R",
+      "value": "4.7k",
+      "footprint": "R_0603",
+      "nets": {
+        "1": "3V3",
+        "2": "SDA"
+      },
+      "sch": [
+        297.18,
+        134.62,
+        0
+      ],
+      "pcb": [
+        52.9,
+        63,
+        90
+      ],
+      "mpn": "0603WAF4701T5E",
+      "manufacturer": "UNI-ROYAL",
+      "lcsc": "C23162"
+    },
+    {
+      "ref": "R6",
+      "symbol": "R",
+      "value": "2.2k",
+      "footprint": "R_0603",
+      "nets": {
+        "1": "3V3",
+        "2": "PWR_A"
+      },
+      "sch": [
+        157.48,
+        172.72,
+        90
+      ],
+      "pcb": [
+        66.15,
+        81.4,
+        90
+      ],
+      "mpn": "0603WAF2201T5E",
+      "manufacturer": "UNI-ROYAL",
+      "lcsc": "C4190"
+    },
+    {
+      "ref": "R7",
+      "symbol": "R",
+      "value": "2.2k",
+      "footprint": "R_0603",
+      "nets": {
+        "1": "3V3",
+        "2": "PPS_A"
+      },
+      "sch": [
+        228.6,
+        172.72,
+        90
+      ],
+      "pcb": [
+        66.15,
+        84.5,
+        90
+      ],
+      "mpn": "0603WAF2201T5E",
+      "manufacturer": "UNI-ROYAL",
+      "lcsc": "C4190"
+    },
+    {
+      "ref": "R8",
+      "symbol": "R",
+      "value": "1M",
+      "footprint": "R_0603",
+      "nets": {
+        "1": "PPS_RAW",
+        "2": "GND"
+      },
+      "sch": [
+        276.86,
+        203.2,
+        0
+      ],
+      "pcb": [
+        61,
+        80.5,
+        0
+      ],
+      "mpn": "0603WAF1004T5E",
+      "manufacturer": "UNI-ROYAL",
+      "lcsc": "C22935"
+    },
+    {
+      "ref": "D2",
+      "symbol": "LED",
+      "value": "PWR green",
+      "footprint": "LED_0603",
+      "nets": {
+        "1": "GND",
+        "2": "PWR_A"
+      },
+      "sch": [
+        190.5,
+        172.72,
+        0
+      ],
+      "pcb": [
+        63.7,
+        82.2,
+        0
+      ],
+      "mpn": "19-21/G6C-FM1N2B/4T",
+      "manufacturer": "Everlight",
+      "lcsc": "C2984263"
+    },
+    {
+      "ref": "D3",
+      "symbol": "LED",
+      "value": "PPS green",
+      "footprint": "LED_0603",
+      "nets": {
+        "1": "PPS_K",
+        "2": "PPS_A"
+      },
+      "sch": [
+        261.62,
+        172.72,
+        0
+      ],
+      "pcb": [
+        63.7,
+        84.5,
+        0
+      ],
+      "mpn": "19-21/G6C-FM1N2B/4T",
+      "manufacturer": "Everlight",
+      "lcsc": "C2984263"
+    },
+    {
+      "ref": "Q1",
+      "symbol": "Q_NMOS_GSD",
+      "value": "BSS138",
+      "footprint": "SOT23",
+      "nets": {
+        "1": "PPS_RAW",
+        "2": "GND",
+        "3": "PPS_K"
+      },
+      "sch": [
+        238.76,
+        203.2,
+        0
+      ],
+      "pcb": [
+        59.8,
+        77.0,
+        0
+      ],
+      "mpn": "BSS138",
+      "manufacturer": "onsemi",
+      "lcsc": "C52895",
+      "purpose": "High impedance PPS LED driver; no heavy startup TIMEPULSE load",
+      "datasheet": "https://www.onsemi.com/pdf/datasheet/bss138-d.pdf"
+    },
+    {
+      "ref": "TP1",
+      "symbol": "TestPoint",
+      "value": "3V3",
+      "footprint": "TestPoint",
+      "nets": {
+        "1": "3V3"
+      },
+      "sch": [
+        332.74,
+        170.18,
+        0
+      ],
+      "pcb": [
+        52.1,
+        55.0,
+        0
+      ],
+      "mpn": "PCB feature",
+      "manufacturer": "PCB",
+      "lcsc": "",
+      "exclude_bom": true,
+      "assembly": "PCB feature; no assembly"
+    },
+    {
+      "ref": "TP2",
+      "symbol": "TestPoint",
+      "value": "GND",
+      "footprint": "TestPoint",
+      "nets": {
+        "1": "GND"
+      },
+      "sch": [
+        363.22,
+        170.18,
+        0
+      ],
+      "pcb": [
+        67.3,
+        55.0,
+        0
+      ],
+      "mpn": "PCB feature",
+      "manufacturer": "PCB",
+      "lcsc": "",
+      "exclude_bom": true,
+      "assembly": "PCB feature; no assembly"
+    },
+    {
+      "ref": "TP4",
+      "symbol": "TestPoint",
+      "value": "TX",
+      "footprint": "TestPoint",
+      "nets": {
+        "1": "TX"
+      },
+      "sch": [
+        363.22,
+        185.42,
+        0
+      ],
+      "pcb": [
+        55,
+        76.7,
+        0
+      ],
+      "mpn": "PCB feature",
+      "manufacturer": "PCB",
+      "lcsc": "",
+      "exclude_bom": true,
+      "assembly": "PCB feature; no assembly"
+    },
+    {
+      "ref": "TP5",
+      "symbol": "TestPoint",
+      "value": "RX",
+      "footprint": "TestPoint",
+      "nets": {
+        "1": "RX"
+      },
+      "sch": [
+        332.74,
+        200.66,
+        0
+      ],
+      "pcb": [
+        56.3,
+        79.8,
+        0
+      ],
+      "mpn": "PCB feature",
+      "manufacturer": "PCB",
+      "lcsc": "",
+      "exclude_bom": true,
+      "assembly": "PCB feature; no assembly"
+    },
+    {
+      "ref": "TP6",
+      "symbol": "TestPoint",
+      "value": "PPS",
+      "footprint": "TestPoint",
+      "nets": {
+        "1": "PPS"
+      },
+      "sch": [
+        363.22,
+        200.66,
+        0
+      ],
+      "pcb": [
+        56.3,
+        82,
+        0
+      ],
+      "mpn": "PCB feature",
+      "manufacturer": "PCB",
+      "lcsc": "",
+      "exclude_bom": true,
+      "assembly": "PCB feature; no assembly"
+    },
+    {
+      "ref": "#FLG01",
+      "symbol": "PWR_FLAG",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "nets": {
+        "1": "3V3"
+      },
+      "sch": [
+        38.1,
+        45.72,
+        0
+      ],
+      "pcb": [
+        0,
+        0,
+        0
+      ],
+      "mpn": "",
+      "manufacturer": "",
+      "lcsc": "",
+      "virtual": true,
+      "purpose": "Actual source: external 3.3 V header"
+    },
+    {
+      "ref": "#FLG02",
+      "symbol": "PWR_FLAG",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "nets": {
+        "1": "GND"
+      },
+      "sch": [
+        63.5,
+        45.72,
+        0
+      ],
+      "pcb": [
+        0,
+        0,
+        0
+      ],
+      "mpn": "",
+      "manufacturer": "",
+      "lcsc": "",
+      "virtual": true,
+      "purpose": "Actual source: external 3.3 V header"
+    }
+  ],
+  "footprints": {
+    "MAX_M10S": "custom",
+    "MHF_I": "custom",
+    "Header_1x06": "Connector_PinHeader_2.54mm.pretty/PinHeader_1x06_P2.54mm_Vertical.kicad_mod",
+    "C_0603": "Capacitor_SMD.pretty/C_0603_1608Metric.kicad_mod",
+    "R_0603": "Resistor_SMD.pretty/R_0603_1608Metric.kicad_mod",
+    "LED_0603": "LED_SMD.pretty/LED_0603_1608Metric.kicad_mod",
+    "SOT23": "Package_TO_SOT_SMD.pretty/SOT-23.kicad_mod",
+    "TestPoint": "TestPoint.pretty/TestPoint_Pad_D1.0mm.kicad_mod",
+    "ADCM_S05R5SA": "custom",
+    "PESD3V3C1BSF": "custom",
+    "CPH3225A": "custom"
+  },
+  "notes": [
+    "Rev C: no RTC backup supply; U1 pin 6 intentionally open.",
+    "25.0 x 36.5 mm; four layers; unchanged RF launch and header locations.",
+    "19 fitted parts; 5 PCB test points. Host must restore runtime configuration after power removal."
+  ]
+}

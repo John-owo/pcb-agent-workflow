@@ -1,0 +1,6 @@
+interface:
+  display_name: "JLC Support Communication"
+  short_description: "Chase reviews and clarify production files with JLCPCB support"
+  default_prompt: "Use $jlc-support to draft a message to JLCPCB support for this order."
+policy:
+  allow_implicit_invocation: true
