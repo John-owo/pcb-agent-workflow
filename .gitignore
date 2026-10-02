@@ -17,6 +17,9 @@ response.json
 __pycache__/
 *.pyc
 .venv/
+.deps/
+.venv-deps/
+.pip-cache/
 node_modules/
 
 # Local outputs

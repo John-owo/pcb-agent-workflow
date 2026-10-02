@@ -53,6 +53,8 @@
 
 ### 2. 逐層比較
 
+每次使用新的私有輸出目錄；執行後檢查退出碼與 JSON `status`。WARNING 必須分類與追問，INCOMPLETE／ERROR 必須補足資料或修正後重跑；不可因部分圖層成功、沒有差異框或產生了報告就寫 PASS。`render_compare` 的 PASS 只涵蓋輸入與 rendering，不能代替後續比對或使用者批准。狀態契約、缺錫膏層的排除記錄與相對路徑配對方式見 [cam-diff README](../../scripts/cam-diff/README.md#結果與停止條件)。
+
 ```
 python render_compare.py --original <固定包 gerbers.zip> --factory <工廠生產稿> --offset auto --out <私有目錄>
 python pixel_compare.py --renders <私有目錄>

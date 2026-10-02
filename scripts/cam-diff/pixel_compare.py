@@ -20,7 +20,7 @@ Usage
   python pixel_compare.py --renders cam-diff-out
   python pixel_compare.py --renders cam-diff-out --layers F_Cu B_Cu --tolerance-px 1
 
-Requires Pillow (python -m pip install pillow). Any Python >= 3.8.
+Requires the pinned CAM runtime (Python 3.12; pip install -r requirements-cam.txt).
 """
 from __future__ import annotations
 
@@ -99,6 +99,9 @@ def compare_layer(label, info, renders, out, fr: Frames, args):
     b = load_mask(renders / info["png_factory"])
     if a.size != b.size:
         raise SystemExit(f"error: {label}: image sizes differ {a.size} vs {b.size}")
+    expected = (max(1, round((fr.x1 - fr.x0) * fr.ppmm)), max(1, round((fr.y1 - fr.y0) * fr.ppmm)))
+    if a.size != expected:
+        raise ValueError(f"{label}: render dimensions do not cover the declared frame")
     w, h = a.size
     px_area = 1.0 / (fr.ppmm ** 2)
     added, removed = ImageChops.subtract(b, a), ImageChops.subtract(a, b)
@@ -154,6 +157,7 @@ def compare_layer(label, info, renders, out, fr: Frames, args):
     for r in regions:
         r.pop("_box_px")
     return {
+        "changed_pixels": count(added) + count(removed),
         "size_px": [w, h],
         "added_mm2": round(count(added) * px_area, 4),
         "removed_mm2": round(count(removed) * px_area, 4),
@@ -182,33 +186,62 @@ def parse_args(argv=None):
     return ap.parse_args(argv)
 
 
-def main(argv=None):
-    args = parse_args(argv)
+def run(args, result):
     try:
         import PIL  # noqa: F401
     except ImportError:
-        raise SystemExit("error: Pillow is missing; run: python -m pip install pillow")
+        raise SystemExit("error: Pillow is missing; run: python -m pip install -r requirements-cam.txt")
     renders = Path(args.renders)
     summary = json.loads((renders / "layer-summary.json").read_text(encoding="utf-8"))
     out = Path(args.out) if args.out else renders
     out.mkdir(parents=True, exist_ok=True)
     fr = Frames(summary)
-    labels = args.layers or list(summary["layers"])
-    result = {"tool": "pixel_compare.py", "ppmm": fr.ppmm, "tolerance_px": args.tolerance_px,
-              "tolerance_mm": round(args.tolerance_px / fr.ppmm, 4), "layers": {}}
+    if not math.isfinite(fr.ppmm) or fr.ppmm <= 0 or not all(math.isfinite(v) for v in
+            (fr.x0, fr.x1, fr.y0, fr.y1, fr.dx, fr.dy, fr.c, fr.s)) or fr.x1 <= fr.x0 or fr.y1 <= fr.y0:
+        raise ValueError("invalid render frame")
+    if args.tolerance_px < 0 or args.group_px < 0 or args.min_region_px < 1 or args.max_regions < 1:
+        raise ValueError("invalid pixel or region limits")
+    labels = args.layers if args.layers is not None else list(summary["layers"])
+    result.update(ppmm=fr.ppmm, tolerance_mm=round(args.tolerance_px / fr.ppmm, 4),
+                  upstream_status=summary.get("status"), requested_layers=labels)
+    if summary.get("status") != "PASS":
+        result["issues"].append({"status": "INCOMPLETE", "message": "render verification did not PASS"})
+    if not labels:
+        result["issues"].append({"status": "INCOMPLETE", "message": "no layers selected"})
+    if set(labels) != set(summary["layers"]):
+        result["issues"].append({"status": "INCOMPLETE", "message": "partial layer selection"})
     print(f"{'layer':10} {'added':>9} {'removed':>9} {'add>tol':>9} {'rem>tol':>9} {'regions':>8}   (mm2)")
     for label in labels:
         info = summary["layers"].get(label)
         if not info:
-            print(f"{label:10} not in layer-summary.json, skipped")
+            result["issues"].append({"status": "INCOMPLETE", "message": f"{label}: missing requested layer"})
             continue
         r = compare_layer(label, info, renders, out, fr, args)
         result["layers"][label] = r
+        if r["changed_pixels"]:
+            result["issues"].append({"status": "WARNING", "message": f"{label}: raster differences require review"})
         print(f"{label:10} {r['added_mm2']:9.3f} {r['removed_mm2']:9.3f} {r['added_beyond_tol_mm2']:9.3f} "
               f"{r['removed_beyond_tol_mm2']:9.3f} {r['regions_total']:8d}")
-    (out / "pixel-summary.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(f"\nwrote {out / 'pixel-summary.json'}; open the *-diff.png files and classify each orange box")
 
 
+def main(argv=None):
+    args = parse_args(argv)
+    out = Path(args.out or args.renders)
+    out.mkdir(parents=True, exist_ok=True)
+    result = {"tool": "pixel_compare.py", "schema_version": 1,
+              "scope": "raster difference detection; not netlist or production approval",
+              "tolerance_px": args.tolerance_px, "layers": {}, "issues": []}
+    try:
+        run(args, result)
+    except (Exception, SystemExit) as e:
+        result["issues"].append({"status": "ERROR", "message": f"analysis failed ({type(e).__name__})"})
+        print(f"error: {e}")
+    priority = {"PASS": 0, "WARNING": 1, "INCOMPLETE": 2, "ERROR": 3}
+    result["status"] = max((i["status"] for i in result["issues"]), key=priority.get, default="PASS")
+    (out / "pixel-summary.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    return 0 if result["status"] == "PASS" else 1 if result["status"] == "WARNING" else 2
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

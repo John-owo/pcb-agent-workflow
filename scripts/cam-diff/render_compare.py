@@ -23,8 +23,8 @@ Next steps
   python pixel_compare.py --renders cam-diff-out
   python check_inner_removals.py --renders cam-diff-out
 
-Requires Python >= 3.12 (gerbonara's minimum), gerbonara and Pillow:
-  python -m pip install gerbonara pillow
+Requires the pinned CAM runtime; Python 3.12 is the supported CI baseline:
+  python -m pip install -r requirements-cam.txt
 Coordinates are in mm. Gerber Y points up; the PNGs are drawn with Y up as seen from the top.
 """
 from __future__ import annotations
@@ -34,13 +34,14 @@ import fnmatch
 import hashlib
 import json
 import math
+import re
 import warnings
 import zipfile
 from collections import Counter, defaultdict
 from pathlib import Path, PurePosixPath
 
 # label, patterns for the original release, patterns for the factory file.
-# Patterns match file basenames, case-insensitive, first pattern with a hit wins.
+# Patterns match basenames, or relative paths when they contain '/'. All hits count.
 # The factory names (tl, bl, l2 ...) are what one JLCPCB production file used; check yours.
 DEFAULT_LAYERS = [
     ("F_Cu", ["*-F_Cu.*", "*.gtl"], ["tl", "*.gtl", "*-F_Cu.*"]),
@@ -77,18 +78,17 @@ class Source:
             with zipfile.ZipFile(self.path) as z:
                 for name in sorted(z.namelist()):
                     if not name.endswith("/"):
+                        if name in self.files:
+                            raise ValueError(f"duplicate ZIP member: {name}")
                         self.files[name] = z.read(name)
             self.sha256 = hashlib.sha256(self.path.read_bytes()).hexdigest()
         else:
-            raise SystemExit(f"error: {path} is neither a folder nor a zip file")
+            raise ValueError("source is neither a folder nor a zip file")
 
     def find(self, patterns, exclude=()):
-        for pat in patterns:
-            hits = [rel for rel in self.files
-                    if rel not in exclude and fnmatch.fnmatch(PurePosixPath(rel).name.lower(), pat.lower())]
-            if hits:
-                return hits
-        return []
+        return sorted({rel for pat in patterns for rel in self.files
+                       if rel not in exclude and fnmatch.fnmatchcase(
+                           (rel if '/' in pat else PurePosixPath(rel).name).lower(), pat.lower())})
 
     def describe(self):
         return {
@@ -109,6 +109,13 @@ def kind_of(data: bytes) -> str | None:
     return None
 
 
+def is_cam_candidate(rel, data):
+    name = PurePosixPath(rel).name.lower()
+    patterns = DRILL_ORIGINAL + DRILL_FACTORY + ["*.gbr", "*.ger", "*.gerber", "*.pho", "vcut", "sk"]
+    patterns += [p for _, orig, fact in DEFAULT_LAYERS for p in orig + fact]
+    return kind_of(data) is not None or any(fnmatch.fnmatchcase(name, p.lower()) for p in patterns)
+
+
 def load_cam(rel: str, data: bytes):
     """Parse one file with gerbonara. Returns (CamFile, kind, warning_count)."""
     from gerbonara.excellon import ExcellonFile
@@ -125,6 +132,32 @@ def load_cam(rel: str, data: bytes):
         else:
             cam = GerberFile.from_string(text, filename=rel)
     return cam, kind, len(caught)
+
+
+def compare_upload(original, upload):
+    """Compare relative member paths; never collapse nested files to basenames."""
+    o = original.describe()["members"]
+    u = upload.describe()["members"]
+    result = {"same": sorted(n for n in o.keys() & u.keys() if o[n] == u[n]),
+              "different": sorted(n for n in o.keys() & u.keys() if o[n] != u[n]),
+              "only_in_original": sorted(o.keys() - u.keys()),
+              "only_in_upload_copy": sorted(u.keys() - o.keys())}
+    result["status"] = "PASS" if not any(result[k] for k in
+        ("different", "only_in_original", "only_in_upload_copy")) else "INCOMPLETE"
+    return result
+
+
+def issue(summary, status, message):
+    summary["issues"].append({"status": status, "message": message})
+
+
+def finish_report(summary, path):
+    severity = {"PASS": 0, "WARNING": 1, "INCOMPLETE": 2, "ERROR": 3}
+    summary["status"] = max((i["status"] for i in summary["issues"]),
+                            key=severity.get, default="PASS")
+    path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    print(f"status: {summary['status']}")
+    return 0 if summary["status"] == "PASS" else 1 if summary["status"] == "WARNING" else 2
 
 
 # ----------------------------------------------------------------------------- transform
@@ -395,6 +428,18 @@ def match_drills(orig, fact, tf: Transform, window, match_radius, moved_tol):
         for d, k in grid.near(h["X"], h["Y"], match_radius):
             pairs.append((d, i, k))
     pairs.sort()
+    ambiguous = []
+    for side, pos in (("original", 1), ("factory", 2)):
+        candidates = defaultdict(list)
+        for pair in pairs:
+            candidates[pair[pos]].append(pair[0])
+        for index, distances in candidates.items():
+            distances.sort()
+            if len(distances) > 1 and math.isclose(distances[0], distances[1], abs_tol=1e-9):
+                ambiguous.append({"side": side, "hole_index": index})
+    if ambiguous:
+        return {"status": "INCOMPLETE", "original_count": len(orig), "factory_count": len(fact),
+                "ambiguous_candidates": ambiguous}
     used_o, used_f, matches = set(), set(), []
     for d, i, k in pairs:
         if i in used_o or k in used_f:
@@ -435,6 +480,8 @@ def match_drills(orig, fact, tf: Transform, window, match_radius, moved_tol):
         else:
             outside[f"{f['d']:.3f}"] += 1
     return {
+        "status": "WARNING" if moved or missing or extra_in or any(
+            pair.split(" -> ")[0] != pair.split(" -> ")[1] for pair in diam) else "PASS",
         "original_count": len(orig),
         "factory_count": len(fact),
         "matched": len(matches),
@@ -477,6 +524,8 @@ def parse_args(argv=None):
     ap.add_argument("--pair", action="append", default=[], metavar="LABEL=ORIG_PATTERN,FACTORY_PATTERN",
                     help="add or override a layer pair, e.g. In1_Cu=*-In1_Cu.*,l2 (repeatable)")
     ap.add_argument("--only-pairs", action="store_true", help="ignore the built-in layer pairs, use --pair only")
+    ap.add_argument("--omit-layer", action="append", default=[], metavar="LABEL=REASON",
+                    help="record an intentional layer exclusion (never a full PASS)")
     ap.add_argument("--match-radius", type=float, default=0.5, help="max mm between holes to pair them")
     ap.add_argument("--moved-tol", type=float, default=0.005, help="report matched holes further apart than this (mm)")
     ap.add_argument("--auto-tol", type=float, default=0.02, help="hole tolerance (mm) for --offset auto")
@@ -486,13 +535,12 @@ def parse_args(argv=None):
     return ap.parse_args(argv)
 
 
-def main(argv=None):
-    args = parse_args(argv)
+def run(args, summary):
     try:
         import gerbonara  # noqa: F401
         import PIL  # noqa: F401
     except ImportError as e:
-        raise SystemExit(f"error: missing dependency ({e.name}); run: python -m pip install gerbonara pillow")
+        raise SystemExit(f"error: missing dependency ({e.name}); run: python -m pip install -r requirements-cam.txt")
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -507,30 +555,61 @@ def main(argv=None):
             raise SystemExit(f"error: bad --pair {spec!r}; use LABEL=ORIG_PATTERN,FACTORY_PATTERN")
         layers = [x for x in layers if x[0] != label] + [[label, [o_pat], [f_pat]]]
 
-    summary = {
-        "tool": "render_compare.py",
-        "ppmm": args.ppmm,
-        "original_source": orig_src.describe(),
-        "factory_source": fact_src.describe(),
-        "layers": {},
-        "factory_files": {},
-        "notes": [],
-    }
+    summary.update(ppmm=args.ppmm, original_source=orig_src.describe(),
+                   factory_source=fact_src.describe())
+    omitted = {}
+    for spec in args.omit_layer:
+        label, reason = spec.split("=", 1)
+        if not reason.strip() or label not in {x[0] for x in layers}:
+            raise ValueError("--omit-layer needs a known LABEL and nonempty REASON")
+        omitted[label] = reason
+        issue(summary, "INCOMPLETE", f"{label}: explicitly excluded: {reason}")
+    summary["omitted_layers"] = omitted
+    if args.only_pairs:
+        issue(summary, "INCOMPLETE", "--only-pairs is a partial diagnostic comparison")
+    if any(not re.fullmatch(r"[A-Za-z0-9_-]+", x[0]) for x in layers):
+        raise ValueError("layer labels must contain only letters, digits, '_' or '-'")
+    for name in ("ppmm", "panel_ppmm", "auto_tol", "match_radius"):
+        if not math.isfinite(getattr(args, name)) or getattr(args, name) <= 0:
+            raise ValueError(f"{name} must be finite and positive")
+    if args.supersample < 1 or not math.isfinite(args.margin) or args.margin < 0:
+        raise ValueError("supersample must be positive; margin must be finite and nonnegative")
+    if not math.isfinite(args.rotate) or not math.isfinite(args.moved_tol) or args.moved_tol < 0:
+        raise ValueError("rotation/tolerance must be finite; tolerance must be nonnegative")
+    if args.check_upload:
+        summary["upload_check"] = compare_upload(orig_src, Source(args.check_upload))
+        if summary["upload_check"]["status"] != "PASS":
+            issue(summary, "INCOMPLETE", "upload members differ; resolve relative paths and hashes")
+    else:
+        summary["upload_check"] = {"status": "NOT_RUN"}
+        issue(summary, "WARNING", "upload identity not checked (--check-upload not supplied)")
 
     # --- drills first (they can define the offset)
     drill_o_files = orig_src.find(DRILL_ORIGINAL)
     drill_f_files = fact_src.find(DRILL_FACTORY)
+    for side, files in (("original", drill_o_files), ("factory", drill_f_files)):
+        names = Counter(PurePosixPath(rel).name.lower() for rel in files)
+        if any(n > 1 for n in names.values()):
+            raise ValueError(f"ambiguous {side} drill basenames; select a source with one board's drill set")
     orig_holes, fact_holes, slot_count = [], [], {"original": 0, "factory": 0}
     for rel in drill_o_files:
-        cam, kind, _ = load_cam(rel, orig_src.files[rel])
+        cam, kind, warn = load_cam(rel, orig_src.files[rel])
+        if warn:
+            issue(summary, "INCOMPLETE", f"drill parser warnings: original {rel}")
         h, s = drill_hits(cam, kind, rel)
         orig_holes += h
         slot_count["original"] += s
     for rel in drill_f_files:
-        cam, kind, _ = load_cam(rel, fact_src.files[rel])
+        cam, kind, warn = load_cam(rel, fact_src.files[rel])
+        if warn:
+            issue(summary, "INCOMPLETE", f"drill parser warnings: factory {rel}")
         h, s = drill_hits(cam, kind, rel)
         fact_holes += h
         slot_count["factory"] += s
+    if not orig_holes or not fact_holes:
+        issue(summary, "INCOMPLETE", "missing or empty drill hits on one side")
+    if any(slot_count.values()):
+        issue(summary, "INCOMPLETE", "slots are counted but not geometrically compared")
 
     rot_only = Transform(args.rotate)
     if len(args.offset) == 1 and args.offset[0].lower() == "auto":
@@ -538,8 +617,7 @@ def main(argv=None):
         (dx, dy), score, others = estimate_offset(rotated, [(f["x"], f["y"]) for f in fact_holes], args.auto_tol)
         summary["offset_estimate"] = {"matched_holes": score, "of": len(orig_holes), "other_candidates": others}
         if others:
-            summary["notes"].append("several board positions match (panel with copies?); "
-                                    "pass --offset explicitly to pick another one")
+            raise ValueError("ambiguous automatic offset; specify --offset DX DY for each board position")
         print(f"estimated offset: ({dx:.4f}, {dy:.4f}) mm, {score}/{len(orig_holes)} holes within {args.auto_tol} mm")
         for o in others:
             print(f"  other candidate: {o['offset_mm']} ({o['matched']} holes)")
@@ -548,26 +626,46 @@ def main(argv=None):
     else:
         raise SystemExit("error: --offset takes DX DY or auto")
     tf = Transform(args.rotate, dx, dy)
+    if not all(math.isfinite(v) for v in (dx, dy)):
+        raise ValueError("offset must be finite")
     summary["transform"] = {"rotate_deg_ccw": args.rotate, "offset_mm": [round(dx, 6), round(dy, 6)],
                             "meaning": "factory = rotate(original) + offset"}
 
     # --- load layer pairs
     used_factory = set(drill_f_files)
+    used_original = set(drill_o_files)
     loaded = {}
     for label, o_pats, f_pats in layers:
-        o_hits, f_hits = orig_src.find(o_pats), fact_src.find(f_pats, exclude=used_factory)
+        o_hits, f_hits = orig_src.find(o_pats), fact_src.find(f_pats)
+        if label in omitted:
+            used_original.update(o_hits)
+            continue
+        required = label in {"F_Cu", "B_Cu", "Outline"} or bool(o_hits or f_hits) or any(
+            spec.split("=", 1)[0] == label for spec in args.pair)
         if not o_hits or not f_hits:
-            if o_hits or f_hits:
-                summary["notes"].append(f"{label}: only found on one side "
-                                        f"(original={o_hits[:1]}, factory={f_hits[:1]})")
+            if required:
+                issue(summary, "INCOMPLETE", f"{label}: missing layer (original={o_hits}, factory={f_hits})")
             continue
         if len(o_hits) > 1 or len(f_hits) > 1:
-            summary["notes"].append(f"{label}: several files match, used the first: {o_hits[0]} / {f_hits[0]}")
+            issue(summary, "INCOMPLETE", f"{label}: ambiguous layer (original={o_hits}, factory={f_hits})")
+            continue
         o_rel, f_rel = o_hits[0], f_hits[0]
+        if o_rel in used_original or f_rel in used_factory:
+            issue(summary, "INCOMPLETE", f"{label}: file reused by another layer or drill mapping")
+            continue
         used_factory.add(f_rel)
+        used_original.add(o_rel)
         o_cam, _, o_warn = load_cam(o_rel, orig_src.files[o_rel])
         f_cam, _, f_warn = load_cam(f_rel, fact_src.files[f_rel])
         loaded[label] = (o_rel, f_rel, o_cam, f_cam, o_warn, f_warn)
+        if o_warn or f_warn:
+            issue(summary, "INCOMPLETE", f"{label}: parser warnings require investigation")
+        if (not o_cam.objects or not f_cam.objects) and (o_cam.objects or f_cam.objects or
+                                                      label in {"F_Cu", "B_Cu", "Outline"}):
+            issue(summary, "INCOMPLETE", f"{label}: empty artwork on one side")
+    for rel, data in orig_src.files.items():
+        if is_cam_candidate(rel, data) and rel not in used_original:
+            issue(summary, "INCOMPLETE", f"original CAM file not compared: {rel}")
 
     if not loaded:
         raise SystemExit("error: no layer pairs found; check the inputs or use --pair")
@@ -581,6 +679,7 @@ def main(argv=None):
         bnds = centerline_bounds(base[2], tf) if base else None
         window_src = "original Outline centre line"
         if bnds is None:
+            issue(summary, "INCOMPLETE", "missing usable outline; fallback window cannot certify board coverage")
             xs, ys = [], []
             for label, (_, _, o_cam, _, _, _) in loaded.items():
                 b = centerline_bounds(o_cam, tf)
@@ -592,6 +691,10 @@ def main(argv=None):
         (x0, y0), (x1, y1) = bnds
         x0, y0, x1, y1 = x0 - args.margin, y0 - args.margin, x1 + args.margin, y1 + args.margin
     window = [[x0, y0], [x1, y1]]
+    if not all(math.isfinite(v) for v in (x0, y0, x1, y1)) or x1 <= x0 or y1 <= y0:
+        raise ValueError("window must have finite, increasing bounds")
+    if args.window:
+        issue(summary, "INCOMPLETE", "explicit window is a partial diagnostic comparison")
     # snap the window size to whole pixels so every PNG has the same grid
     w_px, h_px = max(1, round((x1 - x0) * args.ppmm)), max(1, round((y1 - y0) * args.ppmm))
     window = [[x0, y0], [x0 + w_px / args.ppmm, y0 + h_px / args.ppmm]]
@@ -616,44 +719,43 @@ def main(argv=None):
 
     # --- panel overviews of every factory Gerber/drill file (rails, tooling holes, v-cut, markers)
     for rel, data in fact_src.files.items():
-        if kind_of(data) is None:
+        if not is_cam_candidate(rel, data):
             continue
         try:
             cam, kind, warn = load_cam(rel, data)
         except Exception as e:  # keep going; report what could not be parsed
-            summary["factory_files"][rel] = {"error": str(e)[:200]}
+            summary["factory_files"][rel] = {"error": type(e).__name__}
+            issue(summary, "INCOMPLETE", f"factory CAM parse failed: {rel}")
             continue
         b = bounds_of(cam)
         info = {"kind": kind, "objects": len(cam.objects), "bounds_mm": b, "parser_warnings": warn,
                 "paired": rel in used_factory}
         if b:
-            name = "panel-" + PurePosixPath(rel).name.replace(".", "_") + ".png"
+            name = "panel-" + hashlib.sha256(rel.encode()).hexdigest() + ".png"
             pad = 1.0
             rasterize(cam, None, [[b[0][0] - pad, b[0][1] - pad], [b[1][0] + pad, b[1][1] + pad]],
                       args.panel_ppmm, 2).save(out / name)
             info["png_panel"] = name
         summary["factory_files"][rel] = info
+        if rel not in used_factory:
+            issue(summary, "WARNING", f"factory CAM file only rendered as overview, not compared: {rel}")
+        if warn:
+            issue(summary, "INCOMPLETE", f"factory parser warnings: {rel}")
 
     # --- drills
     summary["drills"] = {"original_files": drill_o_files, "factory_files": drill_f_files, "slots": slot_count}
     if orig_holes and fact_holes:
         summary["drills"].update(match_drills(orig_holes, fact_holes, tf, window, args.match_radius, args.moved_tol))
+        d = summary["drills"]
+        if d.get("ambiguous_candidates"):
+            issue(summary, "INCOMPLETE", "ambiguous drill matching; no assignment selected")
+        elif d["moved"] or d["missing_in_factory"] or d["extra_inside_board"] or any(
+                pair.split(" -> ")[0] != pair.split(" -> ")[1] for pair in d["diameter_original_to_factory"]):
+            issue(summary, "WARNING", "drill differences require engineering review")
+        if any(not (x0 <= h["X"] <= x1 and y0 <= h["Y"] <= y1) for h in orig_holes):
+            issue(summary, "INCOMPLETE", "original holes outside comparison window")
     else:
         summary["notes"].append("drill matching skipped: no drill hits on one side")
-
-    # --- factory copy of the original upload
-    if args.check_upload:
-        up = Source(args.check_upload)
-        o_by = {PurePosixPath(r).name: hashlib.sha256(b).hexdigest() for r, b in orig_src.files.items()}
-        u_by = {PurePosixPath(r).name: hashlib.sha256(b).hexdigest() for r, b in up.files.items()}
-        summary["upload_check"] = {
-            "same": sorted(n for n in o_by if n in u_by and o_by[n] == u_by[n]),
-            "different": sorted(n for n in o_by if n in u_by and o_by[n] != u_by[n]),
-            "only_in_original": sorted(n for n in o_by if n not in u_by),
-            "only_in_upload_copy": sorted(n for n in u_by if n not in o_by),
-        }
-
-    (out / "layer-summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     # --- console summary
     d = summary["drills"]
@@ -667,14 +769,40 @@ def main(argv=None):
         for m in d["moved"]:
             print(f"  moved: {m['original_mm']} -> {m['factory_back_in_original_frame_mm']} "
                   f"({m['distance_mm']} mm, original frame)")
-    if "upload_check" in summary:
+    if "same" in summary["upload_check"]:
         u = summary["upload_check"]
         print(f"upload copy: {len(u['same'])} same, {len(u['different'])} different, "
               f"{len(u['only_in_original'])} only in original, {len(u['only_in_upload_copy'])} only in copy")
     for n in summary["notes"]:
         print("note:", n)
+    for item in summary["issues"]:
+        print(f"{item['status']}: {item['message']}")
     print(f"\nwrote {out / 'layer-summary.json'} and {2 * len(loaded)} layer PNGs")
 
 
+def main(argv=None):
+    args = parse_args(argv)
+    summary = {"tool": "render_compare.py", "schema_version": 1,
+               "scope": "CAM input coverage and rendering; not production approval",
+               "layers": {}, "factory_files": {}, "notes": [], "issues": []}
+    out = Path(args.out)
+    for source in (args.original, args.factory, args.check_upload):
+        if source and Path(source).is_dir() and (out.resolve() == Path(source).resolve() or
+                                                 Path(source).resolve() in out.resolve().parents):
+            print("error: output must be outside source folders")
+            return 2
+    out.mkdir(parents=True, exist_ok=True)
+    if any(out.iterdir()):
+        print("error: output directory must be empty; use a new run directory")
+        return 2
+    try:
+        run(args, summary)
+    except (Exception, SystemExit) as e:
+        # Parser exceptions may contain private local paths; keep shared reports path-free.
+        issue(summary, "ERROR", f"analysis failed ({type(e).__name__})")
+        print(f"error: {e}")
+    return finish_report(summary, out / "layer-summary.json")
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
