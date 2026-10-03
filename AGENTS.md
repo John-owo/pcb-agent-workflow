@@ -8,8 +8,9 @@ Claude Code 透過 `CLAUDE.md` 匯入本檔；Codex 直接讀本檔。兩邊的�
 
 | 路徑 | 內容 |
 |---|---|
+| `docs/` | 新手入門、術語表、第一塊板檢查清單 |
 | `docs/workflow/` | 流程文件：協作、KiCad 工具、發行包、JLC 下單、生產稿比對 |
-| `templates/` | 給新 PCB 專案複製使用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md` |
+| `templates/` | 給新 PCB 專案複製使用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`、`kicad-project.gitignore` |
 | `skills/` | Claude Code 與 Codex 共用的 skill，每個資料夾一個 `SKILL.md` |
 | `scripts/` | 輔助腳本；各自在檔頭或 README 說明用法 |
 | `examples/` | 固定版本的範例設計包 |

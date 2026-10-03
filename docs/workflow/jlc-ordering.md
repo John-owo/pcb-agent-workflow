@@ -6,6 +6,8 @@
 - PCBA FAQ：<https://jlcpcb.com/help/article/pcb-assembly-faqs>
 - 表面處理：<https://jlcpcb.com/help/article/jlcpcb-surface-finish>
 
+第一次下單、還不熟流程的話，先讀 [新手入門](../getting-started.md) 的第 7、8 步：只做 PCB 自己焊，或 Economic PCBA 只貼單面。
+
 客服與工程溝通見 [skills/jlc-support](../../skills/jlc-support/SKILL.md)；收到生產稿之後的比對見 [production-file-review.md](production-file-review.md)。
 
 **誰決定：** 上傳檔案、接受條款、送審、付款、下載工廠檔案、確認生產稿或貼裝稿、寄信，每一次都要使用者明確同意（催辦與純技術澄清有一個限定例外，見 jlc-support 的硬規則）。agent 做到準備檔案、核對配料、起草訊息為止。
@@ -26,7 +28,7 @@
 
 - BOM 至少要有 Comment／Value、Designator、Footprint、`LCSC Part #`。
 - CPL 只放 BOM 裡真的要貼裝的位號。DNP、測試點、fiducial、安裝孔不要混進去。
-- BOM 與 CPL 的位號集合要完全一致，上傳前先用腳本比對一次。
+- BOM 與 CPL 的位號集合要完全一致，上傳前用 [scripts/check_bom_cpl.py](../../scripts/check_bom_cpl.py) 比對一次。它也檢查 JLC 欄名、重複位號、料號格式與座標；旋轉與極性仍要在預覽畫面確認。
 - Gerber、鑽孔、BOM、CPL、裝配圖要用同一個發行版本。
 
 ## 3. 上傳後逐項核對配料

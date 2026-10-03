@@ -4,18 +4,23 @@
 
 這套流程來自一塊 4 層 GNSS 測試板（u-blox MAX-M10S，25 × 36.5 mm）從設計、審查、報價、送審、客服往返到確認生產稿的實際經驗。重複有用的做法寫成文件和 skill；踩過的雷寫成檢查項目。
 
+**第一次做 PCB？** 從 [新手入門](docs/getting-started.md) 開始：從安裝 KiCad 走到在 JLC 下單，每一步寫你要做什麼、可以請 agent 做什麼、怎麼確認做對了。其他文件之後再看。
+
 ## 內容
 
 | 路徑 | 內容 |
 |---|---|
+| [docs/getting-started.md](docs/getting-started.md) | **新手入門**：第一塊板的範圍、環境、原理圖、選料、板子規則、佈線、匯出、下單 |
+| [docs/first-board-checklist.md](docs/first-board-checklist.md) | 送廠前的檢查清單，給人看，也給 agent 審查用 |
+| [docs/glossary.md](docs/glossary.md) | 術語表：Gerber、BOM、CPL、DFM、工藝邊、Basic／Extended 料等 |
 | [docs/workflow/collaboration.md](docs/workflow/collaboration.md) | 人與多個 agent 協作：單一寫入者、WORKLOG、接手順序、審查最多兩輪、哪些動作要使用者同意 |
 | [docs/workflow/kicad-tools.md](docs/workflow/kicad-tools.md) | KiCad 原生 CLI 與 KiCad MCP 的分工、常用命令、修改 PCB 前的保全 |
 | [docs/workflow/release-package.md](docs/workflow/release-package.md) | 固定發行包：內容、雜湊清單、release-checks、版本資料夾命名 |
 | [docs/workflow/jlc-ordering.md](docs/workflow/jlc-ordering.md) | JLC 下單：服務等級、BOM／CPL、配料核對、壓成本、送單設定、付款後流程 |
 | [docs/workflow/production-file-review.md](docs/workflow/production-file-review.md) | 收到工廠生產稿後，怎麼跟原始 Gerber 比對、怎麼判讀差異 |
 | [skills/jlc-support/](skills/jlc-support/SKILL.md) | 跟 JLC 客服、工程、業務窗口溝通的 skill：寫信結構、六種範本、期限、停止條件 |
-| [templates/](templates/) | 新專案用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md` |
-| [scripts/](scripts/) | 發行包打包驗證、Konnect stdio 呼叫器、生產稿差異比對 |
+| [templates/](templates/) | 新專案用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`，以及 KiCad 專案的 `.gitignore` |
+| [scripts/](scripts/) | BOM／CPL 一致性檢查、發行包打包驗證、Konnect stdio 呼叫器、生產稿差異比對 |
 | [examples/max-m10s-breakout-revc/](examples/max-m10s-breakout-revc/README.md) | 實際下單過的範例設計包：KiCad 原生檔、Gerber、BOM、CPL、裝配圖、驗證紀錄 |
 
 ## 流程總覽
@@ -38,7 +43,7 @@ flowchart LR
 
 ### 新專案
 
-把 `templates/` 裡的四個檔案複製到 PCB 專案根目錄，把 `<...>` 換成自己的內容。專案已經有 `README.md` 的話，不要直接覆蓋，把範本的段落合併進去。之後每次接手，agent 會從 `README.md` 和 `WORKLOG.md` 讀起。
+把 `templates/` 裡的四個 Markdown 檔複製到 PCB 專案根目錄，把 `<...>` 換成自己的內容；`kicad-project.gitignore` 複製後改名為 `.gitignore`。專案已經有 `README.md` 的話，不要直接覆蓋，把範本的段落合併進去。之後每次接手，agent 會從 `README.md` 和 `WORKLOG.md` 讀起。
 
 ### 安裝 jlc-support skill
 
