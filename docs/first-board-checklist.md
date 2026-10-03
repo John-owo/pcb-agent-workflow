@@ -42,13 +42,13 @@
 
 - [ ] Gerber、鑽孔、BOM、CPL 是同一次、同一版本匯出的。
 - [ ] 用 Gerber Viewer 看過每一層：板框完整、銅層正確、沒有多餘或缺少的層。
-- [ ] BOM 與 CPL 用 JLC 欄名，`scripts/check_bom_cpl.py` 結果是 PASS，或每個 WARNING 都有原因。
+- [ ] BOM 與 CPL 用 JLC 欄名，pcb-agent-workflow 的 `scripts/check_bom_cpl.py` 結果是 PASS，或每個 WARNING 都有原因。
 - [ ] DNP、測試點、安裝孔沒有混進 BOM 與 CPL。
 - [ ] 交出去的檔案已經固定成一份，記錄在專案的 README 或 WORKLOG。
 
 ## 下單前
 
 - [ ] 在 JLC 預覽畫面逐顆看過 pin 1、極性、旋轉角度。
-- [ ] Confirm Production file 選 Yes。
+- [ ] Confirm Production file 選 Yes；有 JLC 貼裝時，Confirm Parts Placement 也選 Yes。
 - [ ] 看過報價裡未含在總價的項目。
-- [ ] 上傳、送單、付款由自己按下，agent 只做到核對與起草。
+- [ ] 上傳、接受條款、送單、付款、下載工廠檔案、確認生產稿或貼裝稿、寄信，都由自己決定並按下；agent 只做到核對與起草。完整規則見 jlc-ordering.md 的「誰決定」。

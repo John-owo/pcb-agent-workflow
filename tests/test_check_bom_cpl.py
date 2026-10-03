@@ -1,6 +1,7 @@
 """BOM/CPL consistency checks. The fixed example is only read, never written."""
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -119,7 +120,55 @@ class CheckBomCplTests(unittest.TestCase):
         self.assertIn("no LCSC Part #", text)
         self.assertIn("does not look like C12345", text)
         self.assertIn("2 parts share Top position", text)
-        self.assertIn("has no unit", text)
+        self.assertIn("1 rows have coordinates without a unit", text)
+
+    def test_full_width_digits_and_odd_rotations_do_not_pass(self):
+        bom = BOM.replace('"C25804"', '"C２５８０４"')
+        code, report = self.check(bom=bom)
+        self.assertEqual(code, 1)
+        self.assertIn("does not look like C12345", self.messages(report))
+        for rotation in ("nan", "inf", "9_0", "９０"):
+            code, report = self.check(cpl=CPL.replace('"Top","90"', f'"Top","{rotation}"'))
+            self.assertEqual(code, 2, rotation)
+            self.assertIn(f"Rotation '{rotation}' is not a number", self.messages(report))
+        code, report = self.check(cpl=CPL.replace('"Top","90"', '"Top","450"'))
+        self.assertEqual(code, 1)
+        self.assertIn("outside -360..360", self.messages(report))
+
+    def test_mid_coordinate_with_full_width_digits_is_error(self):
+        code, report = self.check(cpl=CPL.replace('"3.0mm"', '"３.0mm"'))
+        self.assertEqual(code, 2)
+        self.assertIn("is not a number in mm", self.messages(report))
+
+    def test_unnamed_trailing_columns_and_multiline_fields(self):
+        bom = ('"Comment","Designator","Footprint","LCSC Part #",,\n'
+               '"100nF\nX7R","C1,C2","C_0603","C14663",,\n'
+               '"10k","R1","R_0603","C25804",,\n')
+        code, report = self.check(bom=bom)
+        self.assertEqual(code, 0, self.messages(report))
+        code, report = self.check(bom=bom.replace('"C25804"', '""'))
+        self.assertIn("BOM line 4 (R1)", self.messages(report))
+
+    def test_unprintable_text_and_oversized_field_never_exit_as_warning(self):
+        env = dict(os.environ, PYTHONIOENCODING="ascii")
+        bom_path, cpl_path = self.root / "bom.csv", self.root / "cpl.csv"
+        bom_path.write_text(BOM.replace('"C25804"', '"C25804µ"'), encoding="utf-8")
+        cpl_path.write_text(CPL, encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--bom", str(bom_path), "--cpl", str(cpl_path)],
+            capture_output=True, text=True, check=False, env=env)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("status: WARNING", result.stdout)
+        self.assertNotIn("Traceback", result.stderr)
+        code, report = self.check(bom=BOM.replace('"10k"', '"' + "x" * 200000 + '"'))
+        self.assertEqual((code, report["status"]), (2, "ERROR"))
+        self.assertIn("CSV cannot be parsed", self.messages(report))
+
+    def test_same_file_for_bom_and_cpl_is_error(self):
+        path = self.root / "both.csv"
+        path.write_text(BOM, encoding="utf-8")
+        code, report = self.run_paths(path, path)
+        self.assertEqual((code, report["status"]), (2, "ERROR"))
 
     def test_empty_tables_are_incomplete(self):
         code, report = self.check(bom=BOM.splitlines()[0] + "\n", cpl=CPL.splitlines()[0] + "\n")

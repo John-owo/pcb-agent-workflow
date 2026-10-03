@@ -21,7 +21,9 @@ Standard library only.
 
 import argparse
 import csv
+import io
 import json
+import math
 import re
 import sys
 from collections import Counter
@@ -38,9 +40,11 @@ NOT_CHECKED = [
     "Basic/Extended classification and fees",
     "consistency with Gerber files",
 ]
-RANGE = re.compile(r"^([A-Za-z_]+)(\d+)-([A-Za-z_]*)(\d+)$")
-LCSC = re.compile(r"^C\d+$")
-COORD = re.compile(r"^(-?\d+(?:\.\d+)?)\s*(mm)?$", re.IGNORECASE)
+# ASCII digits only: full-width digits typed with a CJK input method must not pass.
+RANGE = re.compile(r"^([A-Za-z_]+)([0-9]+)-([A-Za-z_]*)([0-9]+)$")
+LCSC = re.compile(r"^C[0-9]+$")
+COORD = re.compile(r"^(-?[0-9]+(?:\.[0-9]+)?)\s*(mm)?$", re.IGNORECASE)
+NUMBER = re.compile(r"^-?[0-9]+(?:\.[0-9]+)?$")
 
 
 def issue(report, status, message):
@@ -60,13 +64,23 @@ def read_table(path, required, label, report):
     except OSError as e:
         issue(report, "ERROR", f"{label}: cannot read file ({type(e).__name__})")
         return None
-    reader = csv.reader(text.splitlines())
-    header = next(reader, None)
-    if not header:
-        issue(report, "ERROR", f"{label}: empty file")
+    reader = csv.reader(io.StringIO(text, newline=""))
+    try:
+        header = next(reader, None)
+        if not header:
+            issue(report, "ERROR", f"{label}: empty file")
+            return None
+        header = [h.strip() for h in header]
+        records = []
+        start = reader.line_num + 1
+        for values in reader:
+            records.append((start, values))
+            start = reader.line_num + 1
+    except csv.Error as e:
+        issue(report, "ERROR", f"{label} line {reader.line_num}: CSV cannot be parsed ({e})")
         return None
-    header = [h.strip() for h in header]
-    duplicated = sorted(h for h, n in Counter(header).items() if n > 1)
+    # Spreadsheet programs often append empty, unnamed columns; only named ones must be unique.
+    duplicated = sorted(h for h, n in Counter(header).items() if n > 1 and h)
     if duplicated:
         issue(report, "ERROR", f"{label}: duplicated columns {duplicated}")
         return None
@@ -75,7 +89,7 @@ def read_table(path, required, label, report):
         issue(report, "ERROR", f"{label}: missing columns {missing}; expected {list(required)}")
         return None
     rows = []
-    for line, values in enumerate(reader, start=2):
+    for line, values in records:
         if not any(v.strip() for v in values):
             continue
         if len(values) != len(header):
@@ -128,18 +142,18 @@ def check_bom(rows, report):
     return names
 
 
-def parse_coord(value, where, column, report):
+def parse_coord(value, where, column, report, unitless):
     m = COORD.match(value)
     if not m:
         issue(report, "ERROR", f"{where}: {column} '{value}' is not a number in mm")
         return None
     if not m.group(2):
-        issue(report, "WARNING", f"{where}: {column} '{value}' has no unit; write e.g. 12.5mm")
+        unitless.append(where)
     return float(m.group(1))
 
 
 def check_cpl(rows, report):
-    names, sides, positions = [], Counter(), Counter()
+    names, sides, positions, unitless = [], Counter(), Counter(), []
     for line, row in rows:
         where = f"CPL line {line}"
         ref = row["Designator"]
@@ -151,19 +165,25 @@ def check_cpl(rows, report):
             issue(report, "ERROR", f"{where}: one CPL row must hold exactly one designator")
         names.extend(refs)
         where = f"{where} ({ref})"
-        x = parse_coord(row["Mid X"], where, "Mid X", report)
-        y = parse_coord(row["Mid Y"], where, "Mid Y", report)
+        x = parse_coord(row["Mid X"], where, "Mid X", report, unitless)
+        y = parse_coord(row["Mid Y"], where, "Mid Y", report, unitless)
         side = row["Layer"].capitalize()
         if side not in ("Top", "Bottom"):
             issue(report, "ERROR", f"{where}: Layer '{row['Layer']}' must be Top or Bottom")
         else:
             sides[side] += 1
-        try:
-            float(row["Rotation"])
-        except ValueError:
-            issue(report, "ERROR", f"{where}: Rotation '{row['Rotation']}' is not a number")
+        rotation = row["Rotation"]
+        if not NUMBER.match(rotation) or not math.isfinite(float(rotation)):
+            issue(report, "ERROR", f"{where}: Rotation '{rotation}' is not a number in degrees")
+        elif abs(float(rotation)) > 360:
+            issue(report, "WARNING", f"{where}: Rotation '{rotation}' is outside -360..360")
         if x is not None and y is not None and side in ("Top", "Bottom"):
             positions[(side, x, y)] += 1
+    if unitless:
+        rows = sorted(set(unitless))
+        issue(report, "WARNING",
+              f"CPL: {len(rows)} rows have coordinates without a unit (first: {rows[0]}); "
+              "write e.g. 12.5mm so the unit is not assumed")
     for (side, x, y), count in sorted(positions.items()):
         if count > 1:
             issue(report, "WARNING", f"CPL: {count} parts share {side} position ({x}, {y})")
@@ -188,6 +208,10 @@ def run(bom_path, cpl_path):
     report = {"tool": "check_bom_cpl.py", "schema_version": 1,
               "scope": "BOM/CPL designator and format consistency; not assembly approval",
               "not_checked": NOT_CHECKED, "issues": []}
+    if Path(bom_path).resolve() == Path(cpl_path).resolve():
+        issue(report, "ERROR", "--bom and --cpl are the same file")
+        report["status"] = "ERROR"
+        return report
     bom_rows = read_table(bom_path, BOM_COLUMNS, "BOM", report)
     cpl_rows = read_table(cpl_path, CPL_COLUMNS, "CPL", report)
     if bom_rows is not None and cpl_rows is not None:
@@ -216,6 +240,18 @@ def main(argv=None):
     if args.json and args.json.resolve() in (args.bom.resolve(), args.cpl.resolve()):
         print("error: --json must not overwrite an input file", file=sys.stderr)
         return 2
+    # Reflected CSV text may not fit the console code page; never let printing crash.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(errors="backslashreplace")
+    try:
+        return report_and_exit(args)
+    except Exception as e:  # a crash must never look like PASS or WARNING
+        print(f"ERROR: internal error ({type(e).__name__})")
+        print("status: ERROR")
+        return 2
+
+
+def report_and_exit(args):
     report = run(args.bom, args.cpl)
     if args.json:
         try:
