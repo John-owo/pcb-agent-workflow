@@ -120,7 +120,7 @@ class CheckBomCplTests(unittest.TestCase):
         self.assertIn("no LCSC Part #", text)
         self.assertIn("does not look like C12345", text)
         self.assertIn("2 parts share Top position", text)
-        self.assertIn("1 rows have coordinates without a unit", text)
+        self.assertIn("1 rows have coordinates without a unit (first: CPL line 4 (R1))", text)
 
     def test_full_width_digits_and_odd_rotations_do_not_pass(self):
         bom = BOM.replace('"C25804"', '"C２５８０４"')

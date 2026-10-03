@@ -45,7 +45,7 @@
 git clone https://github.com/John-owo/pcb-agent-workflow.git
 ```
 
-下面寫 `<pcb-agent-workflow>` 的地方，代表這個資料夾的路徑。
+沒有裝 Git 的話，也可以在 GitHub 頁面用 Code → Download ZIP 下載後解壓縮。下面寫 `<pcb-agent-workflow>` 的地方，代表這個資料夾的路徑。
 
 **確認做對了：** 終端機執行 `kicad-cli version` 能印出版本號。Windows 若找不到指令，KiCad 的 `bin` 資料夾可能沒有加進 PATH，可以請 agent 協助找出安裝位置。
 

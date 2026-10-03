@@ -180,7 +180,7 @@ def check_cpl(rows, report):
         if x is not None and y is not None and side in ("Top", "Bottom"):
             positions[(side, x, y)] += 1
     if unitless:
-        rows = sorted(set(unitless))
+        rows = list(dict.fromkeys(unitless))  # file order
         issue(report, "WARNING",
               f"CPL: {len(rows)} rows have coordinates without a unit (first: {rows[0]}); "
               "write e.g. 12.5mm so the unit is not assumed")
