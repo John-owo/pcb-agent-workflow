@@ -27,7 +27,7 @@ Usage
 holes.json (optional), original single-board frame, mm, same origin as your Gerbers:
   [{"x": 6.34, "y": 5.90, "net": "PPS"}, {"x": 20.84, "y": 28.5, "net": "GND"}, ...]
 
-Requires Pillow (python -m pip install pillow). Any Python >= 3.8.
+Requires the pinned CAM runtime (Python 3.12; pip install -r requirements-cam.txt).
 """
 from __future__ import annotations
 
@@ -48,8 +48,12 @@ class Frames:
     def __init__(self, summary):
         (self.x0, self.y0), (self.x1, self.y1) = summary["window_mm"]
         self.ppmm = summary["ppmm"]
+        if not all(math.isfinite(v) for v in (self.x0, self.y0, self.x1, self.y1, self.ppmm)) or self.ppmm <= 0 or self.x1 <= self.x0 or self.y1 <= self.y0:
+            raise ValueError("invalid render window or ppmm")
         t = summary.get("transform", {})
         self.dx, self.dy = t.get("offset_mm", [0.0, 0.0])
+        if not all(math.isfinite(v) for v in (self.dx, self.dy, t.get("rotate_deg_ccw", 0.0))):
+            raise ValueError("invalid transform")
         a = math.radians(t.get("rotate_deg_ccw", 0.0))
         self.c, self.s = math.cos(a), math.sin(a)
 
@@ -94,11 +98,16 @@ def components(indices, w):
         stack, comp = [s], [s]
         while stack:
             i = stack.pop()
-            for j in (i - 1, i + 1, i - w, i + w, i - w - 1, i - w + 1, i + w - 1, i + w + 1):
-                if j in todo:
-                    todo.remove(j)
-                    stack.append(j)
-                    comp.append(j)
+            x, y = i % w, i // w
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    if (dx == 0 and dy == 0) or not 0 <= x + dx < w:
+                        continue
+                    j = (y + dy) * w + x + dx
+                    if j in todo:
+                        todo.remove(j)
+                        stack.append(j)
+                        comp.append(j)
         out.append(comp)
     return out
 
@@ -108,6 +117,12 @@ def check_layer(label, info, renders, fr: Frames, holes, args):
 
     a = load_mask(renders / info["png_original"])
     b = load_mask(renders / info["png_factory"])
+    if a.size != b.size:
+        raise ValueError(f"{label}: original/factory image sizes differ")
+    expected_size = (max(1, round((fr.x1 - fr.x0) * fr.ppmm)),
+                     max(1, round((fr.y1 - fr.y0) * fr.ppmm)))
+    if a.size != expected_size:
+        raise ValueError(f"{label}: image size does not cover the declared render window")
     w, h = a.size
     ad, bd = a.tobytes(), b.tobytes()
     k = 2 * args.tolerance_px + 1
@@ -195,9 +210,11 @@ def check_layer(label, info, renders, fr: Frames, holes, args):
     return {
         "removed_beyond_tol_mm2": round(removed_n / fr.ppmm ** 2, 4),
         "removed_outside_unused_pads_mm2": round(len(out_idx) / fr.ppmm ** 2, 4),
+        "removed_outside_unused_pads_px": len(out_idx),
         "suspicious_regions": regions[: args.max_regions],
         "suspicious_regions_total": len(regions),
         "holes_total": len(rows),
+        "holes_outside_window": sum(r.get("state") == "outside_window" for r in rows),
         "isolated_pads": sum(r.get("state") == "isolated" for r in rows),
         "isolated_pads_removed": sum(r.get("verdict", "").startswith("unused pad removed") for r in rows),
         "connected_pads": sum(r.get("state") == "connected" for r in rows),
@@ -229,52 +246,99 @@ def parse_args(argv=None):
 
 def main(argv=None):
     args = parse_args(argv)
+    renders = Path(args.renders)
+    out = Path(args.out) if args.out else renders / "inner-check.json"
+    result = {"schema_version": 1, "tool": "check_inner_removals.py", "status": "PASS", "issues": [],
+              "scope": "Selected layers only; raster heuristic for isolated-pad removals, not netlist or manufacturing approval.",
+              "tolerance_px": args.tolerance_px, "max_pad_mm": args.max_pad_mm, "layers": {}}
+
+    def issue(status, message):
+        result["issues"].append({"status": status, "message": message})
+        priority = {"PASS": 0, "WARNING": 1, "INCOMPLETE": 2, "ERROR": 3}
+        if priority[status] > priority[result["status"]]:
+            result["status"] = status
+
     try:
         import PIL  # noqa: F401
-    except ImportError:
-        raise SystemExit("error: Pillow is missing; run: python -m pip install pillow")
-    renders = Path(args.renders)
-    summary = json.loads((renders / "layer-summary.json").read_text(encoding="utf-8"))
-    fr = Frames(summary)
-
-    if args.holes:
-        raw = json.loads(Path(args.holes).read_text(encoding="utf-8"))
-        holes = []
-        for hdef in raw:
-            X, Y = fr.fwd(float(hdef["x"]), float(hdef["y"]))
-            holes.append({**hdef, "X": X, "Y": Y})
-    else:
-        holes = summary.get("drills", {}).get("original_holes", [])
+        if args.tolerance_px < 0 or not math.isfinite(args.max_pad_mm) or args.max_pad_mm <= 0 or args.min_region_px < 1 or args.max_regions < 1:
+            raise ValueError("tolerance must be nonnegative; pad size and region limits must be positive")
+        summary = json.loads((renders / "layer-summary.json").read_text(encoding="utf-8"))
+        upstream = summary.get("status")
+        result["upstream_status"] = upstream
+        if upstream != "PASS":
+            issue("ERROR" if upstream == "ERROR" else "INCOMPLETE",
+                  f"render verification did not PASS (status={upstream!r})")
+        fr = Frames(summary)
+        if args.holes:
+            raw = json.loads(Path(args.holes).read_text(encoding="utf-8"))
+            holes = []
+            for hdef in raw:
+                x, y = float(hdef["x"]), float(hdef["y"])
+                if not all(math.isfinite(v) for v in (x, y)):
+                    raise ValueError("hole coordinates must be finite")
+                X, Y = fr.fwd(x, y)
+                holes.append({**hdef, "x": x, "y": y, "X": X, "Y": Y})
+            reference = summary.get("drills", {}).get("original_holes", [])
+            matches = [[i for i, original in enumerate(reference)
+                        if math.isclose(hole["x"], float(original["x"]), rel_tol=0, abs_tol=1e-6)
+                        and math.isclose(hole["y"], float(original["y"]), rel_tol=0, abs_tol=1e-6)]
+                       for hole in holes]
+            verified = bool(reference) and len(holes) == len(reference) and all(len(m) == 1 for m in matches)
+            verified = verified and len({m[0] for m in matches}) == len(reference)
+            result["custom_holes_verified"] = verified
+            if not verified:
+                issue("INCOMPLETE", "custom holes must match every original drill hole uniquely within 0.000001 mm")
+                # Keep diagnostic geometry from the drill reference; do not trust unverified net labels.
+                holes = reference
+        else:
+            holes = summary.get("drills", {}).get("original_holes", [])
         if not holes:
-            raise SystemExit("error: no holes in layer-summary.json; pass --holes")
-        if args.plane_nets:
-            print("note: --plane-nets needs nets from --holes; drill files carry no nets")
-
-    labels = args.layers or [lb for lb in summary["layers"] if re.fullmatch(r"In\d+_Cu", lb)]
-    if not labels:
-        raise SystemExit("error: no inner layers found; pass --layers (e.g. F_Cu B_Cu) to check other layers")
-    result = {"tool": "check_inner_removals.py", "tolerance_px": args.tolerance_px,
-              "max_pad_mm": args.max_pad_mm, "layers": {}}
-    for label in labels:
-        info = summary["layers"].get(label)
-        if not info:
-            print(f"{label}: not in layer-summary.json, skipped")
-            continue
-        r = check_layer(label, info, renders, fr, holes, args)
-        result["layers"][label] = r
-        print(f"{label}: removed {r['removed_beyond_tol_mm2']} mm2; outside unused pads "
-              f"{r['removed_outside_unused_pads_mm2']} mm2 in {r['suspicious_regions_total']} region(s)")
-        print(f"  holes {r['holes_total']}: isolated {r['isolated_pads']} (removed {r['isolated_pads_removed']}), "
-              f"connected {r['connected_pads']} (lost centre {r['connected_pads_lost_center']})")
-        if args.plane_nets and args.holes:
-            print(f"  plane-net holes that lost centre copper: {len(r['plane_net_holes_lost_center'])}")
-        for reg in r["suspicious_regions"][:10]:
-            print(f"  SUSPICIOUS removal at original {reg['center_original_mm']} mm "
-                  f"(factory {reg['center_factory_mm']}), {reg['removed_mm2']} mm2")
-    out = Path(args.out) if args.out else renders / "inner-check.json"
-    out.write_text(json.dumps(result, indent=2), encoding="utf-8")
-    print(f"wrote {out}")
+            issue("INCOMPLETE", "no original holes available; provide --holes")
+        for hole in holes:
+            if not all(math.isfinite(float(hole[k])) for k in ("x", "y", "X", "Y")):
+                raise ValueError("hole coordinates must be finite")
+        if args.plane_nets and (not args.holes or any(not h.get("net") for h in holes)):
+            issue("INCOMPLETE", "--plane-nets requires a net for every hole from --holes")
+        labels = args.layers if args.layers is not None else [lb for lb in summary["layers"] if re.fullmatch(r"In\d+_Cu", lb)]
+        result["requested_layers"] = labels
+        if not labels:
+            issue("INCOMPLETE", "no layers selected; provide --layers to check other layers")
+        prerequisite_status = result["status"]
+        for label in labels:
+            info = summary["layers"].get(label)
+            if not info:
+                issue("INCOMPLETE", f"{label}: not in layer-summary.json")
+                result["layers"][label] = {"status": "INCOMPLETE", "issues": ["not in layer-summary.json"]}
+                continue
+            try:
+                r = check_layer(label, info, renders, fr, holes, args)
+                r["status"] = prerequisite_status
+                if r["holes_outside_window"]:
+                    if r["status"] != "ERROR":
+                        r["status"] = "INCOMPLETE"
+                    issue("INCOMPLETE", f"{label}: {r['holes_outside_window']} holes outside render window")
+                if r["removed_outside_unused_pads_px"] or r["connected_pads_lost_center"] or r["plane_net_holes_lost_center"]:
+                    if r["status"] == "PASS":
+                        r["status"] = "WARNING"
+                    issue("WARNING", f"{label}: suspicious copper removal requires review")
+                result["layers"][label] = r
+                print(f"{label}: {r['status']}; outside unused pads {r['removed_outside_unused_pads_mm2']} mm2; connected pads lost {r['connected_pads_lost_center']}")
+            except (OSError, ValueError, KeyError, TypeError, IndexError, AttributeError, OverflowError) as exc:
+                print(f"{label}: ERROR: {exc}")
+                message = f"{label}: invalid or unreadable render input ({type(exc).__name__})"
+                issue("ERROR", message)
+                result["layers"][label] = {"status": "ERROR", "issues": [message]}
+    except (ImportError, OSError, ValueError, KeyError, TypeError, IndexError, AttributeError, OverflowError) as exc:
+        print(f"ERROR: {exc}")
+        issue("ERROR", f"invalid or unreadable input ({type(exc).__name__})")
+    try:
+        out.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    except OSError as exc:
+        print(f"ERROR: cannot write result: {exc}")
+        return 2
+    print(f"{result['status']}: wrote {out}")
+    return {"PASS": 0, "WARNING": 1, "INCOMPLETE": 2, "ERROR": 2}[result["status"]]
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

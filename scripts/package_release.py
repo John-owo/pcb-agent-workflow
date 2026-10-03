@@ -10,6 +10,9 @@ Writes into --out:
     <name>.zip.sha256.txt    sha256 of the zip itself
 
 After writing, the zip is reopened and every entry is checked against the manifest.
+The ZIP hash identifies this exact archive, not a reproducible build: ZIP entries
+retain source timestamps/permissions and the generated manifest's timestamp.
+Compare SHA256-files.json for content identity across rebuilds.
 Standard library only.
 """
 

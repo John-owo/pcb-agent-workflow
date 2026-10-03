@@ -43,6 +43,10 @@ python scripts/package_release.py --src releases/my-board-revC --out dist
 
 雜湊清單用來確認「這就是當時那一份」，不能拿來還原。要能還原，就保留完整的 zip 或 commit。
 
+`SHA256-files.json` 識別相對路徑與檔案內容；相同內容重新封裝時，清單應相同。zip 的 `.sha256.txt` 則只識別**這次產生的封裝檔**，不保證 deterministic rebuild（相同內容重建會得到逐位元相同的 zip）：ZIP 會保留來源檔的時間、權限等 metadata，產生的清單也有當次時間，Python／壓縮函式庫版本也可能影響封裝。要驗證收到的發行包，使用該包隨附的 ZIP 雜湊；要跨次重建比較內容，逐項比較檔案清單。不要把重建 ZIP 的雜湊不同直接解讀為製造檔改變。
+
+腳本的 `all_entries_verified: true` 只表示封裝後的內容雜湊檢查完成；它不表示 ERC／DRC、CAM／Gerber 完整性、板廠接受或實板驗證通過。
+
 ## release-checks.json
 
 把發行前的檢查寫成機器可讀的檔案，之後比對、審查都方便。建議的欄位：
