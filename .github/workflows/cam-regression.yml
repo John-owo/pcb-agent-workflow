@@ -27,6 +27,7 @@ jobs:
       - name: Check script entry points
         run: |
           python scripts/package_release.py --help
+          python scripts/check_bom_cpl.py --help
           python scripts/cam-diff/render_compare.py --help
           python scripts/cam-diff/pixel_compare.py --help
           python scripts/cam-diff/check_inner_removals.py --help
