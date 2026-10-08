@@ -4,7 +4,7 @@
 
 先說清楚這份指南的範圍：
 
-- **走到下單為止。** 這套流程來自一塊已經下單、但還沒有實板測試的 GNSS 板（見 [examples/](../examples/max-m10s-breakout-revc/README.md)）。到板後的上電與測試還沒寫，等實板驗證後再補。
+- **走到下單為止。** 這套流程來自一塊已經下單、但還沒有實板測試的 GNSS 板（見 [examples/](../examples/max-m10s-breakout-revc/README.md)）。到板後的上電與測試，目前有範例板的 [實測程序](../examples/max-m10s-breakout-revc-tests/README.md)，但還沒在實板上跑過。
 - **那塊範例板不適合當第一塊板來模仿。** 它是 4 層、含 RF 天線，屬於進階設計。讀它是為了看完整發行包長什麼樣子，不是照著畫。
 - **agent 是助手，不是設計者。** 它能查資料、解釋錯誤、檢查檔案、起草文件；結論要對照原廠 datasheet，按下付款或送單的一定是你。
 - 看不懂的詞查 [術語表](glossary.md)。
