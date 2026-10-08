@@ -13,7 +13,8 @@ Claude Code 透過 `CLAUDE.md` 匯入本檔；Codex 直接讀本檔。兩邊的�
 | `templates/` | 給新 PCB 專案複製使用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`、`kicad-project.gitignore` |
 | `skills/` | Claude Code 與 Codex 共用的 skill，每個資料夾一個 `SKILL.md` |
 | `scripts/` | 輔助腳本；各自在檔頭或 README 說明用法 |
-| `examples/` | 固定版本的範例設計包 |
+| `examples/` | 固定發行包形式的範例設計，以及旁邊的 `*-tests/` 實測紀錄 |
+| `CONTEXT.md` | 這套流程自己定義的用詞（給 agent 統一用語）；一般術語見 `docs/glossary.md` |
 | `docs/agents/` | 工程類 skill 讀取的設定：issue tracker、triage 標籤、domain docs |
 
 ## 修改規則
@@ -24,10 +25,12 @@ Claude Code 透過 `CLAUDE.md` 匯入本檔；Codex 直接讀本檔。兩邊的�
   rg -n -i --hidden -g '!.git' -g '!scripts/privacy-patterns.txt' -f scripts/privacy-patterns.txt .
   ```
 
-  目前唯一的正常命中，是 `docs/workflow/kicad-tools.md` 裡的環境變數名稱 `%LOCALAPPDATA%`。另外對照自己的姓名、帳號、信箱、客戶代碼再搜一次；Gerber zip 要解開來搜；圖片和 PDF 要打開來看。
+  目前的正常命中只有兩處：`docs/workflow/kicad-tools.md` 裡的環境變數名稱 `%LOCALAPPDATA%`，以及本檔說明這件事的這一行。另外對照自己的姓名、帳號、信箱、客戶代碼再搜一次；Gerber zip 要解開來搜；圖片和 PDF 要打開來看。
 - **不放截圖。** 截圖幾乎都含帳號資訊。需要圖示時，用重新繪製的示意圖或板圖。
 - **不放原廠 datasheet。** 放原廠連結。第三方工具與 skill 寫來源、版本與授權，不附上本體。
-- **範例設計包是固定版本。** 不要用工具重新生成、重新填銅或另存檔案。要修正就另開新版本資料夾，並在 README 說明差異。換行字元不轉換的設定見 `.gitattributes`。
+- **範例設計包是固定發行包。** 不要用工具重新生成、重新填銅或另存檔案，也不要在裡面新增檔案。要修正就另開新版本資料夾，並在 README 說明差異。換行字元不轉換的設定見 `.gitattributes`。
+  - 例外：範例的 `README.md` 是公開時重寫的說明，不是發行檔，可以更新（例如加上實測紀錄的連結、更正說明文字）。
+  - 實板到貨後的**實測紀錄**與勘誤，放在範例包旁邊的 `examples/<範例>-tests/`，不寫進範例包的 `verification/`。`verification/` 只保存發行時的驗證。用詞見 `CONTEXT.md`。
 - **時效性資訊要標快照日期。** JLC 的期限、價格、料庫狀態都會變，寫成「YYYY-MM 觀察」，並提醒讀者以當下的網站和信件為準。
 - **skill 格式。** `SKILL.md` 的 frontmatter 要有 `name` 和 `description`，description 同時寫中文與英文觸發詞。Codex 用的介面資訊放在 `agents/openai.yaml`。參考資料放 `references/`，從 `SKILL.md` 連過去。
 - **語言。** 文件以繁體中文為主；寄給 JLC 的訊息範本用英文。

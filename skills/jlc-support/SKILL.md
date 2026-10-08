@@ -1,6 +1,6 @@
 ---
 name: jlc-support
-description: 與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、工程師、業務窗口溝通。用於催辦審查或 DFM、生產稿與貼裝稿的技術澄清、訂單被取消後的追問、報價與優惠申請、付款後跟進、退款追問；先核對網站與信箱，再起草可獨立閱讀、含界線句的訊息，寄出與任何確認都等使用者同意。Use when drafting or sending messages to JLCPCB support or engineers, chasing a DFM or review, handling a cancelled order, confirming production files, or asking for a quote or coupon. Triggers: "JLC 客服", "催 DFM", "寫信給 JLC", "訂單被取消", "生產稿", "貼裝確認", "JLCPCB support", "chase DFM", "production file".
+description: '與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、工程師、業務窗口溝通。用於催辦審查或 DFM、生產稿與貼裝確認的技術澄清、訂單被取消後的追問、報價與優惠申請、付款後請對方負責到底、退款追問；先核對網站與信箱，再起草可獨立閱讀、含界線句的訊息，寄出與任何確認都等使用者同意。Use when drafting or sending messages to JLCPCB support or engineers, chasing a DFM or review, handling a cancelled order, confirming production files, or asking for a quote or coupon. Triggers: "JLC 客服", "催 DFM", "寫信給 JLC", "訂單被取消", "生產稿", "貼裝確認", "JLCPCB support", "chase DFM", "production file".'
 ---
 
 # JLC 客服溝通
@@ -15,7 +15,7 @@ description: 與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、工
 - 從網站下載工廠的生產稿或其他檔案
 - 上傳檔案、接受條款、提交訂單（包含「只送審不付款」）
 - 接受加費、補償或優惠方案
-- 確認生產稿（Confirm Production）或貼裝稿（Confirm Parts Placement）
+- 確認生產稿（Confirm Production）或貼裝確認（Confirm Parts Placement）
 - 修改設計或製造檔
 
 唯一的例外：使用者可以明確說出範圍和期限，事先授權「催辦」與「純技術澄清」兩種訊息，例如「到這張訂單出貨前，帶界線句的催辦可以直接送」。
@@ -97,7 +97,7 @@ description: 與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、工
 
 ## 參考
 
-- [references/templates.md](references/templates.md)：催辦、取消恢復、技術澄清、報價優惠、付款後跟進、退款追問六種範本
+- [references/templates.md](references/templates.md)：催辦、取消恢復、技術澄清、報價優惠、付款後請對方負責到底、退款追問六種範本
 - [references/pitfalls.md](references/pitfalls.md)：踩過的雷與教訓
 - [references/deadlines.md](references/deadlines.md)：觀察到的期限與客服時段（快照）
 - [references/case-study.md](references/case-study.md)：一次完整訂單的匿名時間線

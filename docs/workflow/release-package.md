@@ -6,7 +6,8 @@
 
 | 類型 | 放哪裡 | 會不會再改 |
 |---|---|---|
-| 發行包：原生設計、元件庫、製造檔、驗證結果 | `releases/<版本>/` 或專案約定的固定位置 | 不改。要修正就開新版本 |
+| 固定發行包：原生設計、元件庫、製造檔、驗證結果 | `releases/<版本>/` 或專案約定的固定位置 | 不改。要修正就開新版本 |
+| 實測紀錄：到板後的上電、功能測試結果與勘誤 | 發行包外，例如 `releases/<版本>-tests/` | 持續增加 |
 | 訂單、審稿、客服進度 | 發行包外的報告檔，例如 `reports/<訂單>-<日期>/` | 持續更新 |
 | 目前該用哪一版 | 根目錄 README 的入口表 | 基準改變時更新 |
 
@@ -82,4 +83,4 @@ python scripts/package_release.py --src releases/my-board-revC --out dist
 | `review-snapshot.zip`、`review-r1-fixed.zip` | 交給審查的固定版本，以及第一輪修正後的版本 |
 | `<board>-<rev>-<YYYYMMDD>.zip` | 正式發行包 |
 
-`candidate`、`review`、`fixtures` 裡也有同名的 PCB，但它們不是最新版，也不能只因檔名重複就刪除。目前該用哪一版，以 README 入口表為準。
+`candidate`、`review`、`fixtures` 裡也有同名的 PCB，但它們不是目前的固定發行包，也不能只因檔名重複就刪除。目前該用哪一版，以 README 入口表為準。

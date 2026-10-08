@@ -168,14 +168,14 @@ python <pcb-agent-workflow>/scripts/check_bom_cpl.py --bom out/bom-jlc.csv --cpl
 
 - 上傳後在預覽畫面逐顆看 pin 1 與極性方向。
 - **Confirm Production file** 選 Yes，工廠改稿前會先給你確認。走路線 B 時，**Confirm Parts Placement** 也選 Yes。
-- 上傳、接受條款、送單、付款、下載工廠檔案、確認生產稿或貼裝稿、寄信，每一次都由你決定、你自己按（完整規則見 [jlc-ordering.md](workflow/jlc-ordering.md) 開頭的「誰決定」）。agent 可以幫你核對、起草要問客服的訊息，停在按下按鈕之前。
+- 上傳、接受條款、送單、付款、下載工廠檔案、確認生產稿或貼裝確認、寄信，每一次都由你決定、你自己按（完整規則見 [jlc-ordering.md](workflow/jlc-ordering.md) 開頭的「誰決定」）。agent 可以幫你核對、起草要問客服的訊息，停在按下按鈕之前。
 
 下單前，把要交給工廠的那一份檔案固定下來（見 [release-package.md](workflow/release-package.md)），之後的問題才對得上版本。
 
 ## 9. 等板子與到板後
 
 - 工廠寄來生產稿時，由你下載檔案，再請 agent 依 [production-file-review.md](workflow/production-file-review.md) 協助比對。確認生產稿仍由你決定。
-- 到板後的上電與測試流程還沒寫進這個 repo。在那之前，至少做到：先目視檢查有沒有短路或錫橋；上電前用電錶量電源對地不是短路；第一次上電用有限流功能的電源，從低電流開始。
+- 到板後的上電與測試，照範例板的 [實測程序](../examples/max-m10s-breakout-revc-tests/README.md) 做。你的板子不同時，至少保留它的前三步：目視檢查短路或錫橋、上電前量電源對地不是短路、第一次上電用有限流功能的電源。
 
 ## 接下來讀什麼
 

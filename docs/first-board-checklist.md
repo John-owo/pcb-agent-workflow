@@ -51,4 +51,4 @@
 - [ ] 在 JLC 預覽畫面逐顆看過 pin 1、極性、旋轉角度。
 - [ ] Confirm Production file 選 Yes；有 JLC 貼裝時，Confirm Parts Placement 也選 Yes。
 - [ ] 看過報價裡未含在總價的項目。
-- [ ] 上傳、接受條款、送單、付款、下載工廠檔案、確認生產稿或貼裝稿、寄信，都由自己決定並按下；agent 只做到核對與起草。完整規則見 jlc-ordering.md 的「誰決定」。
+- [ ] 上傳、接受條款、送單、付款、下載工廠檔案、確認生產稿或貼裝確認、寄信，都由自己決定並按下；agent 只做到核對與起草。完整規則見 jlc-ordering.md 的「誰決定」。
