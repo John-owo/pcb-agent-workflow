@@ -97,7 +97,7 @@ Thank you,
 <NAME>
 ```
 
-## E. 付款後請求跟進
+## E. 付款後請對方負責到底
 
 ```
 Subject: Re: <THREAD> — replacement order <NEW_ID> paid; please take ownership

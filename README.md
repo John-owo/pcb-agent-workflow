@@ -53,26 +53,30 @@ Claude Code 與 Codex 共用同一份 `SKILL.md`：
 git clone https://github.com/John-owo/pcb-agent-workflow.git
 ```
 
+先建立 `skills` 資料夾，再複製。沒有這個資料夾時，複製指令會把 skill 的內容直接攤在 `skills/` 底下，agent 就找不到它。
+
 Claude Code（macOS／Linux／Git Bash）：
 
 ```bash
-cp -r pcb-agent-workflow/skills/jlc-support ~/.claude/skills/
+mkdir -p ~/.claude/skills && cp -r pcb-agent-workflow/skills/jlc-support ~/.claude/skills/
 ```
 
 Codex：
 
 ```bash
-cp -r pcb-agent-workflow/skills/jlc-support ~/.codex/skills/
+mkdir -p ~/.codex/skills && cp -r pcb-agent-workflow/skills/jlc-support ~/.codex/skills/
 ```
 
-Windows PowerShell：
+Windows PowerShell（Codex 的話把 `.claude` 換成 `.codex`）：
 
 ```powershell
-Copy-Item -Recurse pcb-agent-workflow\skills\jlc-support "$HOME\.claude\skills\"
-Copy-Item -Recurse pcb-agent-workflow\skills\jlc-support "$HOME\.codex\skills\"
+New-Item -ItemType Directory -Force "$HOME\.claude\skills" | Out-Null
+Copy-Item -Recurse -Force pcb-agent-workflow\skills\jlc-support "$HOME\.claude\skills\"
 ```
 
-只想在單一專案使用，就放到該專案的 `.claude/skills/`。安裝後跟 agent 說「幫我寫信催 JLC 的 DFM」或「訂單被取消了，幫我追問」，就會套用這個 skill。
+裝好之後，`~/.claude/skills/jlc-support/SKILL.md`（或 `.codex` 底下的同一路徑）要存在。更新時重跑同一組指令即可。
+
+只想在單一專案使用，就放到該專案的 `.claude/skills/jlc-support/`。安裝後重新開一個 agent 對話，跟它說「幫我寫信催 JLC 的 DFM」或「訂單被取消了，幫我追問」，就會套用這個 skill。
 
 ### 搭配的 KiCad 分析 skill
 
@@ -96,9 +100,23 @@ Copy-Item -Recurse pcb-agent-workflow\skills\jlc-support "$HOME\.codex\skills\"
 
 ## 限制
 
-- 範例板完成了 ERC／DRC 與 agent 審查，也實際送單了，但還沒有實板測試。範例是送單時的發行包；工廠 CAM 之後做的微調不在裡面。詳見範例的 README。
+- 範例板完成了 ERC／DRC 與 agent 審查，也實際送單了，但還沒有實板測試。範例是送單時的發行包；工廠 CAM 之後做的微調不在裡面。實測程序與結果見 [examples/max-m10s-breakout-revc-tests](examples/max-m10s-breakout-revc-tests/README.md)。
 - JLC 的期限、價格、料庫狀態是 2026-09 的觀察，以當下的網站和信件為準。
 - 流程以 Windows、KiCad 10、JLCPCB 為主要環境。其他板廠可以參考溝通原則，但網站流程不同。
+
+## 支援範圍
+
+這套流程只在下面的環境驗證過：
+
+| 項目 | 支援 |
+|---|---|
+| 作業系統 | Windows |
+| EDA | KiCad 10 |
+| agent | Claude Code、Codex（兩者都要能用） |
+| 板廠 | JLCPCB |
+| 收貨地 | 台灣（順豐） |
+
+其他環境（macOS、Linux、其他 KiCad 版本、PCBWay 等其他板廠）可能可以用，但沒有驗證。這類 issue 會標成 `wontfix`，回覆「可能可用，未驗證」；溝通原則不受板廠限制，可以照用。
 
 ## 授權
 

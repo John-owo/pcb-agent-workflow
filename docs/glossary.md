@@ -49,7 +49,9 @@
 | Basic／Extended 料 | Basic 料長期裝在貼片機上；Extended 料需要換料，每種另收費用。Preferred Extended 在 Economic 組裝可免換料費（2026-10 觀察，以 JLC 網站為準） |
 | Economic／Standard 組裝 | JLC 的兩種組裝服務等級，差在可貼的面、最小元件與尺寸限制，見 [jlc-ordering.md](workflow/jlc-ordering.md) |
 | DFM | Design for Manufacturing，板廠檢查設計能不能做 |
-| 生產稿（production file） | 工廠依你的檔案調整後、準備投產的版本，需要你確認 |
+| 確認稿 | 付款後工廠請你確認的東西的總稱，分成下面兩種 |
+| 生產稿（production file） | 只指 PCB：工廠依你的 Gerber 做 CAM 處理後、準備投產的版本，需要你確認 |
+| 貼裝確認（parts placement） | 只指 PCBA：每顆元件的位置、角度、極性，需要你確認；JLC 逾期會自動投產 |
 | 工藝邊（rails） | 加在板子外圍、讓機器夾持的邊條，貼裝後可拆 |
 | 拼板（panel） | 多片板子排在一起生產 |
 | V-cut | 拼板之間的 V 形切槽，方便折斷分板 |
@@ -58,9 +60,12 @@
 
 ## 這個 repo 的用語
 
+這一節的正式定義在根目錄的 [CONTEXT.md](../CONTEXT.md)，兩邊不一致時以 CONTEXT.md 為準。
+
 | 名詞 | 意思 |
 |---|---|
-| 發行包（release package） | 交給工廠的那一份固定檔案，之後不再修改，見 [release-package.md](workflow/release-package.md) |
+| 固定發行包（release package） | 交給工廠的那一份檔案，之後不再修改，見 [release-package.md](workflow/release-package.md) |
+| 實測紀錄 | 板子到貨後的上電與功能測試結果，放在固定發行包之外 |
 | WORKLOG | 按時間記錄誰做了什麼、停在哪裡的工作紀錄 |
 | 寫入者（writer） | 同一時間唯一可以修改設計檔的人或 agent |
 | PASS／WARNING／INCOMPLETE／ERROR | 本 repo 腳本的結果狀態。只有 PASS 代表該腳本的檢查範圍全部通過；其他都需要處理或審查 |
