@@ -186,4 +186,5 @@ python <pcb-agent-workflow>/scripts/check_bom_cpl.py --bom out/bom-jlc.csv --cpl
 | 跟 agent 協作、交接 | [collaboration.md](workflow/collaboration.md) |
 | JLC 下單細節 | [jlc-ordering.md](workflow/jlc-ordering.md) |
 | 跟 JLC 客服溝通 | [jlc-support skill](../skills/jlc-support/SKILL.md) |
+| 把原理圖畫得好讀、好除錯 | [readable-schematic-layout skill](../skills/readable-schematic-layout/SKILL.md) |
 | 讓 agent 直接操作 KiCad（進階） | [kicad-tools.md](workflow/kicad-tools.md) |

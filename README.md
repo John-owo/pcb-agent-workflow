@@ -19,6 +19,7 @@
 | [docs/workflow/jlc-ordering.md](docs/workflow/jlc-ordering.md) | JLC 下單：服務等級、BOM／CPL、配料核對、壓成本、送單設定、付款後流程 |
 | [docs/workflow/production-file-review.md](docs/workflow/production-file-review.md) | 收到工廠生產稿後，怎麼跟原始 Gerber 比對、怎麼判讀差異 |
 | [skills/jlc-support/](skills/jlc-support/SKILL.md) | 跟 JLC 客服、工程、業務窗口溝通的 skill：寫信結構、六種範本、期限、停止條件 |
+| [skills/readable-schematic-layout/](skills/readable-schematic-layout/SKILL.md) | 把原理圖與佈局畫成人類好讀、好除錯的 skill：內建 symbol、電源 symbol、實際畫線、依流向分區、文字不重疊；附 netlist 比對腳本，證明只改畫法、沒改電路。獨立版本見 [John-owo/kicad-readable-schematic](https://github.com/John-owo/kicad-readable-schematic) |
 | [templates/](templates/) | 新專案用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`，以及 KiCad 專案的 `.gitignore` |
 | [scripts/](scripts/) | BOM／CPL 一致性檢查、發行包打包驗證、Konnect stdio 呼叫器、生產稿差異比對 |
 | [examples/max-m10s-breakout-revc/](examples/max-m10s-breakout-revc/README.md) | 實際下單過的範例設計包：KiCad 原生檔、Gerber、BOM、CPL、裝配圖、驗證紀錄 |
@@ -77,6 +78,12 @@ Copy-Item -Recurse -Force pcb-agent-workflow\skills\jlc-support "$HOME\.claude\s
 裝好之後，`~/.claude/skills/jlc-support/SKILL.md`（或 `.codex` 底下的同一路徑）要存在。更新時重跑同一組指令即可。
 
 只想在單一專案使用，就放到該專案的 `.claude/skills/jlc-support/`。安裝後重新開一個 agent 對話，跟它說「幫我寫信催 JLC 的 DFM」或「訂單被取消了，幫我追問」，就會套用這個 skill。
+
+### 安裝 readable-schematic-layout skill
+
+步驟同上，把指令裡的 `jlc-support` 換成 `readable-schematic-layout`。裝好後跟 agent 說「把原理圖改成好讀的畫法，不要改電路」或「原理圖文字重疊，整理一下」就會套用。比對腳本只用 Python 標準庫，用法見 `SKILL.md` 第 3 節。
+
+這個 skill 也單獨放在 [John-owo/kicad-readable-schematic](https://github.com/John-owo/kicad-readable-schematic)，給只想要這個 skill 的人使用；兩邊內容相同，以本 repo 為準同步。
 
 ### 搭配的 KiCad 分析 skill
 

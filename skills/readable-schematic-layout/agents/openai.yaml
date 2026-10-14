@@ -1,0 +1,6 @@
+interface:
+  display_name: "Readable KiCad Schematic & Layout"
+  short_description: "Redraw KiCad schematics and layouts for human debugging; prove the netlist is unchanged"
+  default_prompt: "Use $readable-schematic-layout to redraw this schematic so it is easy to read and debug, without changing the circuit."
+policy:
+  allow_implicit_invocation: true
