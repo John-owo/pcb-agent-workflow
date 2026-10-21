@@ -1,0 +1,9 @@
+{
+  "name": "jlc-send-guard",
+  "version": "0.1.0",
+  "description": "Optional hook: asks for confirmation before any Gmail send, reply or forward tool runs, so a drafted JLC message is never sent without the user's OK. Does not cover browser clicks.",
+  "author": { "name": "John-owo" },
+  "repository": "https://github.com/John-owo/pcb-agent-workflow",
+  "license": "MIT",
+  "keywords": ["hook", "gmail", "confirmation", "safety"]
+}

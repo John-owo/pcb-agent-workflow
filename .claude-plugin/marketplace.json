@@ -1,0 +1,59 @@
+{
+  "name": "pcb-agent-workflow",
+  "description": "KiCad 10 + JLCPCB workflow skills for Claude Code and Codex: JLC support messages, production file review, readable schematics.",
+  "version": "0.1.0",
+  "owner": {
+    "name": "John-owo",
+    "url": "https://github.com/John-owo"
+  },
+  "plugins": [
+    {
+      "name": "jlc-support",
+      "source": "./",
+      "skills": ["./skills/jlc-support"],
+      "version": "0.1.0",
+      "description": "Draft verifiable, boundary-marked messages to JLCPCB support and engineers; compute confirmation deadlines. Sending and confirming always wait for the user.",
+      "author": { "name": "John-owo" },
+      "repository": "https://github.com/John-owo/pcb-agent-workflow",
+      "license": "MIT",
+      "keywords": ["jlcpcb", "pcb", "pcba", "support", "dfm"],
+      "category": "hardware"
+    },
+    {
+      "name": "jlc-production-review",
+      "source": "./",
+      "skills": ["./skills/jlc-production-review"],
+      "version": "0.1.0",
+      "description": "Diff JLCPCB production files and parts placement against the fixed release, classify every change, and check BOM/CPL. Bundles the CAM diff scripts.",
+      "author": { "name": "John-owo" },
+      "repository": "https://github.com/John-owo/pcb-agent-workflow",
+      "license": "MIT",
+      "keywords": ["jlcpcb", "gerber", "cam", "bom", "cpl", "kicad"],
+      "category": "hardware"
+    },
+    {
+      "name": "readable-schematic-layout",
+      "source": "./",
+      "skills": ["./skills/readable-schematic-layout"],
+      "version": "0.1.0",
+      "description": "Redraw KiCad schematics and layouts for human debugging, and prove the circuit is unchanged with netlist and pin-to-pad checks.",
+      "author": { "name": "John-owo" },
+      "repository": "https://github.com/John-owo/pcb-agent-workflow",
+      "license": "MIT",
+      "keywords": ["kicad", "schematic", "layout", "netlist", "debug"],
+      "category": "hardware"
+    },
+    {
+      "name": "jlc-send-guard",
+      "source": "./plugins/jlc-send-guard",
+      "version": "0.1.0",
+      "description": "Optional Claude Code hook: asks for confirmation before any Gmail send, reply or forward tool runs. Off by default; does not cover browser clicks.",
+      "author": { "name": "John-owo" },
+      "repository": "https://github.com/John-owo/pcb-agent-workflow",
+      "license": "MIT",
+      "keywords": ["hook", "gmail", "confirmation", "safety"],
+      "category": "hardware",
+      "defaultEnabled": false
+    }
+  ]
+}
