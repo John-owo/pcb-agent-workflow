@@ -144,14 +144,14 @@ CPL 用位置檔匯出後，欄名要改成 JLC 的格式，座標加上單位�
 改好之後執行檢查腳本：
 
 ```bash
-python <pcb-agent-workflow>/scripts/check_bom_cpl.py --bom out/bom-jlc.csv --cpl out/cpl-jlc.csv
+python <pcb-agent-workflow>/skills/jlc-production-review/scripts/check_bom_cpl.py --bom out/bom-jlc.csv --cpl out/cpl-jlc.csv
 ```
 
 它檢查 BOM 與 CPL 的位號是否完全一致、有沒有重複、料號格式、座標與面別。結果是 `PASS`（退出碼 0）、`WARNING`（1，要人看過）、`INCOMPLETE` 或 `ERROR`（2，不能下單）。它**不**檢查旋轉角度、極性、庫存與 footprint 是否正確；這些要在 JLC 的預覽畫面確認。
 
 **可以請 agent：**
 
-> 把 out/ 裡 KiCad 匯出的位置檔改成 JLC 的 CPL 欄名與格式，另存成 cpl-jlc.csv，不要覆蓋原檔，然後跑 <pcb-agent-workflow>/scripts/check_bom_cpl.py 並解釋結果。
+> 把 out/ 裡 KiCad 匯出的位置檔改成 JLC 的 CPL 欄名與格式，另存成 cpl-jlc.csv，不要覆蓋原檔，然後跑 <pcb-agent-workflow>/skills/jlc-production-review/scripts/check_bom_cpl.py 並解釋結果。
 
 **確認做對了：** 用 KiCad 的 Gerber Viewer 打開匯出的 Gerber，每一層都看一次；檢查腳本是 `PASS`，或每個 `WARNING` 都說得出原因。
 
@@ -174,7 +174,7 @@ python <pcb-agent-workflow>/scripts/check_bom_cpl.py --bom out/bom-jlc.csv --cpl
 
 ## 9. 等板子與到板後
 
-- 工廠寄來生產稿時，由你下載檔案，再請 agent 依 [production-file-review.md](workflow/production-file-review.md) 協助比對。確認生產稿仍由你決定。
+- 工廠寄來生產稿時，由你下載檔案，再請 agent 依 [jlc-production-review skill](../skills/jlc-production-review/SKILL.md) 協助比對。確認生產稿仍由你決定。
 - 到板後的上電與測試，照範例板的 [實測程序](../examples/max-m10s-breakout-revc-tests/README.md) 做。你的板子不同時，至少保留它的前三步：目視檢查短路或錫橋、上電前量電源對地不是短路、第一次上電用有限流功能的電源。
 
 ## 接下來讀什麼

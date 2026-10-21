@@ -1,6 +1,6 @@
 # cam-diff：工廠生產稿與原始 Gerber 的逐層比對
 
-把工廠 CAM 改過的生產稿（常含工藝邊、拼板）對齊回你送出的單板 Gerber，逐層找出差異。審查流程與判讀方式見 [docs/workflow/production-file-review.md](../../docs/workflow/production-file-review.md)。
+把工廠 CAM 改過的生產稿（常含工藝邊、拼板）對齊回你送出的單板 Gerber，逐層找出差異。審查流程與判讀方式見 [procedure.md](procedure.md)。
 
 腳本只做分析，不會修改輸入檔，也不會連網。
 
@@ -13,12 +13,12 @@
 | `check_inner_removals.py` | 3.12（固定套件與 CI 使用版本） | `Pillow` |
 
 ```
-python -m pip install -r requirements-cam.txt
+python -m pip install -r scripts/requirements-cam.txt
 ```
 
 建議裝在 venv。gerbonara 會連帶安裝 click、rtree、quart（它自己的 CLI 與檢視器用）。不需要 gerbv，也不需要 KiCad。KiCad 的 Gerber Viewer 適合用來目視複查；要產生帶網路名稱的 `holes.json` 時才需要 KiCad 自帶的 Python（見下方）。
 
-安裝命令從 repo 根目錄執行；相依版本（包含間接套件）固定在 `requirements-cam.txt`。更新版本時重跑 `python -m unittest discover -s tests -v`；CI 會在 Python 3.12 的 Windows 與 Linux 執行測試。
+安裝命令從本 skill 的資料夾執行；相依版本（包含間接套件）固定在 `scripts/requirements-cam.txt`。更新版本時重跑 `python -m unittest discover -s tests -v`；CI 會在 Python 3.12 的 Windows 與 Linux 執行測試。
 
 ## 結果與停止條件
 
@@ -71,9 +71,9 @@ python -m pip install -r requirements-cam.txt
 ## 用法
 
 ```
-python render_compare.py --original release/gerbers.zip --factory factory/production.zip --offset auto --out out
-python pixel_compare.py --renders out
-python check_inner_removals.py --renders out
+python scripts/render_compare.py --original release/gerbers.zip --factory factory/production.zip --offset auto --out out
+python scripts/pixel_compare.py --renders out
+python scripts/check_inner_removals.py --renders out
 ```
 
 常用選項：
@@ -90,8 +90,8 @@ python check_inner_removals.py --renders out
 先拿同一份 Gerber 自我比對，確認環境正常（預期：偏移 (0, 0)、所有孔配對且誤差 0、每層差異都是 0）：
 
 ```
-python render_compare.py --original gerbers.zip --factory gerbers.zip --check-upload gerbers.zip --out selftest
-python pixel_compare.py --renders selftest
+python scripts/render_compare.py --original gerbers.zip --factory gerbers.zip --check-upload gerbers.zip --out selftest
+python scripts/pixel_compare.py --renders selftest
 ```
 
 ### 用 KiCad 產生帶網路名稱的 holes.json

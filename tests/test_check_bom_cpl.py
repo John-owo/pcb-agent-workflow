@@ -10,7 +10,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "check_bom_cpl.py"
+SCRIPT = ROOT / "skills" / "jlc-production-review" / "scripts" / "check_bom_cpl.py"
 EXAMPLE = ROOT / "examples" / "max-m10s-breakout-revc" / "manufacturing"
 
 BOM = ('"Comment","Designator","Footprint","LCSC Part #"\n'

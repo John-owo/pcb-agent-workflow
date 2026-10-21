@@ -17,11 +17,11 @@
 | [docs/workflow/kicad-tools.md](docs/workflow/kicad-tools.md) | KiCad 原生 CLI 與 KiCad MCP 的分工、常用命令、修改 PCB 前的保全 |
 | [docs/workflow/release-package.md](docs/workflow/release-package.md) | 固定發行包：內容、雜湊清單、release-checks、版本資料夾命名 |
 | [docs/workflow/jlc-ordering.md](docs/workflow/jlc-ordering.md) | JLC 下單：服務等級、BOM／CPL、配料核對、壓成本、送單設定、付款後流程 |
-| [docs/workflow/production-file-review.md](docs/workflow/production-file-review.md) | 收到工廠生產稿後，怎麼跟原始 Gerber 比對、怎麼判讀差異 |
-| [skills/jlc-support/](skills/jlc-support/SKILL.md) | 跟 JLC 客服、工程、業務窗口溝通的 skill：寫信結構、六種範本、期限、停止條件 |
-| [skills/readable-schematic-layout/](skills/readable-schematic-layout/SKILL.md) | 把原理圖與佈局畫成人類好讀、好除錯的 skill：內建 symbol、電源 symbol、實際畫線、依流向分區、文字不重疊；附 netlist 比對腳本，證明只改畫法、沒改電路。獨立版本見 [John-owo/kicad-readable-schematic](https://github.com/John-owo/kicad-readable-schematic) |
+| [skills/jlc-support/](skills/jlc-support/SKILL.md) | 跟 JLC 客服、工程、業務窗口溝通的 skill：寫信結構、六種範本、期限計算腳本、工具搭配、停止條件 |
+| [skills/jlc-production-review/](skills/jlc-production-review/SKILL.md) | 審查工廠生產稿與貼裝確認的 skill：把工廠 CAM 稿對齊回原始 Gerber 逐層比對、分類差異、核對貼裝；附比對腳本與 BOM／CPL 檢查 |
+| [skills/readable-schematic-layout/](skills/readable-schematic-layout/SKILL.md) | 把原理圖與佈局畫成人類好讀、好除錯的 skill：內建 symbol、電源 symbol、實際畫線、依流向分區、文字不重疊；附 netlist 比對與腳號對焊盤檢查腳本，證明只改畫法、沒改電路。獨立版本見 [John-owo/kicad-readable-schematic](https://github.com/John-owo/kicad-readable-schematic) |
 | [templates/](templates/) | 新專案用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`，以及 KiCad 專案的 `.gitignore` |
-| [scripts/](scripts/) | BOM／CPL 一致性檢查、發行包打包驗證、Konnect stdio 呼叫器、生產稿差異比對 |
+| [scripts/](scripts/) | 發行包打包驗證、Konnect stdio 呼叫器、本 repo 的隱私掃描與 skill 檢查（各 skill 專用的腳本放在 skill 自己的 `scripts/`） |
 | [examples/max-m10s-breakout-revc/](examples/max-m10s-breakout-revc/README.md) | 實際下單過的範例設計包：KiCad 原生檔、Gerber、BOM、CPL、裝配圖、驗證紀錄 |
 
 ## 流程總覽
@@ -38,6 +38,7 @@ flowchart LR
   S([jlc-support<br/>客服與工程溝通]) -.-> D
   S -.-> E
   S -.-> F
+  R([jlc-production-review<br/>生產稿與貼裝審查]) -.-> F
 ```
 
 ## 開始使用
@@ -78,6 +79,10 @@ Copy-Item -Recurse -Force pcb-agent-workflow\skills\jlc-support "$HOME\.claude\s
 裝好之後，`~/.claude/skills/jlc-support/SKILL.md`（或 `.codex` 底下的同一路徑）要存在。更新時重跑同一組指令即可。
 
 只想在單一專案使用，就放到該專案的 `.claude/skills/jlc-support/`。安裝後重新開一個 agent 對話，跟它說「幫我寫信催 JLC 的 DFM」或「訂單被取消了，幫我追問」，就會套用這個 skill。
+
+### 安裝 jlc-production-review skill
+
+步驟同上，把指令裡的 `jlc-support` 換成 `jlc-production-review`。比對腳本需要 Python 3.12 與固定版本的套件：在 skill 資料夾裡執行 `python -m pip install -r scripts/requirements-cam.txt`（建議裝在 venv）；`check_bom_cpl.py` 只用標準庫。
 
 ### 安裝 readable-schematic-layout skill
 

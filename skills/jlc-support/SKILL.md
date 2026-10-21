@@ -1,6 +1,6 @@
 ---
 name: jlc-support
-description: '與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、工程師、業務窗口溝通。用於催辦審查或 DFM、生產稿與貼裝確認的技術澄清、訂單被取消後的追問、報價與優惠申請、付款後請對方負責到底、退款追問；先核對網站與信箱，再起草可獨立閱讀、含界線句的訊息，寄出與任何確認都等使用者同意。Use when drafting or sending messages to JLCPCB support or engineers, chasing a DFM or review, handling a cancelled order, confirming production files, or asking for a quote or coupon. Triggers: "JLC 客服", "催 DFM", "寫信給 JLC", "訂單被取消", "生產稿", "貼裝確認", "JLCPCB support", "chase DFM", "production file".'
+description: '與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、工程師、業務窗口溝通。用於催辦審查或 DFM、就生產稿與貼裝確認向工廠提出技術澄清（比對與判讀交給 jlc-production-review）、算確認稿到期時間、訂單被取消後的追問、報價與優惠申請、付款後請對方負責到底、退款追問；先核對網站與信箱，再起草可獨立閱讀、含界線句的訊息，寄出與任何確認都等使用者同意。Use when drafting or sending messages to JLCPCB support or engineers, chasing a DFM or review, handling a cancelled order, asking the factory about production file changes, or asking for a quote or coupon. Triggers: "JLC 客服", "催 DFM", "寫信給 JLC", "訂單被取消", "問工廠生產稿", "確認稿期限", "JLCPCB support", "chase DFM", "production file question".'
 ---
 
 # JLC 客服溝通
@@ -30,6 +30,8 @@ description: '與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、�
 跟訂單有關的信，一律從訂單註冊信箱寄出，並回在原信串。寄信工具如果連到別的帳號，先停下來告訴使用者。
 
 ## 寫訊息前先核對
+
+工具與退路見下方「工具搭配」。
 
 1. 打開網站訂單頁，看**詳細狀態**，不要只看頁首的徽章。頁首寫 In Production 時，詳細狀態可能還是 Data Preparation。
 2. 搜尋註冊信箱，垃圾信也要看；再讀上一次的客服對話。
@@ -78,7 +80,13 @@ description: '與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、�
 
 ## 期限倒數
 
-收到生產稿或貼裝確認信時，立刻算出到期的絕對時間（含時區），寫進 WORKLOG 並告訴使用者。有些確認稿逾期會直接投產，在期限前必須讓使用者做出決定。
+收到生產稿或貼裝確認信時，立刻算出到期的絕對時間（含時區），寫進 WORKLOG 並告訴使用者。用本 skill 的腳本計算，不要心算：
+
+```
+python -I scripts/deadline.py --received "<收信時間>" --tz +08:00 --hours 72
+```
+
+退出碼 0 代表還沒到期、1 代表已過期、2 代表輸入錯誤。輸出的「deadline」那幾行照抄進 WORKLOG。有些確認稿逾期會直接投產，在期限前必須讓使用者做出決定。
 
 過去觀察到的期限見 [references/deadlines.md](references/deadlines.md)。那是快照，以當下的信件與網站為準。
 
@@ -88,6 +96,31 @@ description: '與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、�
 - 以下情況通知使用者：有實質進展、出現失敗、需要使用者決定、期限倒數。
 - 以下情況停止：對方最終拒絕；已取得報告並交給使用者；登入或瀏覽器中斷（通知一次後暫停）；使用者說暫停。
 - 對方說「會寄信」「正在催」，不算結案。
+
+## 工具搭配
+
+原則：MCP 只用來看當下狀態，腳本用來算期限、做判定。MCP 回覆「成功」不代表訊息已送達或狀態已改變，要讀回確認。
+
+| 步驟 | MCP／工具 | 腳本（相對於本 skill 資料夾） | 限制 |
+|---|---|---|---|
+| 看訂單詳細狀態、客服對話 | 瀏覽器：Claude in Chrome（Claude Code）；ChatGPT browser extension（Codex 桌面版 `@Chrome`，Codex CLI 不支援） | — | 只讀；不點 Confirm、Submit，不改選項，不下載 |
+| 搜註冊信箱、讀信串 | 信箱：Gmail connector（claude.ai 或 ChatGPT） | — | 先確認連到訂單註冊帳號；寄出另依硬規則 |
+| 起草訊息 | — | — | 草稿可以先寫；寄出等使用者同意 |
+| 算確認稿到期時間 | — | `scripts/deadline.py` | 結果寫進 WORKLOG |
+| 生產稿、貼裝確認的比對 | — | 交給 jlc-production-review skill | 本 skill 只負責把它的待問清單寫成澄清信 |
+
+- 上表只列實際用過的工具。其他瀏覽器或信箱工具未驗證，用之前先列出實際工具與 schema，不要猜參數。
+- **沒有工具時的退路**：沒有瀏覽器或信箱工具（例如在 Codex CLI 裡），請使用者貼上訂單頁的詳細狀態、相關信件與上次對話，再起草。草稿的核對紀錄註明「狀態由使用者提供，未直接核對」。
+
+## 交付草稿時附上
+
+每份草稿前面先給使用者看這幾項，方便使用者決定：
+
+1. **核對紀錄**：看了哪些來源（訂單頁、信箱、上次對話）、核對時間與時區；沒直接核對的註明。
+2. **訊息類型**：需要逐次同意，或落在使用者事先授權的例外內（寫出是哪一條授權）。
+3. **建議管道**：線上聊天、註冊信箱原信串，或業務窗口，以及理由。
+4. **期限**：相關確認稿的到期時間（含時區）與剩餘時間。
+5. **草稿本文**：英文，含界線句。
 
 ## 證據
 
@@ -101,3 +134,4 @@ description: '與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、�
 - [references/pitfalls.md](references/pitfalls.md)：踩過的雷與教訓
 - [references/deadlines.md](references/deadlines.md)：觀察到的期限與客服時段（快照）
 - [references/case-study.md](references/case-study.md)：一次完整訂單的匿名時間線
+- [scripts/deadline.py](scripts/deadline.py)：確認稿到期時間計算（只用標準庫）
