@@ -9,7 +9,7 @@ import unittest
 from PIL import Image
 
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "cam-diff" / "check_inner_removals.py"
+SCRIPT = Path(__file__).resolve().parents[1] / "skills" / "jlc-production-review" / "scripts" / "check_inner_removals.py"
 spec = importlib.util.spec_from_file_location("inner_removals", SCRIPT)
 inner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(inner)

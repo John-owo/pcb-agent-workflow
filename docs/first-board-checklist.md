@@ -42,7 +42,7 @@
 
 - [ ] Gerber、鑽孔、BOM、CPL 是同一次、同一版本匯出的。
 - [ ] 用 Gerber Viewer 看過每一層：板框完整、銅層正確、沒有多餘或缺少的層。
-- [ ] BOM 與 CPL 用 JLC 欄名，pcb-agent-workflow 的 `scripts/check_bom_cpl.py` 結果是 PASS，或每個 WARNING 都有原因。
+- [ ] BOM 與 CPL 用 JLC 欄名，pcb-agent-workflow 的 `skills/jlc-production-review/scripts/check_bom_cpl.py` 結果是 PASS，或每個 WARNING 都有原因。
 - [ ] DNP、測試點、安裝孔沒有混進 BOM 與 CPL。
 - [ ] 交出去的檔案已經固定成一份，記錄在專案的 README 或 WORKLOG。
 

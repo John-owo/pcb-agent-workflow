@@ -2,10 +2,12 @@
 
 由實際寄出並得到回覆的信件改寫成通用版。`<...>` 是要替換的欄位。寄出前依 SKILL.md 的硬規則取得使用者同意。
 
+編號欄位：`<BATCH_ID>` 是整筆訂單（批次）編號，`<PCB_ID>`／`<PCBA_ID>` 是其下的子單號，`<ORDER_ID>` 用在只涉及單一張訂單的信（取消、退款）。
+
 ## A. 催辦審查或 DFM
 
 ```
-Subject: Request for review status and owner — <ORDER_ID>
+Subject: Request for review status and owner — <BATCH_ID>
 
 Hello,
 

@@ -1,0 +1,42 @@
+name: Regression tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: skills/jlc-production-review/scripts/requirements-cam.txt
+      - name: Install pinned CAM dependencies
+        run: python -m pip install -r skills/jlc-production-review/scripts/requirements-cam.txt
+      - name: Run regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Privacy scan
+        run: python -I scripts/check_privacy.py
+      - name: Skill and link lint
+        run: python -I scripts/check_skills.py
+      - name: Check script entry points
+        run: |
+          python scripts/package_release.py --help
+          python scripts/check_privacy.py --help
+          python scripts/check_skills.py --help
+          python skills/jlc-production-review/scripts/check_bom_cpl.py --help
+          python skills/jlc-production-review/scripts/render_compare.py --help
+          python skills/jlc-production-review/scripts/pixel_compare.py --help
+          python skills/jlc-production-review/scripts/check_inner_removals.py --help
+          python skills/jlc-support/scripts/deadline.py --help
+          python skills/readable-schematic-layout/scripts/compare_netlist.py --help
+          python skills/readable-schematic-layout/scripts/check_pin_pad.py --help

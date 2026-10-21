@@ -1,0 +1,6 @@
+interface:
+  display_name: "JLC Production File Review"
+  short_description: "Diff JLCPCB production files and placement against the original release"
+  default_prompt: "Use $jlc-production-review to review the production file and parts placement for this order against the fixed release."
+policy:
+  allow_implicit_invocation: true

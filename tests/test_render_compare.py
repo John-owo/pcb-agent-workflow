@@ -9,7 +9,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
-SCRIPTS = Path(__file__).resolve().parents[1] / "scripts" / "cam-diff"
+SCRIPTS = Path(__file__).resolve().parents[1] / "skills" / "jlc-production-review" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 import render_compare as render
 import pixel_compare as pixel
@@ -286,7 +286,7 @@ class RenderTests(unittest.TestCase):
 
     def test_fixed_release_read_only_self_comparison(self):
         import hashlib
-        archive = SCRIPTS.parents[1] / "examples/max-m10s-breakout-revc/manufacturing/gerbers-board.zip"
+        archive = SCRIPTS.parents[2] / "examples/max-m10s-breakout-revc/manufacturing/gerbers-board.zip"
         before = hashlib.sha256(archive.read_bytes()).hexdigest()
         with contextlib.redirect_stdout(io.StringIO()):
             code = render.main(["--original", str(archive), "--factory", str(archive),

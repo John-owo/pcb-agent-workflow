@@ -5,6 +5,9 @@ Usage: python -I compare_netlist.py BASE.xml NEW.xml [--names]
 Checks that the connectivity grouping is identical: every net is compared as the set of
 "ref.pin" nodes it contains, independent of net names. With --names the net names must
 also match. Also compares components (ref, value, footprint, fields, DNP).
+The symbol library source (libsource) is deliberately not compared: swapping to a
+KiCad built-in symbol changes it by design. A wrong pin map still shows up as a net
+difference here, and check_pin_pad.py checks pin numbers against footprint pads.
 Exit code 0 = identical, 1 = differences printed.
 """
 import sys, xml.etree.ElementTree as ET
