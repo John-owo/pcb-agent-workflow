@@ -40,3 +40,8 @@ jobs:
           python skills/jlc-support/scripts/deadline.py --help
           python skills/readable-schematic-layout/scripts/compare_netlist.py --help
           python skills/readable-schematic-layout/scripts/check_pin_pad.py --help
+          python skills/kicad-enclosure-step/scripts/inventory_models.py --help
+          python skills/kicad-enclosure-step/scripts/export_step.py --help
+          python skills/kicad-enclosure-step/scripts/verify_placement.py --help
+          python skills/kicad-enclosure-step/scripts/step_report.py --help
+          python skills/kicad-enclosure-step/scripts/simple_model.py --help

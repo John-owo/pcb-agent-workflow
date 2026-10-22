@@ -1,0 +1,16 @@
+{
+  "pcb": "../max-m10s-breakout-revc/MAX-M10S-Passive.kicad_pcb",
+  "output": "MAX-M10S-RevC.step",
+  "origin": "board-bottom-left",
+  "no_dnp": true,
+  "models": {
+    "PassiveGNSS:C_0603": [{"file": "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_0603_1608Metric.step"}],
+    "PassiveGNSS:R_0603": [{"file": "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0603_1608Metric.step"}],
+    "PassiveGNSS:LED_0603": [{"file": "${KICAD10_3DMODEL_DIR}/LED_SMD.3dshapes/LED_0603_1608Metric.step"}],
+    "PassiveGNSS:SOT23": [{"file": "${KICAD10_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-23.step"}],
+    "PassiveGNSS:Header_1x06": [{"file": "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x06_P2.54mm_Vertical.step"}],
+    "PassiveGNSS:MAX_M10S": [{"file": "models/MAX-M10S_simple.step"}],
+    "PassiveGNSS:MHF_I": [{"file": "models/MHF-I_20279_simple.step"}],
+    "PassiveGNSS:PESD3V3C1BSF": [{"file": "models/DSN0603-2_simple.step"}]
+  }
+}

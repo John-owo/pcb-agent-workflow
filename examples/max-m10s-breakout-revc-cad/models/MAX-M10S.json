@@ -1,0 +1,9 @@
+{
+  "output": "MAX-M10S_simple.step",
+  "name": "MAX-M10S",
+  "source": "u-blox MAX-M10S data sheet UBX-20035208 R08, Table 21: A 10.1 (10.0-10.7), B 9.7 (9.6-9.8), C 2.5 typ (2.2-2.7) mm. Footprint F.Fab is 9.7 (X) x 10.1 (Y).",
+  "parts": [
+    {"box": [-4.85, 4.85, -5.05, 5.05, 0, 0.9], "color": [0.12, 0.35, 0.18]},
+    {"box": [-4.65, 4.65, -4.85, 4.85, 0.9, 2.5], "color": [0.78, 0.78, 0.80]}
+  ]
+}

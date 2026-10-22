@@ -20,11 +20,13 @@
 | [skills/jlc-support/](skills/jlc-support/SKILL.md) | 跟 JLC 客服、工程、業務窗口溝通的 skill：寫信結構、六種範本、期限計算腳本、工具搭配、停止條件 |
 | [skills/jlc-production-review/](skills/jlc-production-review/SKILL.md) | 審查工廠生產稿與貼裝確認的 skill：把工廠 CAM 稿對齊回原始 Gerber 逐層比對、分類差異、核對貼裝；附比對腳本與 BOM／CPL 檢查 |
 | [skills/readable-schematic-layout/](skills/readable-schematic-layout/SKILL.md) | 把原理圖與佈局畫成人類好讀、好除錯的 skill：內建 symbol、電源 symbol、實際畫線、依流向分區、文字不重疊；附 netlist 比對與腳號對焊盤檢查腳本，證明只改畫法、沒改電路 |
+| [skills/kicad-enclosure-step/](skills/kicad-enclosure-step/SKILL.md) | 把 KiCad 板子匯出成含全部零件的 STEP，給外殼設計用：盤點缺模型的零件、找原廠模型或依規格書自畫、對齊、用暫存副本匯出（不改板檔），逐顆自動檢查位置，最後寫外殼注意事項 |
 | [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) | Claude Code 與 Codex 共用的 plugin marketplace：每個 skill 一個 plugin，加上選用的寄信確認 hook |
 | [plugins/jlc-send-guard/](plugins/jlc-send-guard/) | 選用的 Claude Code hook：Gmail 寄出類工具執行前強制確認 |
 | [templates/](templates/) | 新專案用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`，以及 KiCad 專案的 `.gitignore` |
 | [scripts/](scripts/) | 發行包打包驗證、Konnect stdio 呼叫器、本 repo 的隱私掃描與 skill 檢查（各 skill 專用的腳本放在 skill 自己的 `scripts/`） |
 | [examples/max-m10s-breakout-revc/](examples/max-m10s-breakout-revc/README.md) | 實際下單過的範例設計包：KiCad 原生檔、Gerber、BOM、CPL、裝配圖、驗證紀錄 |
+| [examples/max-m10s-breakout-revc-cad/](examples/max-m10s-breakout-revc-cad/README.md) | 上面那塊板的外殼設計用 STEP（含全部零件）、預覽圖與匯出設定；kicad-enclosure-step 的範例 |
 
 ## 流程總覽
 
@@ -51,13 +53,14 @@ flowchart LR
 
 ### 安裝 skill
 
-三個 skill 各是一個 plugin，可以只裝需要的。Claude Code 與 Codex 讀同一份 marketplace（`.claude-plugin/marketplace.json`）和同一份 `SKILL.md`。
+四個 skill 各是一個 plugin，可以只裝需要的。Claude Code 與 Codex 讀同一份 marketplace（`.claude-plugin/marketplace.json`）和同一份 `SKILL.md`。
 
 | plugin | 用途 |
 |---|---|
 | `jlc-support` | 跟 JLC 客服、工程、業務窗口溝通；附確認稿期限計算 |
 | `jlc-production-review` | 審查生產稿與貼裝確認；附 CAM 比對與 BOM／CPL 檢查腳本 |
 | `readable-schematic-layout` | 原理圖與佈局畫成好讀、好除錯的樣子；附 netlist 與腳號對焊盤檢查 |
+| `kicad-enclosure-step` | 把板子匯出成含全部零件的 STEP 給外殼設計；附盤點、匯出、逐顆位置檢查與自畫模型腳本 |
 | `jlc-send-guard` | 選用的 Claude Code hook，見下方「寄信確認 hook」；預設停用 |
 
 **Claude Code**（在對話裡輸入）：
@@ -79,9 +82,9 @@ codex plugin marketplace add John-owo/pcb-agent-workflow
 codex plugin add jlc-support@pcb-agent-workflow
 ```
 
-更新用 `codex plugin marketplace upgrade`。把 `jlc-support` 換成表中其他名稱，就能裝其他 plugin。裝好後重新開一個對話，跟 agent 說「幫我寫信催 JLC 的 DFM」「幫我比對工廠寄來的生產稿」「把原理圖改成好讀的畫法，不要改電路」，就會套用對應的 skill。
+更新用 `codex plugin marketplace upgrade`。把 `jlc-support` 換成表中其他名稱，就能裝其他 plugin。裝好後重新開一個對話，跟 agent 說「幫我寫信催 JLC 的 DFM」「幫我比對工廠寄來的生產稿」「把原理圖改成好讀的畫法，不要改電路」「我要設計外殼，給我含全部零件的 STEP」，就會套用對應的 skill。
 
-**比對腳本的相依套件**：`jlc-production-review` 的 CAM 比對腳本需要 Python 3.12 與固定版本的套件，在 skill 資料夾裡執行 `python -m pip install -r scripts/requirements-cam.txt`（建議裝在 venv）。其他腳本只用 Python 標準庫。
+**腳本的相依套件**：`jlc-production-review` 的 CAM 比對腳本需要 Python 3.12 與固定版本的套件，在 skill 資料夾裡執行 `python -m pip install -r scripts/requirements-cam.txt`（建議裝在 venv）。`kicad-enclosure-step` 需要 KiCad 10；它的 `step_report.py`、`simple_model.py`、`verify_placement.py` 另需 [CadQuery](https://github.com/CadQuery/cadquery)（`python -m pip install cadquery`，建議裝在 venv），範例與重現指令見 [examples/max-m10s-breakout-revc-cad](examples/max-m10s-breakout-revc-cad/README.md)。其他腳本只用 Python 標準庫。
 
 #### 手動安裝（不用 plugin）
 

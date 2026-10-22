@@ -1,0 +1,6 @@
+interface:
+  display_name: "KiCad Board to Enclosure STEP"
+  short_description: "Export a KiCad board with every part modelled and verified, for enclosure design"
+  default_prompt: "Use $kicad-enclosure-step to export this board as a STEP with all components for enclosure design, and verify every model's placement."
+policy:
+  allow_implicit_invocation: true

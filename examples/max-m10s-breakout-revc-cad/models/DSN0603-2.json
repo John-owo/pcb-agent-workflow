@@ -1,0 +1,8 @@
+{
+  "output": "DSN0603-2_simple.step",
+  "name": "DSN0603-2",
+  "source": "Nexperia PESD3V3Z1BSF data sheet, DSN0603-2 (SOD962-2): 0.6 x 0.3 x 0.3 mm body (package outline 0.625 x 0.32).",
+  "parts": [
+    {"box": [-0.3125, 0.3125, -0.16, 0.16, 0, 0.3], "color": [0.15, 0.15, 0.15]}
+  ]
+}

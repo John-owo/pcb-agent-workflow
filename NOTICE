@@ -44,6 +44,15 @@ MAX_M10S, PESD3V3C1BSF, ADCM_S05R5SA, CPH3225A, MHF_I. The vendor-specific
 footprints were drawn from the manufacturers' published land patterns, which
 are not included here.
 
+examples/max-m10s-breakout-revc-cad/MAX-M10S-RevC.step contains geometry from
+the KiCad official 3D model library (Capacitor_SMD, Resistor_SMD, LED_SMD,
+Package_TO_SOT_SMD, Connector_PinHeader_2.54mm). Under the KiCad libraries
+exception this generated file is not bound by CC-BY-SA. The config references
+the models through ${KICAD10_3DMODEL_DIR}; the model files are not included.
+The three models in examples/max-m10s-breakout-revc-cad/models/ were drawn for
+this project (MIT) from the dimensions in the u-blox, I-PEX and Nexperia
+documents named in each *.json spec.
+
 ------------------------------------------------------------------------------
 mattpocock/skills (MIT)
 https://github.com/mattpocock/skills

@@ -33,6 +33,7 @@ Claude Code 透過 `CLAUDE.md` 匯入本檔；Codex 直接讀本檔。兩邊的�
 - **範例設計包是固定發行包。** 不要用工具重新生成、重新填銅或另存檔案，也不要在裡面新增檔案。要修正就另開新版本資料夾，並在 README 說明差異。換行字元不轉換的設定見 `.gitattributes`。
   - 例外：範例的 `README.md` 是公開時重寫的說明，不是發行檔，可以更新（例如加上實測紀錄的連結、更正說明文字）。
   - 實板到貨後的**實測紀錄**與勘誤，放在範例包旁邊的 `examples/<範例>-tests/`，不寫進範例包的 `verification/`。`verification/` 只保存發行時的驗證。用詞見 `CONTEXT.md`。
+  - 外殼設計用的 3D 檔（含零件的 STEP、匯出設定、自畫模型）放在 `examples/<範例>-cad/`，由 `skills/kicad-enclosure-step` 從範例包的板檔產生；範例包本身不動。下載自 LCSC、GrabCAD 等網站的模型不放進 repo。
 - **時效性資訊要標快照日期。** JLC 的期限、價格、料庫狀態都會變，寫成「YYYY-MM 觀察」，並提醒讀者以當下的網站和信件為準。
 - **skill 格式。** `SKILL.md` 的 frontmatter 要有 `name`（與資料夾同名）和 `description`（1024 字元內），description 同時寫中文與英文觸發詞。Codex 用的介面資訊放在 `agents/openai.yaml`。參考資料放 `references/`、腳本放 `scripts/`，從 `SKILL.md` 用相對路徑連過去；不要用只有某個 agent 會展開的變數。只在特定情境才需要的長段落移到 `references/`。
 - **plugin 與版本。** 新增 skill 時，在 `.claude-plugin/marketplace.json` 加一個 `source` 為 `./`、`skills` 只列該 skill 的 entry。改了 skill 或腳本，就升該 entry 的 `version`（有 `plugin.json` 的 plugin 兩邊一起改），已安裝的使用者才會收到更新。改完用 `claude plugin validate .` 檢查。

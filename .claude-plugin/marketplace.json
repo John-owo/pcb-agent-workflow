@@ -1,6 +1,6 @@
 {
   "name": "pcb-agent-workflow",
-  "description": "KiCad 10 + JLCPCB workflow skills for Claude Code and Codex: JLC support messages, production file review, readable schematics.",
+  "description": "KiCad 10 + JLCPCB workflow skills for Claude Code and Codex: JLC support messages, production file review, readable schematics, enclosure STEP export.",
   "version": "0.1.0",
   "owner": {
     "name": "John-owo",
@@ -41,6 +41,18 @@
       "repository": "https://github.com/John-owo/pcb-agent-workflow",
       "license": "MIT",
       "keywords": ["kicad", "schematic", "layout", "netlist", "debug"],
+      "category": "hardware"
+    },
+    {
+      "name": "kicad-enclosure-step",
+      "source": "./",
+      "skills": ["./skills/kicad-enclosure-step"],
+      "version": "0.1.0",
+      "description": "Export a KiCad board as a STEP with every part modelled, for enclosure design: inventory missing models, add them on a temporary copy, verify each placement against its footprint.",
+      "author": { "name": "John-owo" },
+      "repository": "https://github.com/John-owo/pcb-agent-workflow",
+      "license": "MIT",
+      "keywords": ["kicad", "step", "3d", "enclosure", "mechanical"],
       "category": "hardware"
     },
     {
