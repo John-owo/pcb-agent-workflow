@@ -11,6 +11,8 @@ Claude Code 透過 `CLAUDE.md` 匯入本檔；Codex 直接讀本檔。兩邊的�
 | `docs/` | 新手入門、術語表、第一塊板檢查清單 |
 | `docs/workflow/` | 流程文件：協作、KiCad 工具、發行包、JLC 下單（生產稿比對已併入 `skills/jlc-production-review/`） |
 | `templates/` | 給新 PCB 專案複製使用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`、`kicad-project.gitignore` |
+| `.claude-plugin/marketplace.json` | Claude Code 與 Codex 共用的 plugin marketplace，每個 skill 一個 plugin entry |
+| `plugins/` | 不屬於 skill 的 plugin，目前只有選用的 `jlc-send-guard` hook |
 | `skills/` | Claude Code 與 Codex 共用的 skill，每個資料夾一個 `SKILL.md`；skill 用到的腳本放在該 skill 的 `scripts/`，跟著 skill 一起安裝 |
 | `scripts/` | 不屬於單一 skill 的流程工具（發行包、Konnect 呼叫器），以及本 repo 的隱私掃描與 skill 檢查；各自在檔頭說明用法 |
 | `examples/` | 固定發行包形式的範例設計，以及旁邊的 `*-tests/` 實測紀錄 |
@@ -33,6 +35,7 @@ Claude Code 透過 `CLAUDE.md` 匯入本檔；Codex 直接讀本檔。兩邊的�
   - 實板到貨後的**實測紀錄**與勘誤，放在範例包旁邊的 `examples/<範例>-tests/`，不寫進範例包的 `verification/`。`verification/` 只保存發行時的驗證。用詞見 `CONTEXT.md`。
 - **時效性資訊要標快照日期。** JLC 的期限、價格、料庫狀態都會變，寫成「YYYY-MM 觀察」，並提醒讀者以當下的網站和信件為準。
 - **skill 格式。** `SKILL.md` 的 frontmatter 要有 `name`（與資料夾同名）和 `description`（1024 字元內），description 同時寫中文與英文觸發詞。Codex 用的介面資訊放在 `agents/openai.yaml`。參考資料放 `references/`、腳本放 `scripts/`，從 `SKILL.md` 用相對路徑連過去；不要用只有某個 agent 會展開的變數。只在特定情境才需要的長段落移到 `references/`。
+- **plugin 與版本。** 新增 skill 時，在 `.claude-plugin/marketplace.json` 加一個 `source` 為 `./`、`skills` 只列該 skill 的 entry。改了 skill 或腳本，就升該 entry 的 `version`（有 `plugin.json` 的 plugin 兩邊一起改），已安裝的使用者才會收到更新。改完用 `claude plugin validate .` 檢查。
 - **工具搭配。** skill 提到 MCP 或外部工具時，只點名實際驗證過的工具與版本，其他寫類別並註明未驗證；同時寫出沒有該工具時的退路。原則是 MCP 看狀態與操作，腳本與 `kicad-cli` 判定。
 - **語言。** 文件以繁體中文為主；寄給 JLC 的訊息範本用英文。
 
