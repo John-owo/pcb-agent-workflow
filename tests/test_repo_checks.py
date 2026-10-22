@@ -153,14 +153,13 @@ class MarketplaceTests(unittest.TestCase):
 def find_bash():
     """Git Bash on Windows; plain PATH lookup can hit the WSL launcher in System32."""
     if sys.platform == "win32":
-        for var in ("ProgramFiles", "ProgramFiles(x86)", "LocalAppData"):
+        for var in ("ProgramFiles", "ProgramFiles(x86)"):
             base = os.environ.get(var)
             if not base:
                 continue
-            for rel in ("Git/bin/bash.exe", "Programs/Git/bin/bash.exe"):
-                cand = Path(base) / rel
-                if cand.is_file():
-                    return str(cand)
+            cand = Path(base) / "Git" / "bin" / "bash.exe"
+            if cand.is_file():
+                return str(cand)
         return None
     return shutil.which("bash")
 
