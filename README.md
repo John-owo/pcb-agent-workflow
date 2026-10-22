@@ -19,7 +19,9 @@
 | [docs/workflow/jlc-ordering.md](docs/workflow/jlc-ordering.md) | JLC 下單：服務等級、BOM／CPL、配料核對、壓成本、送單設定、付款後流程 |
 | [skills/jlc-support/](skills/jlc-support/SKILL.md) | 跟 JLC 客服、工程、業務窗口溝通的 skill：寫信結構、六種範本、期限計算腳本、工具搭配、停止條件 |
 | [skills/jlc-production-review/](skills/jlc-production-review/SKILL.md) | 審查工廠生產稿與貼裝確認的 skill：把工廠 CAM 稿對齊回原始 Gerber 逐層比對、分類差異、核對貼裝；附比對腳本與 BOM／CPL 檢查 |
-| [skills/readable-schematic-layout/](skills/readable-schematic-layout/SKILL.md) | 把原理圖與佈局畫成人類好讀、好除錯的 skill：內建 symbol、電源 symbol、實際畫線、依流向分區、文字不重疊；附 netlist 比對與腳號對焊盤檢查腳本，證明只改畫法、沒改電路。獨立版本見 [John-owo/kicad-readable-schematic](https://github.com/John-owo/kicad-readable-schematic) |
+| [skills/readable-schematic-layout/](skills/readable-schematic-layout/SKILL.md) | 把原理圖與佈局畫成人類好讀、好除錯的 skill：內建 symbol、電源 symbol、實際畫線、依流向分區、文字不重疊；附 netlist 比對與腳號對焊盤檢查腳本，證明只改畫法、沒改電路 |
+| [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) | Claude Code 與 Codex 共用的 plugin marketplace：每個 skill 一個 plugin，加上選用的寄信確認 hook |
+| [plugins/jlc-send-guard/](plugins/jlc-send-guard/) | 選用的 Claude Code hook：Gmail 寄出類工具執行前強制確認 |
 | [templates/](templates/) | 新專案用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`，以及 KiCad 專案的 `.gitignore` |
 | [scripts/](scripts/) | 發行包打包驗證、Konnect stdio 呼叫器、本 repo 的隱私掃描與 skill 檢查（各 skill 專用的腳本放在 skill 自己的 `scripts/`） |
 | [examples/max-m10s-breakout-revc/](examples/max-m10s-breakout-revc/README.md) | 實際下單過的範例設計包：KiCad 原生檔、Gerber、BOM、CPL、裝配圖、驗證紀錄 |
@@ -47,15 +49,47 @@ flowchart LR
 
 把 `templates/` 裡的四個 Markdown 檔複製到 PCB 專案根目錄，把 `<...>` 換成自己的內容；`kicad-project.gitignore` 複製後改名為 `.gitignore`。專案已經有 `README.md` 的話，不要直接覆蓋，把範本的段落合併進去。之後每次接手，agent 會從 `README.md` 和 `WORKLOG.md` 讀起。
 
-### 安裝 jlc-support skill
+### 安裝 skill
 
-Claude Code 與 Codex 共用同一份 `SKILL.md`：
+三個 skill 各是一個 plugin，可以只裝需要的。Claude Code 與 Codex 讀同一份 marketplace（`.claude-plugin/marketplace.json`）和同一份 `SKILL.md`。
+
+| plugin | 用途 |
+|---|---|
+| `jlc-support` | 跟 JLC 客服、工程、業務窗口溝通；附確認稿期限計算 |
+| `jlc-production-review` | 審查生產稿與貼裝確認；附 CAM 比對與 BOM／CPL 檢查腳本 |
+| `readable-schematic-layout` | 原理圖與佈局畫成好讀、好除錯的樣子；附 netlist 與腳號對焊盤檢查 |
+| `jlc-send-guard` | 選用的 Claude Code hook，見下方「寄信確認 hook」；預設停用 |
+
+**Claude Code**（在對話裡輸入）：
+
+```text
+/plugin marketplace add John-owo/pcb-agent-workflow
+/plugin install jlc-support@pcb-agent-workflow
+```
+
+Claude Code 2.1.275 以後也可以一步完成：`/plugin install jlc-support --marketplace John-owo/pcb-agent-workflow`。更新用 `/plugin marketplace update pcb-agent-workflow`。
+
+**Codex**（在終端機）：
+
+```bash
+codex plugin marketplace add John-owo/pcb-agent-workflow
+```
+
+```bash
+codex plugin add jlc-support@pcb-agent-workflow
+```
+
+更新用 `codex plugin marketplace upgrade`。把 `jlc-support` 換成表中其他名稱，就能裝其他 plugin。裝好後重新開一個對話，跟 agent 說「幫我寫信催 JLC 的 DFM」「幫我比對工廠寄來的生產稿」「把原理圖改成好讀的畫法，不要改電路」，就會套用對應的 skill。
+
+**比對腳本的相依套件**：`jlc-production-review` 的 CAM 比對腳本需要 Python 3.12 與固定版本的套件，在 skill 資料夾裡執行 `python -m pip install -r scripts/requirements-cam.txt`（建議裝在 venv）。其他腳本只用 Python 標準庫。
+
+#### 手動安裝（不用 plugin）
+
+複製 skill 資料夾到 agent 的 skills 目錄。先建立目錄再複製；沒有這個目錄時，複製指令會把 skill 的內容直接攤在 `skills/` 底下，agent 就找不到它。
 
 ```bash
 git clone https://github.com/John-owo/pcb-agent-workflow.git
 ```
-
-先建立 `skills` 資料夾，再複製。沒有這個資料夾時，複製指令會把 skill 的內容直接攤在 `skills/` 底下，agent 就找不到它。
 
 Claude Code（macOS／Linux／Git Bash）：
 
@@ -63,32 +97,36 @@ Claude Code（macOS／Linux／Git Bash）：
 mkdir -p ~/.claude/skills && cp -r pcb-agent-workflow/skills/jlc-support ~/.claude/skills/
 ```
 
-Codex：
+Codex（Codex 文件寫的使用者 skill 目錄是 `~/.agents/skills`；舊的 `~/.codex/skills` 未驗證）：
 
 ```bash
-mkdir -p ~/.codex/skills && cp -r pcb-agent-workflow/skills/jlc-support ~/.codex/skills/
+mkdir -p ~/.agents/skills && cp -r pcb-agent-workflow/skills/jlc-support ~/.agents/skills/
 ```
 
-Windows PowerShell（Codex 的話把 `.claude` 換成 `.codex`）：
+Windows PowerShell（Codex 的話把 `.claude` 換成 `.agents`）：
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.claude\skills" | Out-Null
 Copy-Item -Recurse -Force pcb-agent-workflow\skills\jlc-support "$HOME\.claude\skills\"
 ```
 
-裝好之後，`~/.claude/skills/jlc-support/SKILL.md`（或 `.codex` 底下的同一路徑）要存在。更新時重跑同一組指令即可。
+裝好後 `~/.claude/skills/jlc-support/SKILL.md`（或 `~/.agents/skills/` 底下的同一路徑）要存在。更新時重跑同一組指令。只想在單一專案使用，就放到該專案的 `.claude/skills/` 或 `.agents/skills/`。手動安裝不含 `jlc-send-guard` hook。
 
-只想在單一專案使用，就放到該專案的 `.claude/skills/jlc-support/`。安裝後重新開一個 agent 對話，跟它說「幫我寫信催 JLC 的 DFM」或「訂單被取消了，幫我追問」，就會套用這個 skill。
+#### 寄信確認 hook（選用，只限 Claude Code）
 
-### 安裝 jlc-production-review skill
+`jlc-send-guard` 在 Gmail connector 的寄出類工具（名稱含 `send`、`reply`、`forward`）執行前，強制跳出確認，auto mode 也一樣。草稿工具不受影響。它預設停用，要用時自己啟用：
 
-步驟同上，把指令裡的 `jlc-support` 換成 `jlc-production-review`。比對腳本需要 Python 3.12 與固定版本的套件：在 skill 資料夾裡執行 `python -m pip install -r scripts/requirements-cam.txt`（建議裝在 venv）；`check_bom_cpl.py` 只用標準庫。
+```text
+/plugin install jlc-send-guard@pcb-agent-workflow
+/plugin enable jlc-send-guard@pcb-agent-workflow
+```
 
-### 安裝 readable-schematic-layout skill
+限制：
 
-步驟同上，把指令裡的 `jlc-support` 換成 `readable-schematic-layout`。裝好後跟 agent 說「把原理圖改成好讀的畫法，不要改電路」或「原理圖文字重疊，整理一下」就會套用。比對腳本只用 Python 標準庫，用法見 `SKILL.md` 第 3 節。
-
-這個 skill 也單獨放在 [John-owo/kicad-readable-schematic](https://github.com/John-owo/kicad-readable-schematic)，給只想要這個 skill 的人使用；兩邊內容相同，以本 repo 為準同步。
+- 它用正規表示式比對工具名稱：`^mcp__.*[Gg][Mm][Aa][Ii][Ll].*__.*([Ss]end|[Rr]eply|[Ff]orward)`。connector 改名後可能漏攔，請在 `/mcp` 看你的 Gmail 工具名稱有沒有被涵蓋；名稱相近的其他工具可能被多攔，多攔只會多一次確認。
+- **擋不住瀏覽器上的動作。** hook 看不到頁面網址和按鈕文字，所以 Claude in Chrome 點 Confirm、Submit 不在它的範圍內；那部分只靠 skill 的硬規則和 Chrome 擴充的網站權限。
+- Codex 端沒有驗證過。Codex 的 plugin hook 要先經使用者信任才會執行，ChatGPT 的 Gmail connector 能不能被攔也不確定。
+- 它是多一道防線，不取代 skill 的硬規則：寄出前仍要使用者在對話中明確同意。
 
 ### 搭配的 KiCad 分析 skill
 
@@ -124,9 +162,11 @@ Copy-Item -Recurse -Force pcb-agent-workflow\skills\jlc-support "$HOME\.claude\s
 |---|---|
 | 作業系統 | Windows |
 | EDA | KiCad 10 |
-| agent | Claude Code、Codex（兩者都要能用） |
+| agent | Claude Code、Codex（兩者都要能用）。plugin 安裝在 Claude Code 2.1.299、Codex CLI 0.163 測過 |
 | 板廠 | JLCPCB |
 | 收貨地 | 台灣（順豐） |
+
+SKILL.md 與腳本是兩個 agent 共用的基準。只有 Claude Code 驗證過的加強功能另外標明：目前只有 `jlc-send-guard` hook。拿掉它，skill 一樣完整，硬規則照樣適用。
 
 其他環境（macOS、Linux、其他 KiCad 版本、PCBWay 等其他板廠）可能可以用，但沒有驗證。這類 issue 會標成 `wontfix`，回覆「可能可用，未驗證」；溝通原則不受板廠限制，可以照用。
 

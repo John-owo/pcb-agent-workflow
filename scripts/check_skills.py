@@ -8,12 +8,16 @@ Checks, for every skills/<name>/:
   - description is at most 1024 characters and has both Chinese and English trigger text
   - agents/openai.yaml exists and its default_prompt mentions $<name>
   - every `scripts/<file>` named in SKILL.md exists in that skill (or a sibling skill)
+And for .claude-plugin/marketplace.json: every skill has exactly one plugin entry that
+lists only that skill, entry names are unique and carry a version, every path exists, and a
+plugin with its own plugin.json has the same name and version.
 And for every git-tracked .md file: relative links point to files that exist
 (placeholder links such as <path> in templates are skipped).
 
 Exit codes: 0 PASS, 1 problems printed, 2 error.
 Standard library only. Read-only.
 """
+import json
 import re
 import subprocess
 import sys
@@ -77,6 +81,50 @@ def check_skill(skill, siblings):
     return problems
 
 
+def check_marketplace(root, skill_names):
+    problems = []
+    path = root / ".claude-plugin" / "marketplace.json"
+    if not path.is_file():
+        return ["marketplace.json missing"]
+    data = json.loads(path.read_text(encoding="utf-8"))
+    entries = data.get("plugins", [])
+    names = [e.get("name") for e in entries]
+    for name in sorted({n for n in names if names.count(n) > 1}):
+        problems.append(f"marketplace: duplicate plugin name {name}")
+    covered = []
+    for e in entries:
+        name, source = e.get("name"), e.get("source", "")
+        if not e.get("version"):
+            problems.append(f"marketplace: {name} has no version")
+        if not isinstance(source, str) or not source.startswith("./") or ".." in source:
+            problems.append(f"marketplace: {name} source must be a ./ path inside the repo")
+            continue
+        plugin_root = root / source
+        if not plugin_root.is_dir():
+            problems.append(f"marketplace: {name} source {source} does not exist")
+            continue
+        for skill in e.get("skills", []):
+            if not (plugin_root / skill / "SKILL.md").is_file():
+                problems.append(f"marketplace: {name} lists {skill}, which has no SKILL.md")
+            covered.append(Path(skill).name)
+        if source in ("./", ".") and len(e.get("skills", [])) != 1:
+            problems.append(f"marketplace: {name} uses the repo root and must list exactly one skill")
+        manifest = plugin_root / ".claude-plugin" / "plugin.json"
+        if manifest.is_file():
+            m = json.loads(manifest.read_text(encoding="utf-8"))
+            if m.get("name") != name:
+                problems.append(f"marketplace: {name} differs from plugin.json name {m.get('name')!r}")
+            if e.get("version") and m.get("version") != e.get("version"):
+                problems.append(f"marketplace: {name} version differs from plugin.json")
+        hooks = plugin_root / "hooks" / "hooks.json"
+        if hooks.is_file() and "hooks" not in json.loads(hooks.read_text(encoding="utf-8")):
+            problems.append(f"marketplace: {name} hooks/hooks.json needs a top-level \"hooks\" key")
+    for skill in skill_names:
+        if covered.count(skill) != 1:
+            problems.append(f"marketplace: skill {skill} is listed {covered.count(skill)} times (want 1)")
+    return problems
+
+
 def check_links(path, rel):
     problems = []
     text = path.read_text(encoding="utf-8")
@@ -99,13 +147,14 @@ def main():
         problems = []
         for skill in skills:
             problems += check_skill(skill, [s for s in skills if s != skill])
+        problems += check_marketplace(ROOT, [s.name for s in skills])
         out = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "*.md"],
                              capture_output=True, check=True)
         docs = [p for p in out.stdout.decode("utf-8").split("\0") if p]
         for rel in docs:
             if (ROOT / rel).is_file():
                 problems += check_links(ROOT / rel, rel)
-    except (OSError, subprocess.CalledProcessError) as e:
+    except (OSError, subprocess.CalledProcessError, json.JSONDecodeError) as e:
         print(f"ERROR: {type(e).__name__}: {e}")
         return 2
     for p in problems:
