@@ -2,7 +2,9 @@
 
 from pathlib import Path
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -148,6 +150,21 @@ class MarketplaceTests(unittest.TestCase):
         self.assertIn("version differs from plugin.json", problems)
 
 
+def find_bash():
+    """Git Bash on Windows; plain PATH lookup can hit the WSL launcher in System32."""
+    if sys.platform == "win32":
+        for var in ("ProgramFiles", "ProgramFiles(x86)", "LocalAppData"):
+            base = os.environ.get(var)
+            if not base:
+                continue
+            for rel in ("Git/bin/bash.exe", "Programs/Git/bin/bash.exe"):
+                cand = Path(base) / rel
+                if cand.is_file():
+                    return str(cand)
+        return None
+    return shutil.which("bash")
+
+
 class SendGuardTests(unittest.TestCase):
     HOOKS = ROOT / "plugins" / "jlc-send-guard" / "hooks" / "hooks.json"
 
@@ -169,7 +186,10 @@ class SendGuardTests(unittest.TestCase):
             self.assertFalse(self.matcher.search(name), name)
 
     def test_command_prints_an_ask_decision(self):
-        r = subprocess.run(["bash", "-c", self.command], capture_output=True, text=True, encoding="utf-8")
+        bash = find_bash()
+        if bash is None:
+            self.skipTest("Git Bash not found")
+        r = subprocess.run([bash, "-c", self.command], capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(r.returncode, 0, r.stderr)
         out = json.loads(r.stdout)["hookSpecificOutput"]
         self.assertEqual(out["hookEventName"], "PreToolUse")
