@@ -1,118 +1,118 @@
-# JLC 下單與送審
+# JLC ordering and review submission
 
-從發行包上傳到 JLCPCB，到付款後確認生產稿的檢查清單。網站規則與價格會變動；下面的數字是 2026-09 的觀察，下單前以官方能力頁與報價為準：
+A checklist from uploading the release package to JLCPCB through confirming the production file after payment. Site rules and prices change; the numbers below were observed 2026-09. Before ordering, go by the official capabilities pages and quote:
 
-- 組裝能力：<https://jlcpcb.com/capabilities/pcb-assembly-capabilities>
-- PCBA FAQ：<https://jlcpcb.com/help/article/pcb-assembly-faqs>
-- 表面處理：<https://jlcpcb.com/help/article/jlcpcb-surface-finish>
+- Assembly capabilities: <https://jlcpcb.com/capabilities/pcb-assembly-capabilities>
+- PCBA FAQ: <https://jlcpcb.com/help/article/pcb-assembly-faqs>
+- Surface finish: <https://jlcpcb.com/help/article/jlcpcb-surface-finish>
 
-第一次下單、還不熟流程的話，先讀 [新手入門](../getting-started.md) 的第 7、8 步：只做 PCB 自己焊，或 Economic PCBA 只貼單面。
+If this is your first order and you don't know the process yet, read steps 7 and 8 of [Getting started](../getting-started.md) first: PCB only and solder it yourself, or Economic PCBA with single-side assembly.
 
-客服與工程溝通見 [skills/jlc-support](../../skills/jlc-support/SKILL.md)；收到生產稿之後的比對見 [jlc-production-review skill](../../skills/jlc-production-review/SKILL.md)。
+For communicating with customer service and engineering, see [skills/jlc-support](../../skills/jlc-support/SKILL.md); for comparing the production file once you receive it, see the [jlc-production-review skill](../../skills/jlc-production-review/SKILL.md).
 
-**誰決定：** 上傳檔案、接受條款、送審、付款、下載工廠檔案、確認生產稿或貼裝確認、寄信，每一次都要使用者明確同意（催辦與純技術澄清有一個限定例外，見 jlc-support 的硬規則）。agent 做到準備檔案、核對配料、起草訊息為止。
+**Who decides:** uploading files, accepting terms, submitting for review, paying, downloading factory files, confirming the production file or parts placement, and sending messages each require the user's explicit consent every time (status chases and pure technical clarifications have one limited exception; see jlc-support's hard rules). The agent goes as far as preparing files, checking parts matching, and drafting messages.
 
-## 1. 選服務等級
+## 1. Choose a service level
 
 | | Economic | Standard |
 |---|---|---|
-| 貼裝面 | 單面 | 單面或雙面 |
-| 最小元件 | 0402 | 0201 |
-| 板子或拼板最小尺寸 | 依能力頁 | 70 × 70 mm，需要工藝邊與 fiducial |
+| Assembly sides | Single side | Single or double side |
+| Smallest component | 0402 | 0201 |
+| Minimum board or panel size | Per capabilities page | 70 × 70 mm, needs rails and fiducials |
 
-- 有 0201 或更小的元件（例如 DSN0603 封裝的 ESD 二極體），就不能選 Economic。
-- 板子小於 70 × 70 mm 時，可以自己做拼板，或請 JLC 加工藝邊與定位點。要拆邊的話，拆邊是另外收費的進階選項。
-- 「5 片」是成品數量，不等於 5 個 panel。拼板單元數和 panel 數要在報價器裡分開設定。
+- If you have 0201 or smaller components (for example an ESD diode in a DSN0603 package), you can't choose Economic.
+- If the board is smaller than 70 × 70 mm, you can panelize it yourself or have JLC add rails and fiducials. Removing the rails is a separately charged advanced option.
+- "5 pcs" is the number of finished boards, not 5 panels. The number of units per panel and the number of panels are set separately in the quote tool.
 
-## 2. 準備 BOM 與 CPL
+## 2. Prepare the BOM and CPL
 
-- BOM 至少要有 Comment／Value、Designator、Footprint、`LCSC Part #`。
-- CPL 只放 BOM 裡真的要貼裝的位號。DNP、測試點、fiducial、安裝孔不要混進去。
-- BOM 與 CPL 的位號集合要完全一致，上傳前用 [check_bom_cpl.py](../../skills/jlc-production-review/scripts/check_bom_cpl.py) 比對一次。它也檢查 JLC 欄名、重複位號、料號格式與座標；旋轉與極性仍要在預覽畫面確認。
-- Gerber、鑽孔、BOM、CPL、裝配圖要用同一個發行版本。
+- The BOM needs at least Comment/Value, Designator, Footprint, `LCSC Part #`.
+- The CPL contains only designators from the BOM that will actually be assembled. Don't mix in DNP parts, test points, fiducials, or mounting holes.
+- The BOM and CPL designator sets must match exactly; compare them once with [check_bom_cpl.py](../../skills/jlc-production-review/scripts/check_bom_cpl.py) before uploading. It also checks JLC column names, duplicate designators, part number format, and coordinates; rotation and polarity still have to be confirmed in the preview.
+- Gerber, drill, BOM, CPL, and assembly drawing must come from the same release version.
 
-## 3. 上傳後逐項核對配料
+## 3. After uploading, check parts matching item by item
 
-平台自動配料後，每一組都要看：
+After the platform matches parts automatically, look at every group:
 
-- 製造商、完整 MPN、C-code、封裝
-- 貼裝面、旋轉角度、極性（看預覽圖上的 pin 1）
-- 即時庫存與耗損量
+- Manufacturer, full MPN, C-code, package
+- Assembly side, rotation, polarity (look at pin 1 in the preview)
+- Live stock and attrition quantity
 
-會出問題的地方：
+Where things go wrong:
 
-- **有庫存不代表能貼。** 料號可能已經被移出組裝料庫，點 Select 時才會跳出提示。2026-09 時，所有超級電容與電池都不能組裝，寄售也不行。
-- **非常規工序要等工廠工程審核同意。** 例如排針從底面反向插入。網站只說支援 THT，不保證任意方向，送審時寫進備註並等工程回覆。被拒絕就是硬阻塞，不要默認改成自己焊。
+- **In stock does not mean it can be assembled.** The part may already have been removed from the assembly parts library, and the notice only pops up when you click Select. As of 2026-09, no supercapacitors or batteries could be assembled, not even as consigned parts.
+- **Non-standard processes need approval from the factory's engineering review.** For example, a pin header inserted upside down from the bottom side. The site only says THT is supported, not that any orientation is; put it in the remarks when submitting for review and wait for engineering's reply. A rejection is a hard blocker; don't silently switch to soldering it yourself.
 
-## 4. 壓成本
+## 4. Cutting cost
 
-實際案例（4 層 25 × 36.5 mm，PCB 5 片、組裝 2 片）。兩次報價都是組裝 2 片，購物車金額從約 USD 174 降到約 USD 90，靠的是這三項：
+Real case (4 layers, 25 × 36.5 mm, 5 PCBs, 2 assembled). Both quotes were for 2 assembled boards; the cart total dropped from about USD 174 to about USD 90 thanks to these three things:
 
-- **只做頂面貼裝。** 排針改成收貨後自己焊，省掉 THT 工序。
-- **讓 JLC 加工藝邊**，比自己做拼板便宜。
-- **表面處理改 OSP。** 同一塊板的 PCB 報價：ENIG 自拼板約 46、ENIG 加 JLC 工藝邊約 26、無鉛噴錫約 14、OSP 約 9（USD）。噴錫表面不平，焊盤很小時不適合；OSP 板子拆封後要盡快焊完，未開封的保存期大約 3 個月。
+- **Top-side assembly only.** The pin headers are soldered by hand after delivery, saving the THT process.
+- **Let JLC add rails**, which is cheaper than panelizing yourself.
+- **Switch the surface finish to OSP.** PCB quotes for the same board: ENIG with own panel about 46, ENIG with JLC rails about 26, lead-free HASL about 14, OSP about 9 (USD). HASL surfaces are uneven and not suited to very small pads; OSP boards should be soldered soon after unsealing, and the shelf life unopened is about 3 months.
 
-另一個常用的做法是只組裝需要的片數，例如 PCB 做 5 片、只貼 2 片，其餘當備品。上面的案例一開始就是這樣報價的。
+Another common approach is to assemble only as many boards as you need, for example making 5 PCBs and assembling only 2, keeping the rest as spares. The case above was quoted this way from the start.
 
-## 5. 送單前的設定
+## 5. Settings before submitting
 
-- **Confirm Production file：Yes**，**Confirm Parts Placement：Yes**。兩個都要保留人工確認。
-- **訂單備註**寫進所有工序要求（拆邊範圍、需要工廠工程審核的元件、禁止自動確認），並附上裝配圖 PDF。工廠 CAM 端看得到備註。
-- **Review Before Payment**：可以先送審再付款。審核時段為工作日（週一至週六 9:00–18:00，GMT+8），每次 10 分鐘到 4 小時。
-- **儲存購物車會改號。** 對外溝通時新舊編號都要附上。
-- 清關資料、付款由使用者本人在網頁上填寫，agent 不經手。
+- **Confirm Production file: Yes**, **Confirm Parts Placement: Yes**. Keep manual confirmation for both.
+- **Order remarks** should include all process requirements (rail removal scope, components needing factory engineering review, no automatic confirmation), with the assembly drawing PDF attached. The factory's CAM side can see the remarks.
+- **Review Before Payment**: you can submit for review first and pay afterwards. Review hours are working days (Monday to Saturday 9:00–18:00, GMT+8), taking 10 minutes to 4 hours each time.
+- **Saving the cart changes its number.** When communicating externally, include both the old and new numbers.
+- Customs clearance details and payment are filled in on the website by the user personally; the agent does not handle them.
 
-## 6. 核對金額
+## 6. Check the amount
 
-- 購物車總價不一定包含進階選項。報價頁標示「不含於 Total Price」或「Quote after review」的項目，會在審查後補收。
-- 優惠券在付款頁才能套用。面額不等於實際折抵，看付款頁的實付金額。
-- 目的地可能另收稅費或清關費，依網站的貿易條款。
+- The cart total doesn't necessarily include advanced options. Items marked "not included in Total Price" or "Quote after review" on the quote page are charged after review.
+- Coupons can only be applied on the payment page. The face value isn't the actual discount; look at the amount actually paid on the payment page.
+- The destination may charge additional taxes or customs clearance fees, per the site's trade terms.
 
-## 7. 付款之後
+## 7. After payment
 
-1. 狀態依序大致是 Reviewing → Data Preparation → 確認稿（生產稿、貼裝確認）→ 投產。看詳細狀態，不要只看頁首徽章。
-2. PCBA 的 DFM 可能要付款後才開始做。
-3. 收到 **PCB 生產稿**：信中要求 48 小時內確認。依 [jlc-production-review skill](../../skills/jlc-production-review/SKILL.md) 比對。
-4. 收到 **PCBA 貼裝確認**：信中寫明 72 小時未確認就直接投產。收信當下算出到期時間，寫進 WORKLOG 並告訴使用者。
-5. 確認生產稿或貼裝確認，一律由使用者決定。
+1. The status goes roughly Reviewing → Data Preparation → confirmation items (production file, parts placement confirmation) → production. Look at the detailed status, not just the badge at the top of the page.
+2. PCBA DFM may only start after payment.
+3. When you receive the **PCB production file**: the email asks for confirmation within 48 hours. Compare it following the [jlc-production-review skill](../../skills/jlc-production-review/SKILL.md).
+4. When you receive the **PCBA parts placement confirmation**: the email states that production proceeds directly if it's not confirmed within 72 hours. Calculate the deadline as soon as the email arrives, write it in the WORKLOG, and tell the user.
+5. Confirming the production file or parts placement is always the user's decision.
 
-## 8. 時程風險
+## 8. Schedule risks
 
-- 網站橫幅會公告工廠假期，並建議提前 3–5 天下單。
-- 網頁上的審查時間不是承諾；2026-09 曾經標 10–60 分鐘，實際超過一天。
-- 審核通過、付款之後，訂單仍可能被取消。要預留重新下單的時間。
+- Site banners announce factory holidays and recommend ordering 3–5 days in advance.
+- The review time shown on the site is not a promise; in 2026-09 it once showed 10–60 minutes and actually took more than a day.
+- Even after review approval and payment, the order can still be cancelled. Leave time to reorder.
 
-## 9. 寄到台灣
+## 9. Shipping to Taiwan
 
-以下是 2026-09 寄到台灣的觀察。物流與海關規定會變，以結帳頁、物流商通知與財政部關務署公告為準。
+The following was observed 2026-09 for shipping to Taiwan. Logistics and customs rules change; go by the checkout page, carrier notices, and announcements from the Customs Administration, Ministry of Finance.
 
-**運送方式**
+**Shipping method**
 
-- 小量訂單選 **SF Express（順豐）**。結帳頁當時估 3–5 個工作天；一張 PCB 5 片加 PCBA 2 片的小單，運費約 USD 5。
-- 交期要把工廠生產時間、工廠假期和運送時間加起來估，不要只看運送天數。
+- For small orders choose **SF Express**. The checkout page estimated 3–5 working days at the time; for a small order of 5 PCBs plus 2 PCBA, shipping was about USD 5.
+- Estimate lead time by adding factory production time, factory holidays, and shipping time; don't look only at shipping days.
 
-**清關資料**
+**Customs clearance details**
 
-- 2026-09 的觀察：JLC 結帳頁把順豐清關用的**身分證字號**列為必填。這是平台的欄位要求，以當次結帳頁為準。
-- **重新下單時，清關欄位不會沿用上一張單。** 每次結帳都要重新確認。這個欄位一空著，就會卡在送單前。
-- 收件人姓名要和證件一致，手機要能收到物流商或海關的簡訊。
-- **實名認證。** 完成關務署的快遞收貨人實名認證後，快遞簡易申報以姓名和手機門號識別身分，報關業者不應再向你索取身分證字號（[關務署實名認證常見問答](https://web.customs.gov.tw/singlehtml/3150?cntId=cus1_3150_3150_1150)）。
-- **預先確認委任。** 2026-03-01 起，個人以實名認證線上委任的簡易申報快遞，全面實施「預先確認委任」：報關業者先透過「EZ WAY 易利委」App 推播貨物資訊，收件人核對與實際購買相符、完成線上委任後，業者才辦理報關（[財政部 2026-02-24 公告](https://www.mof.gov.tw/%20/singlehtml/384fb3077bb349ea973e7fc6f13b6974?cntId=87e84e6a6cbc4af9a6608d03c333b06c)）。沒有確認，貨就會停在報關前。
-- 收到 EZ WAY 推播時，由使用者本人核對品項與金額、決定是否委任；agent 不代為操作。本案的紀錄裡沒有留下這段操作過程，實際畫面以 App 與關務署公告為準。
+- Observed 2026-09: JLC's checkout page lists the **national ID number** used by SF Express for customs clearance as required. This is the platform's field requirement; go by the checkout page each time.
+- **When reordering, the customs fields are not carried over from the previous order.** Recheck them at every checkout. If this field is left empty, the order gets stuck before submission.
+- The recipient's name must match their ID, and the mobile phone must be able to receive SMS from the carrier or customs.
+- **Real-name verification.** After completing the Customs Administration's real-name verification for express consignees, simplified express declarations identify you by name and mobile number, and customs brokers should no longer ask for your national ID number ([Customs Administration real-name verification FAQ](https://web.customs.gov.tw/singlehtml/3150?cntId=cus1_3150_3150_1150)).
+- **Advance confirmation of appointment.** From 2026-03-01, simplified-declaration express shipments for individuals appointed online through real-name verification are all subject to "advance confirmation of appointment": the customs broker first pushes the shipment details through the "EZ WAY" app, and only after the recipient checks that it matches the actual purchase and completes the online appointment does the broker file the declaration ([Ministry of Finance announcement, 2026-02-24](https://www.mof.gov.tw/%20/singlehtml/384fb3077bb349ea973e7fc6f13b6974?cntId=87e84e6a6cbc4af9a6608d03c333b06c)). Without confirmation, the shipment stops before declaration.
+- When an EZ WAY push notification arrives, the user personally checks the items and amount and decides whether to appoint; the agent does not operate it on their behalf. This project's records did not keep this part of the process, so go by the app and Customs Administration announcements for the actual screens.
 
-**誰來填**
+**Who fills it in**
 
-- 身分證字號、收件地址、電話、付款資料，一律由使用者本人在網頁上填寫。
-- agent 不讀取、不記錄、不轉述這些資料，也不在 WORKLOG 或報告裡留下它們。
-- 結帳頁和清關頁的截圖幾乎都含姓名、電話、地址，不要放進任何 repo。需要留證據時，截圖存在自己電腦的私有資料夾；repo 和 WORKLOG 只用文字記下「已由使用者填寫」。
+- National ID number, shipping address, phone, and payment details are always filled in on the website by the user personally.
+- The agent does not read, record, or relay this data, and does not leave it in the WORKLOG or reports.
+- Screenshots of the checkout and customs pages almost always contain name, phone, and address; don't put them in any repo. When you need to keep evidence, store screenshots in a private folder on your own computer; the repo and WORKLOG only record in text "filled in by the user".
 
-**費用**
+**Fees**
 
-- JLC 的貿易條款寫明目的地可能另收稅費或清關費。結帳時看到的金額不一定是最終總額。
-- 是否課稅、課多少，依關務署規定與申報金額而定。收到繳費通知時，先核對是不是物流商的正式通知，再請使用者決定。
+- JLC's trade terms state that the destination may charge additional taxes or customs clearance fees. The amount you see at checkout is not necessarily the final total.
+- Whether tax is charged, and how much, depends on Customs Administration rules and the declared value. When you get a payment notice, first check that it is an official notice from the carrier, then ask the user to decide.
 
-**到貨之後**
+**After delivery**
 
-- 外箱拍照、點數量：PCB 片數、PCBA 片數、有沒有附送的排針或料。
-- OSP 板拆封後要盡快焊完；未開封的保存期大約 3 個月（JLC 表面處理說明）。
-- 上電前先做目視與短路檢查。範例板的完整程序見 [實測程序](../../examples/max-m10s-breakout-revc-tests/README.md)。
+- Photograph the outer box and count quantities: number of PCBs, number of PCBAs, and whether any pin headers or parts were included.
+- Solder OSP boards soon after unsealing; the shelf life unopened is about 3 months (JLC surface finish notes).
+- Do a visual and short-circuit check before powering up. For the example board's full procedure, see the [bench test procedure](../../examples/max-m10s-breakout-revc-tests/README.md).

@@ -1,94 +1,94 @@
 ---
 name: readable-schematic-layout
-description: 把 KiCad 原理圖與 PCB 佈局畫成符合人類習慣、方便除錯的樣子：用 KiCad 內建 symbol、電源 symbol、實際畫線、依電流／訊號流向分區、文字不重疊，佈局對應原理圖分區並留好除錯點。只改畫法時以 netlist 連線分群比對證明電路不變。Use when drawing, redrawing, cleaning up or reviewing a schematic or PCB layout for readability/debuggability — "原理圖好讀", "改成人類畫法", "文字重疊", "用內建 symbol", "方便除錯", "整理原理圖", "layout 好除錯", "readable schematic", "redraw schematic".
+description: 'Draw KiCad schematics and PCB layouts the way humans expect and in a way that is easy to debug - use KiCad built-in symbols and power symbols, draw actual wires, group blocks by current/signal flow, keep text from overlapping, and make the layout mirror the schematic blocks with good debug points. When only the drawing style changes, prove the circuit is unchanged by comparing netlist connection groups. Use when drawing, redrawing, cleaning up or reviewing a schematic or PCB layout for readability/debuggability - "readable schematic", "redraw schematic", "draw it the human way", "overlapping text", "use built-in symbols", "easy to debug", "clean up schematic", "debuggable layout".'
 ---
 
-# 人類好讀、好除錯的原理圖與佈局
+# Human-Readable, Debuggable Schematics and Layouts
 
-目標讀者是拿著電表、示波器除錯的人：看圖就知道電從哪裡來、訊號往哪裡去、該量哪一點。
-專案自己的協作規則（單一寫入者、改檔前先保全版本、審查流程）優先；本 skill 只規定「畫法」與「證明沒改到電路」。
+The target reader is someone debugging with a multimeter and an oscilloscope: from the drawing they should see where power comes from, where signals go, and which point to probe.
+The project's own collaboration rules (single writer, preserve a version before editing files, review process) take precedence; this skill only governs "how to draw" and "proving the circuit was not changed".
 
-## 0. 開工前要問使用者的決策（不要自己決定）
+## 0. Decisions to ask the user before starting (do not decide them yourself)
 
-只有要改檔時才問；只是審查可讀性、不改檔，就直接審，結果列成建議清單。要改檔時一次問完，答完才動檔：
+Ask only when files will be changed; if you are only reviewing readability without changing files, review directly and list results as recommendations. When files will be changed, ask everything at once and touch files only after the answers:
 
-1. **正本是誰**：程式產生器（腳本輸出 `.kicad_sch`），還是直接編輯 `.kicad_sch`（KiCad GUI、KiCad MCP 或腳本）？改成直接編輯後，產生器要刪除或停用，否則重跑會蓋掉人工修改。
-2. **誰操作**：agent（MCP／腳本，不開 GUI）或使用者開 GUI。同一時間只有一位寫入者。
-3. **IC 是否換內建 symbol**（有的才換；沒有的重畫自訂 symbol）。
-4. **網路名稱**：保留原名（文件、韌體、審查紀錄不用改），或改 KiCad 標準名（`+3V3`）。
-5. **跨頁訊號**：頁邊 global label，或 hierarchical label＋根頁連線。
-6. **MCP 做不到時的備案**：小腳本直接改文字檔，或停下來問。
-7. **審查者**：另一個 agent、唯讀子代理，或使用者目視。
+1. **What is the source of truth**: a program generator (a script that outputs `.kicad_sch`), or direct editing of `.kicad_sch` (KiCad GUI, KiCad MCP or scripts)? After switching to direct editing, the generator must be deleted or disabled; otherwise rerunning it overwrites the manual edits.
+2. **Who operates**: the agent (MCP/scripts, no GUI) or the user in the GUI. Only one writer at a time.
+3. **Whether ICs switch to built-in symbols** (only those that have one; redraw custom symbols for the rest).
+4. **Net names**: keep the original names (docs, firmware and review records need no changes), or change to KiCad standard names (`+3V3`).
+5. **Cross-sheet signals**: global labels at the sheet edge, or hierarchical labels + wiring on the root sheet.
+6. **Fallback when MCP cannot do something**: edit the text file directly with a small script, or stop and ask.
+7. **Reviewer**: another agent, a read-only subagent, or the user visually.
 
-## 1. 原理圖畫法
+## 1. Schematic drawing
 
-### Symbol
-- 分立元件一律用 KiCad 內建 symbol：MOS `Transistor_FET:<MPN>` 或 `Device:Q_NMOS`/`Q_PMOS`、開關 `Switch:SW_SPDT`/`SW_Push`、電池 `Device:Battery_Cell`、TVS/ESD `Device:D_TVS`（雙向）或 `Power_Protection:*`、天線 `Device:Antenna_Shield`、測試點 `Connector:TestPoint`、R/C/L/LED `Device:*`。不要用畫成方框的自訂 symbol 代表這些元件。
-- IC 有內建 symbol 就用（例如 `RF_GPS:MAX-M10S`、`Power_Management:TPS22919DCK`、`Logic_LevelTranslator:SN74LVC1T45DBV`）。查法：KiCad 10 的內建庫是一個 symbol 一個檔，看 KiCad 安裝目錄的 `share/kicad/symbols/<庫名>.kicad_symdir/<名稱>.kicad_sym` 是否存在；舊版（單一 `<庫名>.kicad_sym`）則在檔內搜尋 `symbol "<名稱>"`。上面的名稱在 KiCad 10.0.6 的官方庫都存在（2026-10 確認）。
-- 沒有內建 symbol 的 IC／模組自己畫：電源腳在上、GND 在下、輸入在左、輸出在右；同功能的腳（SPI、UART、電源、控制）排在一起；腳名照規格書；未用腳標 no-connect。
-- **換 symbol 一定核對腳號 = footprint 焊盤號**。內建 symbol 的腳號常和自建 footprint 不同（例：SPDT 開關的公共端、電池 +/−、天線饋入／接地）。對不上時換 symbol 或改用自訂 symbol，**不改 footprint、不改連線**；確實要改時先問使用者。
-- 換 symbol 時保留位號、值、footprint、Datasheet、Description 與所有自訂欄位（Manufacturer、MPN、供應商料號、DNP 等）。
+### Symbols
+- Always use KiCad built-in symbols for discrete parts: MOSFET `Transistor_FET:<MPN>` or `Device:Q_NMOS`/`Q_PMOS`, switch `Switch:SW_SPDT`/`SW_Push`, battery `Device:Battery_Cell`, TVS/ESD `Device:D_TVS` (bidirectional) or `Power_Protection:*`, antenna `Device:Antenna_Shield`, test point `Connector:TestPoint`, R/C/L/LED `Device:*`. Do not use custom box-shaped symbols for these parts.
+- Use an IC's built-in symbol if one exists (e.g. `RF_GPS:MAX-M10S`, `Power_Management:TPS22919DCK`, `Logic_LevelTranslator:SN74LVC1T45DBV`). How to check: KiCad 10's built-in libraries have one file per symbol; check whether `share/kicad/symbols/<library>.kicad_symdir/<name>.kicad_sym` exists in the KiCad install directory. For older versions (a single `<library>.kicad_sym`), search the file for `symbol "<name>"`. The names above all exist in the KiCad 10.0.6 official libraries (confirmed 2026-10).
+- Draw your own symbol for ICs/modules without a built-in one: power pins on top, GND at the bottom, inputs on the left, outputs on the right; group pins of the same function (SPI, UART, power, control) together; pin names per the datasheet; mark unused pins no-connect.
+- **When swapping a symbol, always check pin number = footprint pad number.** Built-in symbol pin numbers often differ from self-made footprints (e.g. the common terminal of an SPDT switch, battery +/−, antenna feed/ground). If they do not match, swap the symbol or use a custom symbol; **do not change the footprint or the wiring**. If a change is truly needed, ask the user first.
+- When swapping a symbol, keep the designator, value, footprint, Datasheet, Description and all custom fields (Manufacturer, MPN, supplier part number, DNP, etc.).
 
-### 連線與網路
-- 電源與地用電源 symbol（`power:GND`、`power:+3V3`…）。保留原網路名稱時，內建庫沒有的名稱（如 `VSYS`）在專案庫做同樣式的電源 symbol；網路名稱由 symbol 的 value 決定，做完要在 netlist 確認名稱正確。
-- 電源 symbol 方向固定：正電源朝上、GND 朝下。
-- **頁內元件之間實際畫線**，不要每支腳都掛 label。label 只用在跨頁訊號（集中在頁邊的「介面欄」），或線太長會穿越其他區塊時。
-- 同一網路不要同時用 label 和不同名稱的電源 symbol。
-- 去耦電容畫在所屬 IC 電源腳旁，從腳拉線到電容再到 GND symbol。
-- 線不穿過元件本體；T 形接點要有 junction，避免四向交叉接點。
-- 未用腳放 no-connect；ERC 需要的 `PWR_FLAG` 放在電源進入點旁。
+### Wiring and nets
+- Use power symbols for power and ground (`power:GND`, `power:+3V3`…). When keeping original net names, create power symbols in the same style in the project library for names not in the built-in library (such as `VSYS`); the net name is determined by the symbol's value, so confirm the name in the netlist afterwards.
+- Power symbol orientation is fixed: positive supplies point up, GND points down.
+- **Draw actual wires between components on the same sheet**; do not hang a label on every pin. Use labels only for cross-sheet signals (gathered in an "interface column" at the sheet edge), or when a wire would be so long it crosses other blocks.
+- Do not use both a label and a differently named power symbol on the same net.
+- Draw decoupling capacitors next to the power pin of their IC, wiring from the pin to the capacitor and then to the GND symbol.
+- Wires do not pass through component bodies; T junctions must have a junction dot; avoid four-way crossing junctions.
+- Put no-connect on unused pins; place the `PWR_FLAG` needed by ERC next to the power entry point.
 
-### 排版
-- 依**電流／訊號流向**由左到右：例如 電池 → 保護 → 反接 → 開關 → 系統電源 → 升壓／LDO → 負載；MCU → 位準轉換 → 模組 → RF 前端 → 天線。
-- 每個功能區用圖框圈起來並加標題，例如「電池保護」「5V 升壓」。
-- 電源在上、GND 在下；同類電路（一排下拉電阻、測試點）排成一列對齊。
-- 元件、線、label 放在 50 mil（1.27 mm）格點；symbol 只用 0°／90°／180°／270°。
-- **文字不可重疊**：位號、值、label、註解、腳名彼此不重疊，也不壓在線或 symbol 上；值和位號放在 symbol 旁同一側。
-- 設計註解（電源開關規則、晶片勘誤、斷電隔離、腳位不接的原因）放在相關電路旁的空白處，必要時加框；不要只留在外部文件。
-- 測試點旁標網路名與預期值（例如 `TP1 VBUS_SENSE, 無 USB 時 <0.5 V`）。
-- 紙張不夠就換 A3 或拆頁，不要擠。根頁只放子頁方框與簡短的方塊說明。
+### Arrangement
+- Left to right following **current/signal flow**: e.g. battery → protection → reverse polarity → switch → system power → boost/LDO → loads; MCU → level shifter → module → RF front end → antenna.
+- Enclose each functional block in a frame with a title, e.g. "Battery protection", "5V boost".
+- Power on top, GND at the bottom; align similar circuits (a row of pull-down resistors, test points) in a row.
+- Place components, wires and labels on a 50 mil (1.27 mm) grid; symbols only at 0°/90°/180°/270°.
+- **Text must not overlap**: designators, values, labels, notes and pin names do not overlap each other, nor sit on wires or symbols; put value and designator on the same side next to the symbol.
+- Put design notes (power switch rules, chip errata, power-off isolation, why a pin is left unconnected) in blank space next to the relevant circuit, framed if needed; do not leave them only in external documents.
+- Label test points with the net name and expected value (e.g. `TP1 VBUS_SENSE, <0.5 V without USB`).
+- If the page is too small, switch to A3 or split sheets; do not cram. The root sheet holds only sub-sheet boxes and brief block descriptions.
 
-## 2. PCB 佈局（方便除錯的部分）
+## 2. PCB layout (the debug-friendly parts)
 
-只有要畫或審查佈局時才讀 [references/layout.md](references/layout.md)：分區與位號、4 層板層別分工、測試點與除錯對照圖、手焊友善、佈局驗證。用 Konnect 改佈局前，先讀 [references/konnect-limits.md](references/konnect-limits.md)。
+Read [references/layout.md](references/layout.md) only when drawing or reviewing a layout: blocks and designators, 4-layer stackup role of each layer, test points and debug reference drawings, hand-soldering friendliness, layout verification. Before changing a layout with Konnect, read [references/konnect-limits.md](references/konnect-limits.md) first.
 
-## 3. 驗收：證明只改畫法、沒改電路
+## 3. Acceptance: prove only the drawing changed, not the circuit
 
-改圖前先保全（git commit 或完整副本），並把基準 netlist 複製出來。
+Before editing the drawing, preserve it (git commit or a full copy) and copy out the baseline netlist.
 
-1. 匯出 netlist：`kicad-cli sch export netlist --format kicadxml -o <new>.xml <root>.kicad_sch`
-2. 比對連線分群與元件欄位（腳本在本 skill 目錄的 `scripts/`）：
-   `python -I <skill 目錄>/scripts/compare_netlist.py <base>.xml <new>.xml [--names]`
-   必須 `IDENTICAL`。保留原網路名稱時加 `--names`。任何差異都要能逐條說明，否則回頭修圖。
-3. ERC：`kicad-cli sch erc --severity-all -o erc.rpt <root>.kicad_sch` → 0 錯誤、0 警告。
-4. symbol／footprint 腳號：
-   `python -I <skill 目錄>/scripts/check_pin_pad.py <new>.xml --pcb <專案名>.kicad_pcb`
-   還沒有 PCB 時改用 `--footprints <footprint 資料夾>`。必須 `PASS`；「pad without pin」逐條說明（例如固定用焊盤），「pin without pad」一律回頭修。
-5. 目視：`kicad-cli sch export pdf` → `pdftoppm -r 110 -png` → 逐頁看圖。`pdftoppm` 來自 poppler，Windows 沒有內建（可用 `winget install oschwartz10612.Poppler` 或 conda 的 `poppler` 安裝）；沒有時直接開 PDF 看，或請使用者目視。檢查文字無重疊、線不穿元件、分區清楚、註解都在、流向從左到右。MCP 的重疊偵測工具可輔助，但不能取代目視。
-6. 交審查者看固定版本，重點是 netlist 比對結果與可讀性。
+1. Export the netlist: `kicad-cli sch export netlist --format kicadxml -o <new>.xml <root>.kicad_sch`
+2. Compare connection groups and component fields (scripts are in this skill directory's `scripts/`):
+   `python -I <skill directory>/scripts/compare_netlist.py <base>.xml <new>.xml [--names]`
+   Must be `IDENTICAL`. Add `--names` when keeping the original net names. Every difference must be explainable line by line; otherwise go back and fix the drawing.
+3. ERC: `kicad-cli sch erc --severity-all -o erc.rpt <root>.kicad_sch` → 0 errors, 0 warnings.
+4. Symbol/footprint pin numbers:
+   `python -I <skill directory>/scripts/check_pin_pad.py <new>.xml --pcb <project name>.kicad_pcb`
+   If there is no PCB yet, use `--footprints <footprint folder>` instead. Must be `PASS`; explain each "pad without pin" (e.g. mounting pads); always go back and fix any "pin without pad".
+5. Visual: `kicad-cli sch export pdf` → `pdftoppm -r 110 -png` → look at each page. `pdftoppm` comes from poppler, which Windows does not include (install with `winget install oschwartz10612.Poppler` or conda's `poppler`); without it, open the PDF directly or ask the user to look. Check that text does not overlap, wires do not cross components, blocks are clear, notes are all present, and flow goes left to right. An MCP overlap-detection tool can help but does not replace visual inspection.
+6. Hand a fixed version to the reviewer, focusing on the netlist comparison result and readability.
 
-以上都通過才能說「畫法改完、電路不變」；這仍不代表電氣正確或實板可用。
+Only when all of the above pass can you say "drawing style changed, circuit unchanged"; this still does not mean it is electrically correct or that the physical board will work.
 
-## 4. 工具搭配
+## 4. Tooling
 
-原則：MCP 負責讀現況和即時編輯，腳本與 `kicad-cli` 負責判定。MCP 回覆「成功」不算驗收，一律用第 3 節讀回。
+Principle: MCP reads the current state and does live edits; scripts and `kicad-cli` make the call. An MCP reply of "success" does not count as acceptance; always read back per section 3.
 
-| 步驟 | MCP | 腳本／CLI（相對於本 skill 資料夾） | 通過條件 |
+| Step | MCP | Script/CLI (relative to this skill folder) | Pass condition |
 |---|---|---|---|
-| 開工前存基準 | — | `kicad-cli sch export netlist --format kicadxml` → `base.xml` | 檔案存在 |
-| 讀現況 | Konnect 0.12.1：`get_project_info`、`list_schematic_components` | — | 讀回內容與磁碟檔一致 |
-| 改畫法 | Konnect `sch_components`、`sch_wiring`、`sch_hierarchy` | MCP 做不到的用小腳本改 `.kicad_sch` | 每張子頁改完就跑第 3 節 1–3 步 |
-| 證明電路不變 | — | `scripts/compare_netlist.py`、`kicad-cli sch erc` | `IDENTICAL`、ERC 0 |
-| 腳號對焊盤 | Konnect `get_component_pads`（只當輔助） | `scripts/check_pin_pad.py` | `PASS` |
-| PCB 即時調整 | Konnect `pcb_components`（經 KiCad IPC） | `kicad-cli pcb drc --schematic-parity` | 回覆 `source=ipc`、DRC 0 |
-| 目視 | — | `kicad-cli sch export pdf`（加 `pdftoppm`） | 審查者看過 |
+| Save baseline before starting | — | `kicad-cli sch export netlist --format kicadxml` → `base.xml` | File exists |
+| Read current state | Konnect 0.12.1: `get_project_info`, `list_schematic_components` | — | Read-back matches the file on disk |
+| Change drawing | Konnect `sch_components`, `sch_wiring`, `sch_hierarchy` | Use a small script to edit `.kicad_sch` for what MCP cannot do | Run steps 1–3 of section 3 after each sub-sheet |
+| Prove the circuit is unchanged | — | `scripts/compare_netlist.py`, `kicad-cli sch erc` | `IDENTICAL`, ERC 0 |
+| Pin numbers vs pads | Konnect `get_component_pads` (auxiliary only) | `scripts/check_pin_pad.py` | `PASS` |
+| Live PCB adjustment | Konnect `pcb_components` (via KiCad IPC) | `kicad-cli pcb drc --schematic-parity` | Reply has `source=ipc`, DRC 0 |
+| Visual | — | `kicad-cli sch export pdf` (plus `pdftoppm`) | Reviewer has looked |
 
-- Konnect 版本不是 0.12.1 時，先跑 `get_installation_info`，再取得 `tools/list`（或用 `konnect-call.mjs` 的 `listTools`），以實際 schema 為準。安裝、設定與能力表見 pcb-agent-workflow 的 `docs/workflow/kicad-tools.md`。
-- 沒有 Konnect 時：讀取改用 `kicad-cli` 匯出，修改改用小腳本直接改文字檔（KiCad 沒開著該檔時），驗收照第 3 節不變。
-- 有些 KiCad MCP 工具會把設計資料送到遠端服務。對正式設計使用前逐一確認，並取得使用者同意。
+- If the Konnect version is not 0.12.1, first run `get_installation_info`, then get `tools/list` (or use `listTools` in `konnect-call.mjs`), and go by the actual schema. Installation, configuration and the capability table are in pcb-agent-workflow's `docs/workflow/kicad-tools.md`.
+- Without Konnect: read via `kicad-cli` exports instead, and edit the text file directly with small scripts (when KiCad does not have the file open); acceptance per section 3 is unchanged.
+- Some KiCad MCP tools send design data to remote services. Before using them on a real design, check each one and get the user's consent.
 
-## 5. 工具備忘
+## 5. Tool notes
 
-- 用 KiCad MCP（例如 Konnect）時，先列出並載入原理圖相關工具組（元件、連線、批次、分析、匯出），以實際 schema 為準，不要猜參數。
-- MCP 做不到的動作（例如保留自訂欄位換 symbol）改用小腳本直接改 `.kicad_sch` 文字；一樣在檔案沒被 GUI 開啟時進行、一樣走第 3 節驗收。
-- 每完成一張子頁就跑一次第 3 節 1–3 步，不要全部畫完才比對。
+- When using a KiCad MCP (such as Konnect), first list and load the schematic-related tool groups (components, wiring, batch, analysis, export) and go by the actual schema; do not guess parameters.
+- For actions MCP cannot do (such as swapping a symbol while keeping custom fields), use a small script to edit the `.kicad_sch` text directly; likewise do it while the file is not open in the GUI, and likewise go through section 3 acceptance.
+- Run steps 1–3 of section 3 after finishing each sub-sheet; do not wait until everything is redrawn to compare.

@@ -1,45 +1,45 @@
-# <板名> 外殼設計用 3D 檔
+# <board name> 3D Files for Enclosure Design
 
-來源設計：<板檔路徑>，<版本或 commit>。這份檔案只用來設計外殼，不是製造檔；板檔沒有修改。
+Source design: <board file path>, <version or commit>. These files are for enclosure design only, not for manufacturing; the board file was not modified.
 
-## 檔案
+## Files
 
-| 檔案 | 內容 |
+| File | Contents |
 |---|---|
-| `<板名>.step` | 整板加全部零件（DNP 不放）<；另附參考物件：…> |
-| `preview-top.png`、`preview-bottom.png` | 正面、背面算繪 |
-| `enclosure-step.json` | 匯出設定：每個零件用哪個模型 |
-| `models/` | 補上或自畫的模型 |
+| `<board name>.step` | Full board plus all parts (DNP excluded)<; also includes reference objects: …> |
+| `preview-top.png`, `preview-bottom.png` | Top and bottom renders |
+| `enclosure-step.json` | Export config: which model each part uses |
+| `models/` | Added or self-drawn models |
 
-重新匯出：`python <skill>/scripts/export_step.py enclosure-step.json --render preview`
+To re-export: `python <skill>/scripts/export_step.py enclosure-step.json --render preview`
 
-## 座標
+## Coordinates
 
-- 單位 mm。原點在板子左下角、板底面；+X 向右，+Y 向上，+Z 朝零件面。
-- 板子佔 x 0–<寬>、y 0–<高>、z 0–<板厚>。
-- 換算板上座標（原點在左上、Y 向下）：STEP (x, y) = (板上 x, <高> − 板上 y)。
-- 整體外框：x <…>、y <…>、z <…>。
+- Units are mm. Origin at the board's bottom-left corner, on the board's bottom face; +X right, +Y up, +Z toward the component side.
+- Board occupies x 0–<width>, y 0–<height>, z 0–<thickness>.
+- Converting from board coordinates (origin at top-left, Y down): STEP (x, y) = (board x, <height> − board y).
+- Overall bounding box: x <…>, y <…>, z <…>.
 
-## 外殼要注意的地方
+## Enclosure considerations
 
-| 項目 | STEP 位置 | 說明 |
+| Item | STEP position | Notes |
 |---|---|---|
-| 正面最高點 | <位號>，(<x>, <y>) | 頂端 z <…>，高出板面 <…> mm |
-| 背面最低點 | <位號> | 底到 z <…> |
-| <連接器／USB> 開孔 | x <…>、z <…>，伸出 <哪一邊> 到 <…> | 插頭外皮比母座大，開孔周圍要留空間 |
-| <開關撥桿> | <…> | 寬 <…>、行程 <…> |
-| <天線> | <…> | 上方只能是塑膠，不能放金屬 |
-| <穿板的腳、定位柱> | <…> | 在另一面伸出 <…> mm |
-| 安裝孔 | <位置、孔徑> | 螺絲頭／銅柱直徑上限 <…> |
+| Highest point on top | <designator>, (<x>, <y>) | Top at z <…>, <…> mm above the board surface |
+| Lowest point on bottom | <designator> | Bottom down to z <…> |
+| <connector/USB> cutout | x <…>, z <…>, overhangs <which edge> to <…> | The plug overmold is larger than the receptacle; leave space around the cutout |
+| <switch actuator> | <…> | Width <…>, travel <…> |
+| <antenna> | <…> | Only plastic above it, no metal |
+| <through-board pins, locating posts> | <…> | Protrude <…> mm on the other side |
+| Mounting holes | <position, diameter> | Max screw head/standoff diameter <…> |
 
-## 模型來源與精度
+## Model sources and accuracy
 
-| 位號 | 零件 | 來源 | 備註（校正方式、和規格書的差異） |
+| Designator | Part | Source | Notes (correction method, differences from datasheet) |
 |---|---|---|---|
 | … | … | … | … |
 
-`verify_placement.py`：<n> 個零件全部通過（<日期>）。外形模型不是原廠機構圖；**外殼開孔與卡扣的關鍵尺寸，請以實物量測為準**。
+`verify_placement.py`: all <n> parts pass (<date>). The shape models are not manufacturer mechanical drawings; **for critical enclosure cutout and snap-fit dimensions, rely on measurements of the physical parts**.
 
-## 授權
+## License
 
-<各來源的散布條件；只能內部使用的模型要寫清楚>
+<distribution terms for each source; clearly state which models are for internal use only>

@@ -1,40 +1,40 @@
-# PCB 佈局：方便除錯的部分
+# PCB layout: the debug-friendly parts
 
-電氣與製造規則（RF、阻抗、去耦距離、DFM）以各案設計文件與板廠規範為準；這裡只列除錯與手焊習慣。本節做法來自一塊 95 × 50 mm 4 層板（MCU＋LoRa 模組＋GNSS）的實際佈局；其他板子依層數與密度調整。
+Electrical and manufacturing rules (RF, impedance, decoupling distance, DFM) follow each project's design documents and the fab's specifications; this page lists only debugging and hand-soldering habits. These practices come from the actual layout of a 95 × 50 mm 4-layer board (MCU + LoRa module + GNSS); adjust for other boards by layer count and density.
 
-## 分區與位號
-- 佈局分區對應原理圖分區，按同一個電流流向排；同一功能區的元件放一起。
-- 位號依子頁分段（例如 1xx 電源、2xx MCU、3xx 無線、4xx GNSS）；絲印位號清楚、不壓焊盤／過孔，同一面只用兩種讀向。
-- 密集處放不下的位號只放 F.Fab／B.Fab，並在佈局說明列出清單，除錯時看對照圖（見下方）。
+## Blocks and designators
+- Layout blocks mirror the schematic blocks and follow the same current flow; keep the components of one functional block together.
+- Number designators in ranges per sub-sheet (e.g. 1xx power, 2xx MCU, 3xx wireless, 4xx GNSS); silkscreen designators are legible and do not sit on pads/vias, with only two reading directions per side.
+- Designators that do not fit in dense areas go only on F.Fab/B.Fab, with a list in the layout notes; when debugging, use the reference drawing (see below).
 
-## 層別分工（4 層板）
-- **F.Cu**：零件間短線、射頻線、電池與升壓等大電流路徑；其餘鋪 GND。
-- **In1.Cu**：整面 GND，不走線，作射頻線與所有訊號的回流平面。
-- **In2.Cu**：東西向長線；**B.Cu**：南北向長線。兩層都在空處鋪 GND。
-- 要換方向就用過孔換層，同一層內不交叉。追線時看一層就知道走向。
-- 佈局說明列出每層放了哪些網路，方便審查與除錯時找線。
+## Layer roles (4-layer board)
+- **F.Cu**: short connections between parts, RF lines, high-current paths such as battery and boost; pour GND everywhere else.
+- **In1.Cu**: solid GND, no routing, as the return plane for the RF line and all signals.
+- **In2.Cu**: long east-west runs; **B.Cu**: long north-south runs. Both layers pour GND in empty areas.
+- To change direction, change layers with a via; no crossings within one layer. When tracing a line, one layer tells you the direction.
+- The layout notes list which nets are on each layer, to help find traces when reviewing and debugging.
 
-## 測試點與除錯對照圖
-- 測試點放在探棒碰得到的位置（不在元件下、不被外殼或模組蓋住）；每條電源軌、致能訊號、關鍵 IO 至少一個測試點或可量的焊盤；接地點要好夾鱷魚夾。
-- 測試點絲印只印網路短名（例如 `VBAT`、`3V3G`、`TX`），TP 位號放 Fab 層，避免密集處擠字。
-- 另外輸出正、背面除錯對照圖 PDF，用 Fab 層的焊盤外框與腳號對照位號：
-  `kicad-cli pcb export pdf --sp --cdnp --ev --scale 2.6 -l <銅層,絲印,Fab,Edge.Cuts> -o <輸出>.pdf <板>.kicad_pcb`
-  `--sp` 在 Fab 層畫焊盤外框與腳號、`--cdnp` 在 DNP 元件上打叉、`--ev` 不印值只留位號；`--scale` 依板子大小調整（95 × 50 mm 板用 2.6）。
-- 佈局說明附測試點表：TP 位號、網路、絲印、位置、預期值。
-- 極性元件（二極體、電解電容、電池座、LED）絲印標極性；連接器標腳 1 與訊號名；開關標 ON／OFF 方向。原廠圖沒寫開關方向時不要猜，標「待實物確認」。
-- DNP／選配元件保留焊盤與絲印，在 Fab 層或絲印註明 DNP。
-- 在分段除錯點放可斷開的元件（0 Ω、跳線焊盤），方便分別量各電源軌電流。
-- 板上放版本、日期、專案名；背面可放疊構、表面處理等製造資訊。
+## Test points and debug reference drawings
+- Place test points where a probe can reach (not under components, not covered by the enclosure or a module); every power rail, enable signal and key IO gets at least one test point or measurable pad; ground points should be easy to clip an alligator clip to.
+- Test point silkscreen shows only the short net name (e.g. `VBAT`, `3V3G`, `TX`); TP designators go on the Fab layer to avoid crowding text in dense areas.
+- Also output front and back debug reference drawing PDFs that use Fab-layer pad outlines and pin numbers to map designators:
+  `kicad-cli pcb export pdf --sp --cdnp --ev --scale 2.6 -l <copper layer,silkscreen,Fab,Edge.Cuts> -o <output>.pdf <board>.kicad_pcb`
+  `--sp` draws pad outlines and pin numbers on the Fab layer, `--cdnp` crosses out DNP components, `--ev` hides values and keeps only designators; adjust `--scale` to the board size (2.6 for a 95 × 50 mm board).
+- Attach a test point table to the layout notes: TP designator, net, silkscreen, location, expected value.
+- Mark polarity on the silkscreen for polarized parts (diodes, electrolytic capacitors, battery holders, LEDs); mark pin 1 and signal names on connectors; mark ON/OFF direction on switches. If the manufacturer drawing does not state the switch direction, do not guess; mark it "to be confirmed on the physical part".
+- Keep pads and silkscreen for DNP/optional parts, and note DNP on the Fab layer or silkscreen.
+- At segmented debug points, place components that can be opened (0 Ω, solder jumper pads) so each power rail's current can be measured separately.
+- Put the revision, date and project name on the board; the back can carry manufacturing information such as stackup and surface finish.
 
-## 手焊友善
-- 表面處理選 **HASL 無鉛**（KiCad 板子設定 `HAL lead-free`），送單時也選同一項。OSP 焊盤不上錫，手焊困難。
-- 正、背面 GND 鋪銅用十字散熱連接（例：間隙 0.3 mm、輻條 0.4 mm），讓模組與電池座的大接地焊盤烙鐵熱得起來；In1／In2 用實心連接。
-- 手焊件的焊接面周圍不放零件。
+## Hand-soldering friendliness
+- Choose **lead-free HASL** surface finish (KiCad board setup `HAL lead-free`), and select the same option when ordering. OSP pads do not wet well, making hand soldering difficult.
+- Use thermal relief connections for front and back GND pours (e.g. 0.3 mm gap, 0.4 mm spokes) so the large ground pads of modules and battery holders can be heated by a soldering iron; use solid connections on In1/In2.
+- Do not place parts around the soldering side of hand-soldered components.
 
-## 驗證
-1. DRC：`kicad-cli pcb drc --all-track-errors --schematic-parity --severity-all -o drc.rpt <專案名>.kicad_pcb` → 錯誤 0、未連線 0、原理圖一致性 0；每條警告都要說明來源。
-2. `--schematic-parity` 要在專案正式檔名（和 `.kicad_pro`／`.kicad_sch` 同名）上跑。暫存副本檔名不同時，kicad-cli 不會做一致性檢查，副本的 DRC 結果不能當一致性證據。
-3. 腳本只改絲印、欄位、表面處理時，前後比對走線與過孔、焊盤、鋪銅、元件位置，數量與座標都要相同。
-4. 目視各層 PDF 與除錯對照圖。DRC 通過不代表電氣正確、射頻阻抗正確、板廠接受或實板可用。
+## Verification
+1. DRC: `kicad-cli pcb drc --all-track-errors --schematic-parity --severity-all -o drc.rpt <project name>.kicad_pcb` → 0 errors, 0 unconnected, 0 schematic parity issues; explain the source of every warning.
+2. `--schematic-parity` must run on the project's official file name (same name as `.kicad_pro`/`.kicad_sch`). When a scratch copy has a different file name, kicad-cli does not do the parity check, and the copy's DRC result cannot serve as parity evidence.
+3. When a script changes only silkscreen, fields or surface finish, compare traces and vias, pads, copper pours and component positions before and after; counts and coordinates must all be identical.
+4. Visually inspect each layer's PDF and the debug reference drawings. Passing DRC does not mean electrically correct, correct RF impedance, accepted by the fab, or that the physical board will work.
 
-工具限制見 [konnect-limits.md](konnect-limits.md)。
+Tool limitations are in [konnect-limits.md](konnect-limits.md).

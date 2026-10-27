@@ -1,9 +1,9 @@
-# Konnect 佈局工具限制
+# Konnect layout tool limitations
 
-**快照：Konnect 0.12.1，2026-10 觀察。** 版本不同時，先用 `get_installation_info` 與 `tools/list` 確認實際工具與 schema；以下行為可能已改變。
+**Snapshot: Konnect 0.12.1, observed 2026-10.** If your version differs, first confirm the actual tools and schema with `get_installation_info` and `tools/list`; the behavior below may have changed.
 
-- `update_pcb_from_schematic` 會跳過 `in_bom` 為 no 的元件（例如測試點）；改由使用者在 GUI 按 F8（Update PCB from Schematic）補上。
-- 同步放入的封裝會遺失 SMD／THT 屬性、焊盤倒角等內容。`update_footprints_from_library` 可以更新，但無法處理含 rule area、焊盤 clearance 或特定文字格式的封裝，也會清掉 Datasheet、Description 欄位。這些封裝在 KiCad 關閉時用 pcbnew 腳本從元件庫重載（換之前比對焊盤位置與網路），再依 netlist 補回欄位。
-- 不能移動位號文字；絲印整理在 KiCad 關閉時用 pcbnew 腳本做。
-- `add_zone` 一次只送一個；同時送兩個時 KiCad 回 `AS_BUSY`。
-- 大量走線先在暫存副本用 pcbnew 試算座標並跑 DRC，確認無誤再經 MCP 寫入，寫入後讀回核對。
+- `update_pcb_from_schematic` skips components whose `in_bom` is no (such as test points); have the user add them by pressing F8 (Update PCB from Schematic) in the GUI instead.
+- Footprints placed by sync lose their SMD/THT attribute, pad chamfers and similar content. `update_footprints_from_library` can update them, but cannot handle footprints with rule areas, pad clearances or certain text formats, and also clears the Datasheet and Description fields. Reload these footprints from the library with a pcbnew script while KiCad is closed (compare pad positions and nets before swapping), then restore the fields from the netlist.
+- Cannot move designator text; tidy the silkscreen with a pcbnew script while KiCad is closed.
+- `add_zone` takes only one at a time; sending two at once makes KiCad return `AS_BUSY`.
+- For bulk routing, first compute coordinates with pcbnew on a scratch copy and run DRC; once confirmed, write through MCP, then read back and verify.

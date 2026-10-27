@@ -1,42 +1,42 @@
-# 常見陷阱
+# Common Pitfalls
 
-實際做一塊主板（95 × 50 mm，含 MCU 模組、LoRa 模組、GNSS patch、背面 18650 電池座）時遇到的問題。數值是 2026-10 那次的觀察，換了零件要重新確認。
+Problems encountered while doing an actual main board (95 × 50 mm, with an MCU module, LoRa module, GNSS patch, and an 18650 battery holder on the bottom). Values were observed 2026-10 on that job; reconfirm if parts change.
 
-## 原點與方向
+## Origin and orientation
 
-- **下載的 STEP 原點不一定在封裝原點。** easyeda2kicad 同時產生的 footprint 和 STEP 也可能互相對不上：某個 LoRa 模組，footprint 焊盤比模型偏了 2.7 mm，模型本身反而和專案封裝外框剛好吻合。對齊要看模型幾何，例如外框、焊盤小實體、連接器位置，不要看下載來的 footprint。
-- **有的模型是 Y 朝上。** 例如一個 XIAO 模型的 PCB 厚度方向是 Y。`step_report.py` 看三軸範圍，就能知道哪一軸是厚度。
-- **KiCad 的 `rotate` 正負號和右手定則相反。** KiCad 10 實測：config 寫 `rotate [90, 0, 0]`，結果等於繞 X 軸轉 −90°；要讓「Y 朝上」變成「Z 朝上」，得寫 `-90`。寫錯時模型會翻到板子下方，`verify_placement.py` 會判 FAIL。
-- **轉了 90° 的模組。** 有的模型長寬和封裝互換，例如 9.7 × 10.1 對上 10.1 × 9.7。比對 bbox 的長短邊就看得出來。
-- **饋入點、撥桿方向。** 天線的饋入電極、開關撥桿、連接器開口要和封裝的 F.Fab 標示對照，不能只看外框，因為外框轉 180° 一樣吻合。
+- **A downloaded STEP's origin is not necessarily at the footprint origin.** The footprint and STEP generated together by easyeda2kicad may also not match each other: for one LoRa module, the footprint pads were offset 2.7 mm from the model, while the model itself matched the project footprint outline exactly. Align using the model geometry, e.g. outline, small pad solids, connector position, not the downloaded footprint.
+- **Some models are Y-up.** For example, in one XIAO model the PCB thickness direction is Y. `step_report.py` shows the ranges of all three axes, which tells you which axis is the thickness.
+- **KiCad's `rotate` sign is the opposite of the right-hand rule.** Measured in KiCad 10: writing `rotate [90, 0, 0]` in the config is equivalent to rotating −90° about the X axis; to turn "Y-up" into "Z-up", you have to write `-90`. Getting it wrong flips the model below the board, and `verify_placement.py` reports FAIL.
+- **Modules rotated by 90°.** Some models have length and width swapped relative to the footprint, e.g. 9.7 × 10.1 vs 10.1 × 9.7. Comparing the long and short sides of the bbox reveals this.
+- **Feed point and actuator direction.** An antenna's feed electrode, a switch actuator, and a connector opening must be checked against the footprint's F.Fab markings, not just the outline, because the outline still matches after a 180° rotation.
 
-## 高度與尺寸
+## Height and dimensions
 
-- **板廠庫的模型高度可能不準。** 實例：
-  - LoRa 模組模型高 5.0 mm，規格書 3.87 mm。
-  - GNSS 模組模型高 2.2 mm，規格書典型值 2.5 mm、最大 2.7 mm。
-  - 開關撥桿模型伸出 1.5 mm，型號規格是 2.0 mm。
+- **Model heights from the fab's library may be inaccurate.** Examples:
+  - LoRa module model 5.0 mm tall, datasheet 3.87 mm.
+  - GNSS module model 2.2 mm tall, datasheet typical 2.5 mm, max 2.7 mm.
+  - Switch actuator model protrudes 1.5 mm, part spec is 2.0 mm.
 
-  影響外殼的尺寸以規格書為準，差異寫進說明。
-- **原廠 KiCad 檔的板厚不一定是實際值。** 某開發板官方 KiCad 檔的疊構加起來是 1.6 mm，但官方實體模型的板厚是 1.25 mm。以實體模型或實物為準。
-- **模型可能浮在板上。** 例如某 patch 天線底面在 z = 0.72，要往下移。
-- **原點在本體中心高度的模型。** 例如 z 範圍 −0.53…0.48，代表 z = 0 不是底面，要往上移。
+  For dimensions that affect the enclosure, the datasheet wins; record the differences in the notes.
+- **Board thickness in a manufacturer's KiCad files may not be the real value.** One dev board's official KiCad stackup adds up to 1.6 mm, but the official solid model's board thickness is 1.25 mm. Go by the solid model or the physical part.
+- **Models may float above the board.** For example, one patch antenna's bottom face is at z = 0.72 and needs to be moved down.
+- **Models with the origin at the body's mid-height.** For example, a z range of −0.53…0.48 means z = 0 is not the bottom face; it needs to be moved up.
 
-## 背面零件與穿板
+## Bottom-side parts and through-board features
 
-- 背面零件在 config 裡照正面寫，KiCad 會自動翻到背面。
-- 電池座的定位柱、排針腳會穿過板子，從另一面伸出約 2 mm。外殼要讓出空間，說明裡要寫。
-- 不知道電池在電池座裡的高度時，用 `step_report.py --section x=0` 看托架的弧面，反推電池軸心。例如三個截面點算出半徑 9.58 mm，可以放 Ø18.6 的電池。
+- Write bottom-side parts in the config as if they were on the top; KiCad automatically flips them to the bottom.
+- Battery holder locating posts and header pins go through the board and protrude about 2 mm on the other side. The enclosure must leave room, and the notes must say so.
+- If you do not know the battery's height in the holder, use `step_report.py --section x=0` to view the cradle's curved face and back out the battery axis. For example, three section points giving a radius of 9.58 mm means a Ø18.6 battery fits.
 
-## 匯出
+## Export
 
-- `--no-dnp` 不放 DNP 零件；外殼用的模型通常要這樣。
-- 模型檔路徑請用 `${KICAD10_3DMODEL_DIR}` 或絕對路徑。暫存副本不在原專案資料夾裡，`${KIPRJMOD}` 會指到暫存資料夾。
-- `kicad-cli` 對找不到的模型只印警告，不會失敗。`export_step.py` 遇到 `Could not add 3D model` 會以 exit 2 結束。
-- 用 CadQuery 重存 STEP 會掉顏色。要保留原廠顏色，就別改原檔，在 config 寫 `offset`／`rotate`。
+- `--no-dnp` excludes DNP parts; enclosure models usually want this.
+- Use `${KICAD10_3DMODEL_DIR}` or absolute paths for model files. The temporary copy is not in the original project folder, so `${KIPRJMOD}` points to the temporary folder.
+- `kicad-cli` only prints a warning for missing models and does not fail. `export_step.py` exits with code 2 on `Could not add 3D model`.
+- Re-saving a STEP with CadQuery loses colors. To keep the manufacturer's colors, leave the original file alone and write `offset`/`rotate` in the config.
 
-## 下載
+## Downloads
 
-- GrabCAD 要登入。agent 用的瀏覽器可能是另一個登入狀態；請使用者在那個瀏覽器登入，或自己下載到指定資料夾。
-- GrabCAD 的「Download files」會先顯示「準備中」，幾秒後才下載 zip；單檔連結不一定有反應。
-- 每個來源都放一個新的空資料夾，解壓後只讀 STEP。
+- GrabCAD requires login. The browser the agent uses may have a different login state; ask the user to log in in that browser, or to download to a designated folder themselves.
+- GrabCAD's "Download files" first shows a "preparing" message, and the zip downloads a few seconds later; single-file links do not always respond.
+- Put each source in its own new, empty folder, and after extracting, read only the STEP.

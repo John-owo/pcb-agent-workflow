@@ -1,23 +1,23 @@
-# 3D 模型來源與授權
+# 3D Model Sources and Licenses
 
-依優先順序。授權是 2026-10 觀察，使用前以各網站當下的條款為準。
+In order of priority. Licenses observed 2026-10; check each site's current terms before use.
 
-| 來源 | 怎麼拿 | 適合 | 散布 |
+| Source | How to get it | Good for | Distribution |
 |---|---|---|---|
-| KiCad 官方 3D 庫 | 安裝 KiCad 就有，`${KICAD10_3DMODEL_DIR}/<庫>.3dshapes/<名稱>.step` | 被動元件、常見 IC 封裝、排針、連接器；封裝是官方庫改名、焊盤沒改時，位移都是 0 | CC-BY-SA 4.0 加 KiCad 例外：用到這些模型的設計與輸出不受 CC-BY-SA 約束，模型檔本身受約束。公開 repo 用 `${KICAD10_3DMODEL_DIR}` 引用，不要複製模型檔 |
-| 原廠 | 產品頁、wiki、規格書的 CAD 連結；原廠帳號在 GrabCAD 等平台上傳的檔案 | 模組、開發板、特殊連接器 | 依原廠條款。沒有明確允許散布時，只在內部使用 |
-| LCSC／EasyEDA | `easyeda2kicad --3d --footprint --lcsc_id Cxxxx --output <dir>/lib_Cxxxx` | 板廠料庫裡的零件 | 條款沒有明確允許散布，只在內部使用 |
-| SnapEDA、Ultra Librarian 等 | 需要帳號；有的要隔天才產生 | 補上面都沒有的 | 依各平台條款 |
-| 自己畫（`simple_model.py`） | 依規格書尺寸畫方塊和圓柱 | 找不到模型、下載模型和規格書衝突、要公開的範例 | 自己的作品，可以公開。spec 的 `source` 欄位寫明尺寸出處 |
+| Official KiCad 3D library | Comes with KiCad: `${KICAD10_3DMODEL_DIR}/<library>.3dshapes/<name>.step` | Passives, common IC packages, pin headers, connectors; when a footprint is a renamed official one with unchanged pads, offsets are all 0 | CC-BY-SA 4.0 plus the KiCad exception: designs and output using these models are not bound by CC-BY-SA, but the model files themselves are. In a public repo, reference them via `${KICAD10_3DMODEL_DIR}`; do not copy the model files |
+| Manufacturer | Product page, wiki, datasheet CAD links; files uploaded by the manufacturer's account on GrabCAD and similar platforms | Modules, dev boards, special connectors | Per the manufacturer's terms. Without explicit permission to distribute, use internally only |
+| LCSC/EasyEDA | `easyeda2kicad --3d --footprint --lcsc_id Cxxxx --output <dir>/lib_Cxxxx` | Parts in the fab's parts library | Terms do not explicitly allow distribution; use internally only |
+| SnapEDA, Ultra Librarian, etc. | Account required; some take until the next day to generate | Filling gaps none of the above cover | Per each platform's terms |
+| Draw it yourself (`simple_model.py`) | Draw boxes and cylinders from datasheet dimensions | No model available, downloaded model conflicts with the datasheet, public examples | Your own work, can be published. State the dimension source in the spec's `source` field |
 
-## 找原廠模型的方法
+## Finding manufacturer models
 
-- 搜尋「<型號> STEP」「<型號> 3D model」，優先看原廠網域。
-- 開發板的 wiki 常有「Resources／Mechanical」段落，裡面有 3D 模型、DXF 尺寸圖、KiCad 檔。
-- 原廠 KiCad 專案可以用 `kicad-cli pcb export step` 匯出，但裡面引用的模型常指到原廠內部路徑，例如 `Y:/...`，會缺件；板厚也可能不是實際值。
+- Search "<part number> STEP" or "<part number> 3D model", preferring the manufacturer's domain.
+- Dev board wikis often have a "Resources/Mechanical" section with 3D models, DXF dimension drawings and KiCad files.
+- A manufacturer's KiCad project can be exported with `kicad-cli pcb export step`, but the models it references often point to the manufacturer's internal paths, such as `Y:/...`, so parts will be missing; the board thickness may also not be the real value.
 
-## 自畫的精度
+## Accuracy of self-drawn models
 
-- 外殼需要的只有外形包絡：本體長、寬、高，加上會伸出去的東西（連接器、撥桿、天線座、穿板的腳）。
-- 尺寸用規格書的**典型值**畫，說明裡寫最大值，讓外殼設計者決定留多少間隙。
-- 不必畫內部構造、文字或腳的細節。
+- An enclosure needs only the outer envelope: body length, width and height, plus anything that sticks out (connectors, actuators, antenna connectors, through-board pins).
+- Draw with the datasheet's **typical** values and state the maximum values in the notes, so the enclosure designer can decide how much clearance to leave.
+- No need to draw internal structure, text or pin details.
