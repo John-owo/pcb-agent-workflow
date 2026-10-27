@@ -5,7 +5,7 @@ Usage:
 
 Checks, for every skills/<name>/:
   - SKILL.md has frontmatter with name (= folder name, lowercase-hyphen) and description
-  - description is at most 1024 characters and has both Chinese and English trigger text
+  - description is at most 1024 characters and has English trigger text
   - agents/openai.yaml exists and its default_prompt mentions $<name>
   - every `scripts/<file>` named in SKILL.md exists in that skill (or a sibling skill)
 And for .claude-plugin/marketplace.json: every skill has exactly one plugin entry that
@@ -28,7 +28,6 @@ ROOT = Path(__file__).resolve().parents[1]
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
 SCRIPT_RE = re.compile(r"`(?:[^`]*?\s)?(scripts/[\w.-]+\.(?:py|mjs|txt))")
-CJK_RE = re.compile(r"[一-鿿]")
 LATIN_RE = re.compile(r"[A-Za-z]{3,}")
 
 
@@ -68,8 +67,8 @@ def check_skill(skill, siblings):
         problems.append(f"{name}: description missing")
     elif len(desc) > 1024:
         problems.append(f"{name}: description is {len(desc)} characters (max 1024)")
-    if desc and not (CJK_RE.search(desc) and LATIN_RE.search(desc)):
-        problems.append(f"{name}: description needs both Chinese and English trigger text")
+    if desc and not LATIN_RE.search(desc):
+        problems.append(f"{name}: description needs English trigger text")
     yaml = skill / "agents" / "openai.yaml"
     if not yaml.is_file():
         problems.append(f"{name}: agents/openai.yaml missing")

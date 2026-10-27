@@ -84,15 +84,15 @@ class SkillLintTests(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout)
 
     def test_good_skill(self):
-        skill = self.make_skill("good-skill", "'中文觸發詞。Use when testing; it''s fine.'")
+        skill = self.make_skill("good-skill", "'Use when testing; it''s fine.'")
         self.assertEqual(check_skills.check_skill(skill, []), [])
 
     def test_problems_are_reported(self):
-        skill = self.make_skill("Bad_Skill", "English only", yaml=False,
+        skill = self.make_skill("Bad_Skill", "12 34", yaml=False,
                                 body="Run `python scripts/missing.py`.\n")
         problems = "\n".join(check_skills.check_skill(skill, []))
         self.assertIn("lowercase", problems)
-        self.assertIn("Chinese and English", problems)
+        self.assertIn("English trigger text", problems)
         self.assertIn("openai.yaml missing", problems)
         self.assertIn("scripts/missing.py", problems)
 
