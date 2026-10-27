@@ -1,10 +1,10 @@
-# 訊息範本
+# Message templates
 
-由實際寄出並得到回覆的信件改寫成通用版。`<...>` 是要替換的欄位。寄出前依 SKILL.md 的硬規則取得使用者同意。
+Generalized from emails that were actually sent and got replies. `<...>` marks fields to replace. Before sending, get the user's consent per the hard rules in SKILL.md.
 
-編號欄位：`<BATCH_ID>` 是整筆訂單（批次）編號，`<PCB_ID>`／`<PCBA_ID>` 是其下的子單號，`<ORDER_ID>` 用在只涉及單一張訂單的信（取消、退款）。
+ID fields: `<BATCH_ID>` is the ID of the whole order (batch), `<PCB_ID>`/`<PCBA_ID>` are the sub-order IDs under it, and `<ORDER_ID>` is used in emails that concern a single order only (cancellation, refund).
 
-## A. 催辦審查或 DFM
+## A. Status chase on a review or DFM
 
 ```
 Subject: Request for review status and owner — <BATCH_ID>
@@ -31,7 +31,7 @@ Thank you,
 <NAME>
 ```
 
-## B. 要求恢復被取消的訂單
+## B. Requesting reinstatement of a cancelled order
 
 ```
 Subject: Cancelled order <ORDER_ID> — reinstatement and recovery plan
@@ -57,7 +57,7 @@ Thank you,
 <NAME>
 ```
 
-## C. 生產稿技術澄清
+## C. Technical clarification on the production file
 
 ```
 Subject: Re: <THREAD> — engineering clarification before confirmation
@@ -80,7 +80,7 @@ Thank you,
 <NAME>
 ```
 
-## D. 報價與優惠申請（業務或合作窗口）
+## D. Quote and coupon request (sales or partner contact)
 
 ```
 Subject: <PROJECT> — quote and coupon confirmation (no order yet)
@@ -99,7 +99,7 @@ Thank you,
 <NAME>
 ```
 
-## E. 付款後請對方負責到底
+## E. Asking the factory to take ownership after payment
 
 ```
 Subject: Re: <THREAD> — replacement order <NEW_ID> paid; please take ownership
@@ -119,9 +119,9 @@ Thank you,
 <NAME>
 ```
 
-## F. 退款追問
+## F. Refund follow-up
 
-這份範本由經驗推導，紀錄中還沒有成功案例。重點是和生產進度分開，獨立開一個信串。
+This template is derived from experience; the records have no successful case yet. The key is to keep it separate from production progress in its own thread.
 
 ```
 Subject: Refund status — cancelled order <ORDER_ID> (separate from production follow-up)
@@ -144,9 +144,9 @@ Thank you,
 <NAME>
 ```
 
-## 聊天開場（線上客服）
+## Chat opener (online customer service)
 
-聊天沒有主旨。第一則就貼完整背景，讓排隊中或輪替接手的人直接看懂：
+Chat has no subject line. Paste the full background in the first message so whoever is in the queue or takes over in rotation understands it directly:
 
 ```
 Hello. Order <BATCH_ID> (PCB <PCB_ID> / PCBA <PCBA_ID>; previous IDs <OLD_IDS>).

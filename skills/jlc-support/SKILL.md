@@ -1,137 +1,137 @@
 ---
 name: jlc-support
-description: '與 JLCPCB（及類似 PCB／PCBA 代工廠）的線上客服、工程師、業務窗口溝通。用於催辦審查或 DFM、就生產稿與貼裝確認向工廠提出技術澄清（比對與判讀交給 jlc-production-review）、算確認稿到期時間、訂單被取消後的追問、報價與優惠申請、付款後請對方負責到底、退款追問；先核對網站與信箱，再起草可獨立閱讀、含界線句的訊息，寄出與任何確認都等使用者同意。Use when drafting or sending messages to JLCPCB support or engineers, chasing a DFM or review, handling a cancelled order, asking the factory about production file changes, or asking for a quote or coupon. Triggers: "JLC 客服", "催 DFM", "寫信給 JLC", "訂單被取消", "問工廠生產稿", "確認稿期限", "JLCPCB support", "chase DFM", "production file question".'
+description: 'Communicate with JLCPCB (and similar PCB/PCBA manufacturers) online customer service, engineers and sales contacts. Use for status chases on a review or DFM, technical clarifications to the factory about the production file and parts placement confirmation (comparison and interpretation go to jlc-production-review), computing confirmation deadlines, following up after an order is cancelled, quote and coupon requests, asking the factory to take ownership after payment, and refund follow-ups. Check the website and mailbox first, then draft self-contained messages with a boundary statement; sending and any confirmation wait for the user''s consent. Use when drafting or sending messages to JLCPCB support or engineers, chasing a DFM or review, handling a cancelled order, asking the factory about production file changes, or asking for a quote or coupon. Triggers: "JLCPCB support", "JLC support", "chase DFM", "write to JLC", "order cancelled", "production file question", "confirmation deadline".'
 ---
 
-# JLC 客服溝通
+# JLC Customer Service Communication
 
-目標有兩個：每則訊息都要換到能驗證的答覆；任何回覆都不能被當成你批准了什麼。
+There are two goals: every message must get a verifiable answer, and no reply may be treated as you having approved anything.
 
-## 硬規則
+## Hard rules
 
-以下動作每一次都要使用者在聊天中明確同意，不能從先前的同意類推：
+Each of the following actions requires the user's explicit consent in the chat every single time; it cannot be inferred from earlier consent:
 
-- 寄出信件或送出聊天訊息（草稿可以先寫）
-- 從網站下載工廠的生產稿或其他檔案
-- 上傳檔案、接受條款、提交訂單（包含「只送審不付款」）
-- 接受加費、補償或優惠方案
-- 確認生產稿（Confirm Production）或貼裝確認（Confirm Parts Placement）
-- 修改設計或製造檔
+- Sending an email or a chat message (drafts may be written in advance)
+- Downloading the factory's production file or any other file from the website
+- Uploading files, accepting terms, submitting an order (including "submit for review without paying")
+- Accepting extra fees, compensation or coupon offers
+- Confirming the production file (Confirm Production) or the parts placement confirmation (Confirm Parts Placement)
+- Modifying the design or manufacturing files
 
-唯一的例外：使用者可以明確說出範圍和期限，事先授權「催辦」與「純技術澄清」兩種訊息，例如「到這張訂單出貨前，帶界線句的催辦可以直接送」。
+The only exception: the user may, stating the scope and time limit explicitly, pre-authorize two kinds of messages, "status chase" and "pure technical clarification". For example: "until this order ships, status chases with a boundary statement may be sent directly."
 
-- 例外要寫進專案的 WORKLOG。
-- 例外內的每則訊息都要帶界線句，寄出後記錄時間與內容。
-- 例外永遠不包含上面清單的其他動作：確認、費用、補償、訂單、上傳、下載、設計修改。
-- 範圍不清楚或期限已過，就回到逐次確認。
+- The exception must be written into the project's WORKLOG.
+- Every message under the exception must carry a boundary statement; after sending, record the time and content.
+- The exception never covers the other actions in the list above: confirmations, fees, compensation, orders, uploads, downloads, design changes.
+- If the scope is unclear or the time limit has passed, go back to asking each time.
 
-付款、身分證號、清關資料由使用者本人在網頁填寫。agent 不讀取、不記錄、不轉述這些內容。
+Payment, national ID numbers and customs clearance details are filled in by the user personally on the web page. The agent does not read, record or relay this content.
 
-跟訂單有關的信，一律從訂單註冊信箱寄出，並回在原信串。寄信工具如果連到別的帳號，先停下來告訴使用者。
+Every order-related email is sent from the mailbox the order was registered with, and as a reply in the original thread. If the email tool is connected to a different account, stop first and tell the user.
 
-## 寫訊息前先核對
+## Check before writing a message
 
-工具與退路見下方「工具搭配」。
+For tools and fallbacks, see "Tooling" below.
 
-1. 打開網站訂單頁，看**詳細狀態**，不要只看頁首的徽章。頁首寫 In Production 時，詳細狀態可能還是 Data Preparation。
-2. 搜尋註冊信箱，垃圾信也要看；再讀上一次的客服對話。
-3. 記下所有編號（購物車儲存後可能改號，新舊編號都要記）、狀態、核對時間與時區。
-4. 客服說「信已寄出」或「已處理」時，先查信箱再回覆。這類說法曾被同一家公司的另一位客服推翻。
+1. Open the order page on the website and look at the **detailed status**, not just the badge at the top of the page. When the top says In Production, the detailed status may still be Data Preparation.
+2. Search the registered mailbox, including spam, then read the previous customer-service conversation.
+3. Record all IDs (saving the cart may change the number; record both the old and new IDs), the status, the check time and the time zone.
+4. When customer service says "the email has been sent" or "it has been handled", check the mailbox before replying. Such claims have been contradicted by another agent from the same company.
 
-## 訊息結構
+## Message structure
 
-每則訊息依序包含：
+Each message contains, in order:
 
-1. 主旨：`<要求的動作> — <訂單編號>`
-2. 問候
-3. 一行背景：編號、剛核對到的狀態、時間與時區
-4. 一句影響（例如假期將至、期限倒數）
-5. 編號問題，能寫成二選一就寫成二選一
-6. 退路：拿不到完成時間時，請對方給負責人和下次更新時間（含時區）
-7. 界線句，例如：`This is not approval of DFM/production, design changes or extra fees. Please keep manual confirmation.`
-8. 致謝與署名
+1. Subject: `<requested action> — <order ID>`
+2. Greeting
+3. One line of background: IDs, the status you just checked, time and time zone
+4. One sentence of impact (for example, an upcoming holiday or a deadline counting down)
+5. Numbered questions; phrase them as either/or whenever possible
+6. Fallback: if no completion time is available, ask for an owner and the next update time (with time zone)
+7. Boundary statement, for example: `This is not approval of DFM/production, design changes or extra fees. Please keep manual confirmation.`
+8. Thanks and signature
 
-寫作規則：
+Writing rules:
 
-- **第一則訊息要能獨立看懂。** 線上客服會輪替，接手的人只看得到這一則。
-- **跨日寫絕對日期。** 過了午夜才寄，就把「今天」改成「9 月 28 日」。
-- **一封信只談一件事。** 退款、合規這類問題混在長信末段，連問三次都沒人回答。這類問題要開獨立信串；信尾有 Escalate Case 連結時，可以請使用者決定是否使用。
-- **大部分問題答完後，只追問剩下的那一點。**
-- **把籠統答覆逼成明確確認。** 對方說「別擔心」或「選 Yes 就好」時，回問二選一，例如「是 5 片全部，還是只有 2 片？」
-- **網站和客服說法衝突時，貼網站原文。**
-- **核心問題解決前不接受補償。** 在信中明寫「尚未接受 <補償> 作為解決方案」。
+- **The first message must stand on its own.** Online customer service agents rotate; whoever takes over sees only this one message.
+- **Use absolute dates across days.** If you send after midnight, change "today" to "September 28".
+- **One email, one topic.** Questions such as refunds or compliance, buried at the end of a long email, went unanswered after being asked three times. Open a separate thread for them; if the email footer has an Escalate Case link, let the user decide whether to use it.
+- **Once most questions are answered, follow up only on the remaining point.**
+- **Force vague answers into explicit confirmation.** When they say "don't worry" or "just select Yes", ask back with an either/or, for example "all 5 boards, or only 2?"
+- **When the website and customer service disagree, paste the website's original text.**
+- **Do not accept compensation before the core issue is resolved.** State in the email "I have not yet accepted <compensation> as a resolution."
 
-## 工程澄清
+## Engineering clarification
 
-- 寫明座標系、平移量和 mm 數值，例如 `original (12.3, 4.5) mm single-board coordinates; CAM offset (+23, +17)`。
-- 主動排除誤解：說明「並非指稱斷路」，或「這個讀數可能是游標位置或料庫原點」。
-- 請對方附上標註圖。
-- 不要為了讓顯示數值對齊而改設計；先確認那個數值代表什麼。
-- 重要要求同時寫進訂單備註和附件（裝配圖 PDF），工廠 CAM 端看得到備註。
+- State the coordinate system, offset and mm values, for example `original (12.3, 4.5) mm single-board coordinates; CAM offset (+23, +17)`.
+- Proactively rule out misunderstandings: say "I am not alleging an open circuit", or "this readout may be the cursor position or the library origin".
+- Ask them to attach a marked-up image.
+- Do not change the design just to make a displayed value line up; first confirm what that value represents.
+- Write important requirements into both the order remarks and an attachment (assembly drawing PDF); the factory CAM side can see the remarks.
 
-## 管道
+## Channels
 
-| 管道 | 用途 |
+| Channel | Use |
 |---|---|
-| 線上聊天 | 即時問答、催辦；結束前確認拿到一個能驗證的承諾 |
-| 註冊信箱 | 需要書面證據、附件、工程澄清；回在同一信串 |
-| 業務或合作窗口 | 窗口失效或要協調多個部門時才找。先報進度、說明影響，再提出請求 |
-| 訂單備註＋附件 | 送單時就把工序要求寫進去，讓 CAM 端看得到 |
+| Online chat | Real-time Q&A, status chases; before ending, make sure you have a verifiable commitment |
+| Registered mailbox | Written evidence, attachments, engineering clarifications; reply in the same thread |
+| Sales or partner contact | Only when the usual channels fail or several departments need coordinating. Report progress and explain the impact first, then make the request |
+| Order remarks + attachment | Write process requirements in at submission so the CAM side can see them |
 
-## 期限倒數
+## Deadline countdown
 
-收到生產稿或貼裝確認信時，立刻算出到期的絕對時間（含時區），寫進 WORKLOG 並告訴使用者。用本 skill 的腳本計算，不要心算：
+When you receive a production file or parts placement confirmation email, immediately compute the absolute deadline (with time zone), write it into WORKLOG and tell the user. Use this skill's script; do not compute it in your head:
 
 ```
-python -I scripts/deadline.py --received "<收信時間>" --tz +08:00 --hours 72
+python -I scripts/deadline.py --received "<time received>" --tz +08:00 --hours 72
 ```
 
-退出碼 0 代表還沒到期、1 代表已過期、2 代表輸入錯誤。輸出的「deadline」那幾行照抄進 WORKLOG。有些確認稿逾期會直接投產，在期限前必須讓使用者做出決定。
+Exit code 0 means not yet due, 1 means overdue, 2 means invalid input. Copy the "deadline" lines of the output verbatim into WORKLOG. Some confirmation items go straight into production when overdue, so the user must make a decision before the deadline.
 
-過去觀察到的期限見 [references/deadlines.md](references/deadlines.md)。那是快照，以當下的信件與網站為準。
+Previously observed deadlines are in [references/deadlines.md](references/deadlines.md). That is a snapshot; current emails and the website take precedence.
 
-## 節奏與停止條件
+## Cadence and stop conditions
 
-- 對方沒有承諾時間時，主動催辦至少相隔 4 小時；只查不催的監控可以更密。對方給了時間，就照那個時間。這是間隔的下限，不是自動寄出的許可：每則催辦仍要使用者同意，或落在硬規則的限定例外內。
-- 以下情況通知使用者：有實質進展、出現失敗、需要使用者決定、期限倒數。
-- 以下情況停止：對方最終拒絕；已取得報告並交給使用者；登入或瀏覽器中斷（通知一次後暫停）；使用者說暫停。
-- 對方說「會寄信」「正在催」，不算結案。
+- When they have not committed to a time, proactive status chases are at least 4 hours apart; monitoring that only checks without chasing can be more frequent. If they give a time, follow that time. This is a lower bound on the interval, not permission to send automatically: every status chase still needs the user's consent, or must fall within the limited exception in the hard rules.
+- Notify the user when: there is substantive progress, something fails, a user decision is needed, a deadline is counting down.
+- Stop when: they give a final refusal; the report has been obtained and handed to the user; login or the browser breaks (notify once, then pause); the user says pause.
+- "We will send an email" or "we are chasing it" does not close the case.
 
-## 工具搭配
+## Tooling
 
-原則：MCP 只用來看當下狀態，腳本用來算期限、做判定。MCP 回覆「成功」不代表訊息已送達或狀態已改變，要讀回確認。
+Principle: MCP is only for viewing the current state; scripts compute deadlines and make determinations. An MCP reply of "success" does not mean the message was delivered or the state changed; read back to confirm.
 
-| 步驟 | MCP／工具 | 腳本（相對於本 skill 資料夾） | 限制 |
+| Step | MCP / tool | Script (relative to this skill folder) | Limits |
 |---|---|---|---|
-| 看訂單詳細狀態、客服對話 | 瀏覽器：Claude in Chrome（Claude Code）；ChatGPT browser extension（Codex 桌面版 `@Chrome`，Codex CLI 不支援） | — | 只讀；不點 Confirm、Submit，不改選項，不下載 |
-| 搜註冊信箱、讀信串 | 信箱：Gmail connector（claude.ai 或 ChatGPT） | — | 先確認連到訂單註冊帳號；寄出另依硬規則 |
-| 起草訊息 | — | — | 草稿可以先寫；寄出等使用者同意 |
-| 算確認稿到期時間 | — | `scripts/deadline.py` | 結果寫進 WORKLOG |
-| 生產稿、貼裝確認的比對 | — | 交給 jlc-production-review skill | 本 skill 只負責把它的待問清單寫成澄清信 |
+| View detailed order status, customer-service conversation | Browser: Claude in Chrome (Claude Code); ChatGPT browser extension (Codex desktop `@Chrome`; not supported in Codex CLI) | — | Read-only; do not click Confirm or Submit, do not change options, do not download |
+| Search registered mailbox, read threads | Mailbox: Gmail connector (claude.ai or ChatGPT) | — | First confirm it is connected to the order's registered account; sending follows the hard rules |
+| Draft messages | — | — | Drafts may be written in advance; sending waits for the user's consent |
+| Compute confirmation deadline | — | `scripts/deadline.py` | Write the result into WORKLOG |
+| Compare production file and parts placement confirmation | — | Hand off to the jlc-production-review skill | This skill only turns its list of open questions into a clarification email |
 
-- 上表只列實際用過的工具。其他瀏覽器或信箱工具未驗證，用之前先列出實際工具與 schema，不要猜參數。
-- **沒有工具時的退路**：沒有瀏覽器或信箱工具（例如在 Codex CLI 裡），請使用者貼上訂單頁的詳細狀態、相關信件與上次對話，再起草。草稿的核對紀錄註明「狀態由使用者提供，未直接核對」。
+- The table lists only tools actually used. Other browser or mailbox tools are unverified; before using one, list the actual tool and schema, and do not guess parameters.
+- **Fallback without tools**: if there is no browser or mailbox tool (for example in Codex CLI), ask the user to paste the detailed status from the order page, the relevant emails and the previous conversation, then draft. Note in the draft's check record "status provided by the user, not checked directly".
 
-## 交付草稿時附上
+## Include with each delivered draft
 
-每份草稿前面先給使用者看這幾項，方便使用者決定：
+Before each draft, show the user these items to help them decide:
 
-1. **核對紀錄**：看了哪些來源（訂單頁、信箱、上次對話）、核對時間與時區；沒直接核對的註明。
-2. **訊息類型**：需要逐次同意，或落在使用者事先授權的例外內（寫出是哪一條授權）。
-3. **建議管道**：線上聊天、註冊信箱原信串，或業務窗口，以及理由。
-4. **期限**：相關確認稿的到期時間（含時區）與剩餘時間。
-5. **草稿本文**：英文，含界線句。
+1. **Check record**: which sources were checked (order page, mailbox, previous conversation), the check time and time zone; note anything not checked directly.
+2. **Message type**: requires per-message consent, or falls within an exception the user pre-authorized (state which authorization).
+3. **Suggested channel**: online chat, the original thread in the registered mailbox, or the sales contact, with the reason.
+4. **Deadline**: the deadline of the relevant confirmation items (with time zone) and the time remaining.
+5. **Draft body**: in English, with a boundary statement.
 
-## 證據
+## Evidence
 
-- 每次對話保存聊天全文 txt、寄出畫面截圖，記下對方角色與時間（含時區）。
-- 證據放在專案的私有目錄。截圖常含姓名、信箱、電話、地址，公開前必須去除。
-- agent 寫的摘要不算證據。
+- For each conversation, save the full chat text as txt and a screenshot of the sent screen, and record the other party's role and the time (with time zone).
+- Keep evidence in the project's private directory. Screenshots often contain names, email addresses, phone numbers and addresses; these must be removed before publishing.
+- Summaries written by the agent do not count as evidence.
 
-## 參考
+## References
 
-- [references/templates.md](references/templates.md)：催辦、取消恢復、技術澄清、報價優惠、付款後請對方負責到底、退款追問六種範本
-- [references/pitfalls.md](references/pitfalls.md)：踩過的雷與教訓
-- [references/deadlines.md](references/deadlines.md)：觀察到的期限與客服時段（快照）
-- [references/case-study.md](references/case-study.md)：一次完整訂單的匿名時間線
-- [scripts/deadline.py](scripts/deadline.py)：確認稿到期時間計算（只用標準庫）
+- [references/templates.md](references/templates.md): six templates — status chase, cancellation recovery, technical clarification, quote and coupon, asking for ownership after payment, refund follow-up
+- [references/pitfalls.md](references/pitfalls.md): pitfalls hit and lessons learned
+- [references/deadlines.md](references/deadlines.md): observed deadlines and customer-service hours (snapshot)
+- [references/case-study.md](references/case-study.md): an anonymized timeline of one complete order
+- [scripts/deadline.py](scripts/deadline.py): confirmation deadline calculator (standard library only)

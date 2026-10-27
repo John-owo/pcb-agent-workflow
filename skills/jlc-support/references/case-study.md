@@ -1,24 +1,24 @@
-# 案例：一張 4 層 GNSS 測試板的訂單
+# Case study: an order for a 4-layer GNSS test board
 
-2026 年 9 月，一塊 25 × 36.5 mm 的 4 層 GNSS breakout，PCB 5 片，其中 2 片由工廠做頂面貼裝，排針自行焊接。日期只寫到上中下旬；下旬的事件用相對天數，D1 是送審當天。人員以角色代稱，編號已移除。
+September 2026: a 25 × 36.5 mm 4-layer GNSS breakout, 5 PCBs, 2 of which had top-side assembly done by the factory, with pin headers soldered by hand. Dates are given only as early, mid or late month; late-month events use relative days, with D1 being the day of submission for review. People are referred to by role, and IDs have been removed.
 
-| 日期 | 問了什麼 | 對方怎麼答 | 結果 |
+| Date | What was asked | How they answered | Result |
 |---|---|---|---|
-| 9 月上旬 | 一顆超級電容明明有庫存，卻被移出組裝料庫，能不能人工配料或寄售？ | 都不行，也沒有恢復日期；追問後確認所有超級電容和電池都一樣 | 改版，拿掉這顆儲能元件 |
-| 9 月上旬至中旬 | 向業務窗口申請報價與優惠；先把購物車金額壓低，再附購物車截圖申請 | 發下有門檻、有地區限制的優惠券 | 取得優惠券 |
-| 下旬 D1 | 線上客服：拆邊範圍、差額、某電阻靠板邊是否安全、能否先審後付 | 5 片全部拆邊；差額是拆邊總費，審查後另補；可以先審後付 | 只送審，不付款 |
-| D2 | 催 PCBA 審查（標示 10–60 分鐘，實際已過一夜） | 一位說工程信已寄，另一位更正其實還沒寄 | 隔天收到工程信 |
-| D3 | 工程寄來排針、二極體、LED、工藝邊等問題，用編號逐條回覆 | 隔天回覆：等待最終 DFM | PCB／PCBA 審核通過 |
-| D6 | 單一問題信：最終 DFM 在哪？ | 付款後才做 DFM | 使用者付款 |
-| D6 晚 | 兩張單都被取消，理由是 internal compliance assessment。詢問原因、能否恢復、交期 | 對方承認是同事誤操作，提出小額補償券；追問四點後拒絕恢復原單，假期前無法出貨，只答應假期後優先處理 | 達到「最終拒絕」停止條件 |
-| D6–D7 | 用同一份檔案重新下單，備註附上全部工程澄清；請業務窗口協助協調 | 業務窗口沒有回覆紀錄 | 新單付款 |
-| D7 | 用 Email 請工程窗口負責到底；同時在聊天催 DFM，一次問四項 | 信只有安撫，沒給時程；聊天被轉給工程後只回一句 sure，接著自動關閉 | 仍然沒有期限 |
-| D7 下午 | — | 拆邊補費免收；寄來 PCB 生產稿（請 48 小時內確認）和 PCBA 貼裝確認（72 小時未確認直接投產） | 進入人工審稿 |
-| D7 晚 | 寄出生產稿技術澄清：用座標說明電阻、via 位移、電晶體方向、RF 連接器（J1）的貼裝中心 | 附圖逐條回覆：加了保護註記；via 微移是為了塞孔；電晶體依絲印 pin1 修正；J1 的網頁讀數就是貼裝中心 | 另寄一封只問 J1 讀數與機構中心差 0.89 mm 的信 |
-| D10 | — | — | 使用者自行處理 J1 問題。原單退款和合規標記，截至最後一筆紀錄仍未獲答覆 |
+| Early September | A supercapacitor clearly in stock was removed from the assembly parts library; could it be manually sourced or consigned? | Neither; no restoration date either. On follow-up, they confirmed all supercapacitors and batteries are the same | Revised the design, removing this energy-storage part |
+| Early to mid September | Asked the sales contact for a quote and coupon; first lowered the cart amount, then applied with a cart screenshot attached | Issued a coupon with a minimum spend and region limits | Coupon obtained |
+| Late D1 | Online customer service: scope of rail removal, price difference, whether a resistor near the board edge is safe, whether review can come before payment | Rails removed on all 5 boards; the difference is the total rail-removal fee, charged separately after review; review before payment is possible | Submitted for review only, not paid |
+| D2 | Status chase on PCBA review (stated 10–60 minutes, actually already overnight) | One agent said the engineering email had been sent; another corrected that it had not actually been sent | Engineering email received the next day |
+| D3 | Engineering sent questions about pin headers, diodes, LEDs, rails, etc.; replied point by point by number | Reply the next day: waiting for final DFM | PCB/PCBA review passed |
+| D6 | Single-question email: where is the final DFM? | DFM is done only after payment | User paid |
+| D6 evening | Both orders cancelled, reason given as internal compliance assessment. Asked the reason, whether they could be reinstated, and the lead time | They admitted a colleague's operating error and offered a small compensation coupon; after four follow-up points they refused to reinstate the original order, could not ship before the holiday, and only promised priority handling after the holiday | Reached the "final refusal" stop condition |
+| D6–D7 | Reordered with the same files, with all engineering clarifications in the order remarks; asked the sales contact to help coordinate | No record of a reply from the sales contact | New order paid |
+| D7 | Emailed the engineering contact to take ownership; at the same time chased DFM in chat, asking four items at once | Email only reassured, no timeline; chat was transferred to engineering, who replied only "sure", then it closed automatically | Still no deadline |
+| D7 afternoon | — | Rail-removal fee waived; sent the PCB production file (please confirm within 48 hours) and PCBA parts placement confirmation (goes straight to production if not confirmed within 72 hours) | Entered manual review |
+| D7 evening | Sent a pure technical clarification on the production file: used coordinates to describe a resistor, via shifts, transistor orientation, and the placement centre of the RF connector (J1) | Point-by-point reply with images: added a protective note; vias were moved slightly for via plugging; transistor corrected per silkscreen pin 1; the J1 web readout is the placement centre | Sent another email asking only about the 0.89 mm difference between the J1 readout and the mechanical centre |
+| D10 | — | — | User handled the J1 issue themselves. The original order's refund and compliance flag were still unanswered as of the last record |
 
-## 從這個案例學到的事
+## Lessons from this case
 
-- 有效的是：可獨立閱讀的第一則訊息、每封信都帶界線句、用座標寫工程問題、只追問剩下的一點、把要求寫進訂單備註。
-- 沒效的是：把退款和合規問題混在長信末段、只拿到「會寄信」就結束對話。
-- 細節見 [pitfalls.md](pitfalls.md) 與 [templates.md](templates.md)。
+- What worked: a self-contained first message, a boundary statement in every email, engineering questions written with coordinates, following up only on the remaining point, writing requirements into the order remarks.
+- What did not work: mixing refund and compliance questions into the end of a long email, ending a conversation with only "we will send an email".
+- For details, see [pitfalls.md](pitfalls.md) and [templates.md](templates.md).

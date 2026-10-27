@@ -1,31 +1,31 @@
-# 踩過的雷
+# Pitfalls
 
-2026 年 9 月一張 4 層板 PCB＋PCBA 訂單的教訓。每條附上下次的做法。
+Lessons from a 4-layer PCB + PCBA order in September 2026. Each comes with what to do next time.
 
-## 時程
+## Schedule
 
-- **網頁上的工期不是承諾。** PCBA 進階審查標示 10–60 分鐘，實際超過一天。交期前要預留假期緩衝。
-- **工廠假期會放大任何延誤。** 網站橫幅會公告停工日，並建議提前 3–5 天下單。下單前先看橫幅。
-- **審核通過、付款之後，訂單仍可能被取消。** 標示的理由（internal compliance assessment）和對方後來承認的原因（同事誤操作）不同，原單也不肯恢復。下次一看到取消就要求書面原因，同時準備重新下單，不要只等恢復。
+- **Durations on the web page are not commitments.** PCBA advanced review is stated as 10–60 minutes; it actually took more than a day. Leave holiday buffer before the delivery date.
+- **Factory holidays amplify any delay.** The website banner announces shutdown days and recommends ordering 3–5 days early. Check the banner before ordering.
+- **An order can still be cancelled after review has passed and payment is made.** The stated reason (internal compliance assessment) differed from the cause they later admitted (a colleague's operating error), and they would not reinstate the original order. Next time, as soon as you see a cancellation, request the reason in writing and prepare to reorder in parallel; do not just wait for reinstatement.
 
-## 金額
+## Amounts
 
-- **購物車總價不一定包含所有費用。** 拆邊費列在詳細報價裡，購物車總價卻沒有，審查後才另外補收。以詳細報價為準，有差額就追問。
-- **優惠券面額不等於折抵金額。** 實際折抵依券的適用範圍計算，付款前看結帳頁的實付金額。
+- **The cart total does not necessarily include all fees.** The rail-removal fee was listed in the detailed quote but not in the cart total, and was charged separately after review. Go by the detailed quote, and follow up on any difference.
+- **A coupon's face value is not the discount applied.** The actual discount depends on the coupon's scope; check the amount payable on the checkout page before paying.
 
-## 客服回覆
+## Customer service replies
 
-- **聊天客服常回安撫套話。** 例如「正在催相關團隊」、「別擔心」、「sure」，之後對話閒置約兩分鐘就自動關閉。結束對話前，確認拿到一個能驗證的承諾：誰負責、幾點更新。
-- **客服之間說法會互相矛盾。** 一位說工程信已寄，另一位證實還沒寄。先查信箱再回覆。
-- **長信末段的問題容易被忽略。** 退款和合規問題問了三次都沒有答覆。這類問題要獨立開一個信串。
-- **工程答覆可能沒有解釋你問的差異。** 對方說「viewer 讀數就是貼裝中心」，卻沒說明它和原始機械中心為什麼差 0.89 mm。這時只針對那一點再問一次，並請對方附標註圖。
+- **Chat agents often reply with reassuring boilerplate.** For example "we are chasing the relevant team", "don't worry", "sure", after which the conversation closes automatically after about two minutes of inactivity. Before ending a conversation, make sure you have a verifiable commitment: who owns it and when the next update is.
+- **Agents contradict each other.** One said the engineering email had been sent; another confirmed it had not. Check the mailbox before replying.
+- **Questions at the end of long emails get ignored.** Refund and compliance questions were asked three times without an answer. Open a separate thread for this kind of question.
+- **An engineering answer may not explain the difference you asked about.** They said "the viewer readout is the placement centre" but did not explain why it differs from the original mechanical centre by 0.89 mm. In that case, ask again about that one point only, and ask them to attach a marked-up image.
 
-## 確認稿
+## Confirmation items
 
-- **逾期自動投產會蓋過你的人工確認設定。** PCBA 貼裝確認信寫明 72 小時未確認就直接投產；即使在信中要求保留人工確認，也沒有拿到停用自動放行的承諾。收信當下就算出到期時間。
-- **PCB 生產稿和 PCBA 貼裝確認是兩份東西。** 兩份分開下載、分開判讀、分開確認。
+- **Auto-release on expiry overrides your manual confirmation setting.** The PCBA parts placement confirmation email states that it goes straight into production if not confirmed within 72 hours; even after asking in an email to keep manual confirmation, no commitment to disable the auto-release was obtained. Compute the deadline as soon as the email arrives.
+- **The PCB production file and the PCBA parts placement confirmation are two separate things.** Download, interpret and confirm them separately.
 
-## 編號與帳號
+## IDs and accounts
 
-- **儲存購物車會改號。** 對外訊息附上新舊兩組編號。
-- **寄信工具可能連到別的帳號。** 曾發現信箱 connector 連到的不是訂單註冊帳號。寄信前確認寄件人。
+- **Saving the cart changes the number.** Include both the old and new IDs in outgoing messages.
+- **The email tool may be connected to a different account.** The mailbox connector was once found to be connected to an account other than the one the order was registered with. Confirm the sender before sending.

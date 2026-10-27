@@ -1,19 +1,19 @@
-# 觀察到的期限與時段
+# Observed deadlines and hours
 
-**快照日期：2026 年 9 月。** JLCPCB 隨時可能調整。以當下收到的信件與網站為準；跟這裡不一致時，以信件和網站為準，並更新本頁。
+**Snapshot: observed 2026-09.** JLCPCB may change these at any time. Go by the emails and website you see at the time; where they disagree with this page, the emails and website win, and update this page.
 
-| 項目 | 觀察到的期限或說明 | 來源 |
+| Item | Observed deadline or note | Source |
 |---|---|---|
-| PCBA 貼裝確認（Confirm Parts Placement） | 信中寫明 72 小時內未確認就直接投產 | 系統通知信 |
-| PCB 生產稿（Confirm Production file） | 信中請客戶 48 小時內確認「以免延誤」，沒有寫明逾期會自動投產 | 系統通知信 |
-| 付款前審查（Review Before Payment） | 工作日 10 分鐘至 4 小時（週一至週六 9:00–18:00，GMT+8） | 結帳頁 |
-| PCBA 進階審查 | 網頁寫 10–60 分鐘，實際超過一天 | 網頁與實際紀錄 |
-| 一次順利的流程 | 深夜付款，約 1 小時內審核通過，同日下午寄出生產稿 | 訂單頁與信件 |
-| 線上聊天 | 週一至週五 24 小時；週六 9:00–18:00（GMT+8）；週日推測沒有真人客服 | 聯絡頁 |
-| Email | 頁面寫「通常數小時內回覆」 | 聯絡頁 |
+| PCBA parts placement confirmation (Confirm Parts Placement) | The email states that if not confirmed within 72 hours it goes straight into production | System notification email |
+| PCB production file (Confirm Production file) | The email asks the customer to confirm within 48 hours "to avoid delay"; it does not state that it is auto-released when overdue | System notification email |
+| Review Before Payment | 10 minutes to 4 hours on working days (Monday to Saturday 9:00–18:00, GMT+8) | Checkout page |
+| PCBA advanced review | Web page says 10–60 minutes; actually more than a day | Web page and actual record |
+| A smooth run | Paid late at night, review passed within about 1 hour, production file sent the same afternoon | Order page and emails |
+| Online chat | 24 hours Monday to Friday; Saturday 9:00–18:00 (GMT+8); Sunday presumably no human agents | Contact page |
+| Email | Page says "usually replies within a few hours" | Contact page |
 
-## 使用方式
+## How to use
 
-- 收到確認信當下，把「收信時間＋期限」換算成絕對時間（含時區），寫進 WORKLOG 並告訴使用者。
-- 確認稿到期前留足判讀時間；判讀需要另一個 agent 或人審查時，更要提早。
-- 假期前下單，把停工日加進交期估計。
+- As soon as a confirmation email arrives, convert "time received + deadline" into an absolute time (with time zone), write it into WORKLOG and tell the user.
+- Leave enough interpretation time before a confirmation item's deadline; start even earlier when interpretation needs review by another agent or a person.
+- When ordering before a holiday, add the shutdown days to the lead-time estimate.
