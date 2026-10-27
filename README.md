@@ -1,78 +1,78 @@
 # pcb-agent-workflow
 
-用 Claude Code 或 Codex 當助手，在 KiCad 10 設計 PCB、交 JLCPCB 製造的一套工作流程。
+A workflow for designing PCBs in KiCad 10 with Claude Code or Codex as an assistant, and having JLCPCB manufacture them.
 
-這套流程來自一塊 4 層 GNSS 測試板（u-blox MAX-M10S，25 × 36.5 mm）從設計、審查、報價、送審、客服往返到確認生產稿的實際經驗。重複有用的做法寫成文件和 skill；踩過的雷寫成檢查項目。
+This workflow comes from real experience with a 4-layer GNSS test board (u-blox MAX-M10S, 25 × 36.5 mm), from design, review, quoting, and submission for review, through customer service back-and-forth, to confirming the production file. Practices that proved useful repeatedly became docs and skills; pitfalls we hit became checklist items.
 
-**第一次做 PCB？** 從 [新手入門](docs/getting-started.md) 開始：從安裝 KiCad 走到在 JLC 下單，每一步寫你要做什麼、可以請 agent 做什麼、怎麼確認做對了。其他文件之後再看。
+**First PCB?** Start with [Getting started](docs/getting-started.md): from installing KiCad to ordering at JLC, each step says what you do, what you can ask the agent to do, and how to check it's right. Read the other docs later.
 
-## 內容
+## Contents
 
-| 路徑 | 內容 |
+| Path | Contents |
 |---|---|
-| [docs/getting-started.md](docs/getting-started.md) | **新手入門**：第一塊板的範圍、環境、原理圖、選料、板子規則、佈線、匯出、下單 |
-| [docs/first-board-checklist.md](docs/first-board-checklist.md) | 送廠前的檢查清單，給人看，也給 agent 審查用 |
-| [docs/glossary.md](docs/glossary.md) | 術語表：Gerber、BOM、CPL、DFM、工藝邊、Basic／Extended 料等 |
-| [docs/workflow/collaboration.md](docs/workflow/collaboration.md) | 人與多個 agent 協作：單一寫入者、WORKLOG、接手順序、審查最多兩輪、哪些動作要使用者同意 |
-| [docs/workflow/kicad-tools.md](docs/workflow/kicad-tools.md) | KiCad 原生 CLI 與 KiCad MCP 的分工、常用命令、修改 PCB 前的保全 |
-| [docs/workflow/release-package.md](docs/workflow/release-package.md) | 固定發行包：內容、雜湊清單、release-checks、版本資料夾命名 |
-| [docs/workflow/jlc-ordering.md](docs/workflow/jlc-ordering.md) | JLC 下單：服務等級、BOM／CPL、配料核對、壓成本、送單設定、付款後流程 |
-| [skills/jlc-support/](skills/jlc-support/SKILL.md) | 跟 JLC 客服、工程、業務窗口溝通的 skill：寫信結構、六種範本、期限計算腳本、工具搭配、停止條件 |
-| [skills/jlc-production-review/](skills/jlc-production-review/SKILL.md) | 審查工廠生產稿與貼裝確認的 skill：把工廠 CAM 稿對齊回原始 Gerber 逐層比對、分類差異、核對貼裝；附比對腳本與 BOM／CPL 檢查 |
-| [skills/readable-schematic-layout/](skills/readable-schematic-layout/SKILL.md) | 把原理圖與佈局畫成人類好讀、好除錯的 skill：內建 symbol、電源 symbol、實際畫線、依流向分區、文字不重疊；附 netlist 比對與腳號對焊盤檢查腳本，證明只改畫法、沒改電路 |
-| [skills/kicad-enclosure-step/](skills/kicad-enclosure-step/SKILL.md) | 把 KiCad 板子匯出成含全部零件的 STEP，給外殼設計用：盤點缺模型的零件、找原廠模型或依規格書自畫、對齊、用暫存副本匯出（不改板檔），逐顆自動檢查位置，最後寫外殼注意事項 |
-| [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) | Claude Code 與 Codex 共用的 plugin marketplace：每個 skill 一個 plugin，加上選用的寄信確認 hook |
-| [plugins/jlc-send-guard/](plugins/jlc-send-guard/) | 選用的 Claude Code hook：Gmail 寄出類工具執行前強制確認 |
-| [templates/](templates/) | 新專案用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`，以及 KiCad 專案的 `.gitignore` |
-| [scripts/](scripts/) | 發行包打包驗證、Konnect stdio 呼叫器、本 repo 的隱私掃描與 skill 檢查（各 skill 專用的腳本放在 skill 自己的 `scripts/`） |
-| [examples/max-m10s-breakout-revc/](examples/max-m10s-breakout-revc/README.md) | 實際下單過的範例設計包：KiCad 原生檔、Gerber、BOM、CPL、裝配圖、驗證紀錄 |
-| [examples/max-m10s-breakout-revc-cad/](examples/max-m10s-breakout-revc-cad/README.md) | 上面那塊板的外殼設計用 STEP（含全部零件）、預覽圖與匯出設定；kicad-enclosure-step 的範例 |
+| [docs/getting-started.md](docs/getting-started.md) | **Getting started**: first-board scope, environment, schematic, part selection, board rules, routing, export, ordering |
+| [docs/first-board-checklist.md](docs/first-board-checklist.md) | Pre-fab checklist, for people to read and for agent review |
+| [docs/glossary.md](docs/glossary.md) | Glossary: Gerber, BOM, CPL, DFM, rails, Basic/Extended parts, etc. |
+| [docs/workflow/collaboration.md](docs/workflow/collaboration.md) | People working with multiple agents: single writer, WORKLOG, takeover order, at most two review rounds, which actions need user consent |
+| [docs/workflow/kicad-tools.md](docs/workflow/kicad-tools.md) | Division of labor between the native KiCad CLI and KiCad MCP, common commands, securing backups before modifying the PCB |
+| [docs/workflow/release-package.md](docs/workflow/release-package.md) | Release package: contents, hash manifest, release-checks, version folder naming |
+| [docs/workflow/jlc-ordering.md](docs/workflow/jlc-ordering.md) | JLC ordering: service levels, BOM/CPL, parts matching review, cutting cost, order settings, post-payment process |
+| [skills/jlc-support/](skills/jlc-support/SKILL.md) | Skill for communicating with JLC customer service, engineering, and sales contacts: message structure, six templates, deadline calculation script, tool pairing, stop conditions |
+| [skills/jlc-production-review/](skills/jlc-production-review/SKILL.md) | Skill for reviewing the factory production file and parts placement confirmation: aligns the factory CAM file back to the original Gerbers and compares layer by layer, classifies differences, checks placement; includes comparison scripts and BOM/CPL checks |
+| [skills/readable-schematic-layout/](skills/readable-schematic-layout/SKILL.md) | Skill for drawing schematics and layouts that are easy for humans to read and debug: built-in symbols, power symbols, real wires, regions by signal flow, no overlapping text; includes netlist comparison and pin-to-pad check scripts that prove only the drawing changed, not the circuit |
+| [skills/kicad-enclosure-step/](skills/kicad-enclosure-step/SKILL.md) | Exports a KiCad board as a STEP with all parts for enclosure design: inventories parts missing models, finds vendor models or draws them from datasheets, aligns them, exports from a temporary copy (board file untouched), automatically checks each part's position, and finally writes enclosure notes |
+| [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) | Plugin marketplace shared by Claude Code and Codex: one plugin per skill, plus the optional send confirmation hook |
+| [plugins/jlc-send-guard/](plugins/jlc-send-guard/) | Optional Claude Code hook: forces a confirmation before Gmail send-type tools run |
+| [templates/](templates/) | `AGENTS.md`, `CLAUDE.md`, `WORKLOG.md`, `README.md` for new projects, plus a `.gitignore` for KiCad projects |
+| [scripts/](scripts/) | Release package bundling and verification, Konnect stdio caller, this repo's privacy scan and skill check (skill-specific scripts live in each skill's own `scripts/`) |
+| [examples/max-m10s-breakout-revc/](examples/max-m10s-breakout-revc/README.md) | Example design package that was actually ordered: native KiCad files, Gerbers, BOM, CPL, assembly drawings, verification records |
+| [examples/max-m10s-breakout-revc-cad/](examples/max-m10s-breakout-revc-cad/README.md) | STEP (with all parts) for enclosure design of the board above, preview images, and export settings; the kicad-enclosure-step example |
 
-## 流程總覽
+## Workflow overview
 
 ```mermaid
 flowchart LR
-  A[設計<br/>KiCad 10] --> B[驗證<br/>ERC / DRC / agent 審查]
-  B --> C[固定發行包<br/>雜湊清單]
-  C --> D[上傳與送審<br/>配料核對]
-  D --> E[付款]
-  E --> F[生產稿比對]
-  F --> G[使用者確認]
-  G --> H[到貨與實測]
-  S([jlc-support<br/>客服與工程溝通]) -.-> D
+  A[Design<br/>KiCad 10] --> B[Verification<br/>ERC / DRC / agent review]
+  B --> C[Release package<br/>hash manifest]
+  C --> D[Upload and review<br/>parts matching]
+  D --> E[Payment]
+  E --> F[Production file comparison]
+  F --> G[User confirmation]
+  G --> H[Delivery and bench test]
+  S([jlc-support<br/>customer service and engineering]) -.-> D
   S -.-> E
   S -.-> F
-  R([jlc-production-review<br/>生產稿與貼裝審查]) -.-> F
+  R([jlc-production-review<br/>production file and placement review]) -.-> F
 ```
 
-## 開始使用
+## Getting started
 
-### 新專案
+### New project
 
-把 `templates/` 裡的四個 Markdown 檔複製到 PCB 專案根目錄，把 `<...>` 換成自己的內容；`kicad-project.gitignore` 複製後改名為 `.gitignore`。專案已經有 `README.md` 的話，不要直接覆蓋，把範本的段落合併進去。之後每次接手，agent 會從 `README.md` 和 `WORKLOG.md` 讀起。
+Copy the four Markdown files in `templates/` to the PCB project root and replace `<...>` with your own content; copy `kicad-project.gitignore` and rename it to `.gitignore`. If the project already has a `README.md`, don't overwrite it; merge the template's sections into it. From then on, each time an agent takes over, it starts by reading `README.md` and `WORKLOG.md`.
 
-### 安裝 skill
+### Installing skills
 
-四個 skill 各是一個 plugin，可以只裝需要的。Claude Code 與 Codex 讀同一份 marketplace（`.claude-plugin/marketplace.json`）和同一份 `SKILL.md`。
+Each of the four skills is its own plugin, so you can install only what you need. Claude Code and Codex read the same marketplace (`.claude-plugin/marketplace.json`) and the same `SKILL.md`.
 
-| plugin | 用途 |
+| plugin | Purpose |
 |---|---|
-| `jlc-support` | 跟 JLC 客服、工程、業務窗口溝通；附確認稿期限計算 |
-| `jlc-production-review` | 審查生產稿與貼裝確認；附 CAM 比對與 BOM／CPL 檢查腳本 |
-| `readable-schematic-layout` | 原理圖與佈局畫成好讀、好除錯的樣子；附 netlist 與腳號對焊盤檢查 |
-| `kicad-enclosure-step` | 把板子匯出成含全部零件的 STEP 給外殼設計；附盤點、匯出、逐顆位置檢查與自畫模型腳本 |
-| `jlc-send-guard` | 選用的 Claude Code hook，見下方「寄信確認 hook」；預設停用 |
+| `jlc-support` | Communicating with JLC customer service, engineering, and sales contacts; includes confirmation item deadline calculation |
+| `jlc-production-review` | Reviewing production files and parts placement confirmation; includes CAM comparison and BOM/CPL check scripts |
+| `readable-schematic-layout` | Making schematics and layouts easy to read and debug; includes netlist and pin-to-pad checks |
+| `kicad-enclosure-step` | Exports the board as a STEP with all parts for enclosure design; includes inventory, export, per-part position check, and self-drawn model scripts |
+| `jlc-send-guard` | Optional Claude Code hook, see "Send confirmation hook" below; disabled by default |
 
-**Claude Code**（在對話裡輸入）：
+**Claude Code** (type in the conversation):
 
 ```text
 /plugin marketplace add John-owo/pcb-agent-workflow
 /plugin install jlc-support@pcb-agent-workflow
 ```
 
-Claude Code 2.1.275 以後也可以一步完成：`/plugin install jlc-support --marketplace John-owo/pcb-agent-workflow`。更新用 `/plugin marketplace update pcb-agent-workflow`。
+Claude Code 2.1.275 and later can also do it in one step: `/plugin install jlc-support --marketplace John-owo/pcb-agent-workflow`. Update with `/plugin marketplace update pcb-agent-workflow`.
 
-**Codex**（在終端機）：
+**Codex** (in a terminal):
 
 ```bash
 codex plugin marketplace add John-owo/pcb-agent-workflow
@@ -82,97 +82,97 @@ codex plugin marketplace add John-owo/pcb-agent-workflow
 codex plugin add jlc-support@pcb-agent-workflow
 ```
 
-更新用 `codex plugin marketplace upgrade`。把 `jlc-support` 換成表中其他名稱，就能裝其他 plugin。裝好後重新開一個對話，跟 agent 說「幫我寫信催 JLC 的 DFM」「幫我比對工廠寄來的生產稿」「把原理圖改成好讀的畫法，不要改電路」「我要設計外殼，給我含全部零件的 STEP」，就會套用對應的 skill。
+Update with `codex plugin marketplace upgrade`. Replace `jlc-support` with another name from the table to install other plugins. After installing, start a new conversation and tell the agent things like "write JLC an email chasing the DFM", "compare the production file the factory sent", "redraw the schematic so it's easy to read, without changing the circuit", or "I'm designing an enclosure, give me a STEP with all parts", and the matching skill will apply.
 
-**腳本的相依套件**：`jlc-production-review` 的 CAM 比對腳本需要 Python 3.12 與固定版本的套件，在 skill 資料夾裡執行 `python -m pip install -r scripts/requirements-cam.txt`（建議裝在 venv）。`kicad-enclosure-step` 需要 KiCad 10；它的 `step_report.py`、`simple_model.py`、`verify_placement.py` 另需 [CadQuery](https://github.com/CadQuery/cadquery)（`python -m pip install cadquery`，建議裝在 venv），範例與重現指令見 [examples/max-m10s-breakout-revc-cad](examples/max-m10s-breakout-revc-cad/README.md)。其他腳本只用 Python 標準庫。
+**Script dependencies**: the CAM comparison scripts in `jlc-production-review` need Python 3.12 and pinned package versions; in the skill folder run `python -m pip install -r scripts/requirements-cam.txt` (a venv is recommended). `kicad-enclosure-step` needs KiCad 10; its `step_report.py`, `simple_model.py`, and `verify_placement.py` also need [CadQuery](https://github.com/CadQuery/cadquery) (`python -m pip install cadquery`, a venv is recommended); see [examples/max-m10s-breakout-revc-cad](examples/max-m10s-breakout-revc-cad/README.md) for the example and reproduction commands. Other scripts use only the Python standard library.
 
-#### 手動安裝（不用 plugin）
+#### Manual install (without plugins)
 
-複製 skill 資料夾到 agent 的 skills 目錄。先建立目錄再複製；沒有這個目錄時，複製指令會把 skill 的內容直接攤在 `skills/` 底下，agent 就找不到它。
+Copy the skill folder into the agent's skills directory. Create the directory first, then copy; if the directory doesn't exist, the copy command spreads the skill's contents directly under `skills/` and the agent can't find it.
 
 ```bash
 git clone https://github.com/John-owo/pcb-agent-workflow.git
 ```
 
-Claude Code（macOS／Linux／Git Bash）：
+Claude Code (macOS/Linux/Git Bash):
 
 ```bash
 mkdir -p ~/.claude/skills && cp -r pcb-agent-workflow/skills/jlc-support ~/.claude/skills/
 ```
 
-Codex（Codex 文件寫的使用者 skill 目錄是 `~/.agents/skills`；舊的 `~/.codex/skills` 未驗證）：
+Codex (the Codex docs give `~/.agents/skills` as the user skill directory; the old `~/.codex/skills` is unverified):
 
 ```bash
 mkdir -p ~/.agents/skills && cp -r pcb-agent-workflow/skills/jlc-support ~/.agents/skills/
 ```
 
-Windows PowerShell（Codex 的話把 `.claude` 換成 `.agents`）：
+Windows PowerShell (for Codex, replace `.claude` with `.agents`):
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.claude\skills" | Out-Null
 Copy-Item -Recurse -Force pcb-agent-workflow\skills\jlc-support "$HOME\.claude\skills\"
 ```
 
-裝好後 `~/.claude/skills/jlc-support/SKILL.md`（或 `~/.agents/skills/` 底下的同一路徑）要存在。更新時重跑同一組指令。只想在單一專案使用，就放到該專案的 `.claude/skills/` 或 `.agents/skills/`。手動安裝不含 `jlc-send-guard` hook。
+After installing, `~/.claude/skills/jlc-support/SKILL.md` (or the same path under `~/.agents/skills/`) should exist. To update, rerun the same commands. To use a skill in a single project only, put it in that project's `.claude/skills/` or `.agents/skills/`. Manual install does not include the `jlc-send-guard` hook.
 
-#### 寄信確認 hook（選用，只限 Claude Code）
+#### Send confirmation hook (optional, Claude Code only)
 
-`jlc-send-guard` 在 Gmail connector 的寄出類工具（名稱含 `send`、`reply`、`forward`）執行前，強制跳出確認，auto mode 也一樣。草稿工具不受影響。它預設停用，要用時自己啟用：
+`jlc-send-guard` forces a confirmation prompt before the Gmail connector's send-type tools (names containing `send`, `reply`, `forward`) run, even in auto mode. Draft tools are not affected. It is disabled by default; enable it yourself if you want it:
 
 ```text
 /plugin install jlc-send-guard@pcb-agent-workflow
 /plugin enable jlc-send-guard@pcb-agent-workflow
 ```
 
-限制：
+Limitations:
 
-- 它用正規表示式比對工具名稱：`^mcp__.*[Gg][Mm][Aa][Ii][Ll].*__.*([Ss]end|[Rr]eply|[Ff]orward)`。connector 改名後可能漏攔，請在 `/mcp` 看你的 Gmail 工具名稱有沒有被涵蓋；名稱相近的其他工具可能被多攔，多攔只會多一次確認。
-- **擋不住瀏覽器上的動作。** hook 看不到頁面網址和按鈕文字，所以 Claude in Chrome 點 Confirm、Submit 不在它的範圍內；那部分只靠 skill 的硬規則和 Chrome 擴充的網站權限。
-- Codex 端沒有驗證過。Codex 的 plugin hook 要先經使用者信任才會執行，ChatGPT 的 Gmail connector 能不能被攔也不確定。
-- 它是多一道防線，不取代 skill 的硬規則：寄出前仍要使用者在對話中明確同意。
+- It matches tool names with a regular expression: `^mcp__.*[Gg][Mm][Aa][Ii][Ll].*__.*([Ss]end|[Rr]eply|[Ff]orward)`. If the connector is renamed it may miss tools; check in `/mcp` whether your Gmail tool names are covered. Other tools with similar names may also be caught, which only costs one extra confirmation.
+- **It cannot block actions in the browser.** The hook can't see page URLs or button text, so Claude in Chrome clicking Confirm or Submit is outside its scope; that part relies only on the skill's hard rules and the Chrome extension's site permissions.
+- Not verified on Codex. Codex plugin hooks only run after the user trusts them, and it's uncertain whether ChatGPT's Gmail connector can be intercepted.
+- It is an extra line of defense and does not replace the skill's hard rules: sending still requires the user's explicit consent in the conversation.
 
-### 搭配的 KiCad 分析 skill
+### Companion KiCad analysis skills
 
-原理圖分析、BOM、DRC 審查、EMC、SPICE 等 skill 使用 [aklofas/kicad-happy](https://github.com/aklofas/kicad-happy)（MIT）。本 repo 不附副本，請依該 repo 的說明安裝。這套流程實際用到的有 `kicad`、`bom`、`jlcpcb`、`lcsc`、`datasheets`、`emc`、`spice`。
+Skills for schematic analysis, BOM, DRC review, EMC, SPICE, etc. come from [aklofas/kicad-happy](https://github.com/aklofas/kicad-happy) (MIT). This repo does not include a copy; install it following that repo's instructions. The ones this workflow actually uses are `kicad`, `bom`, `jlcpcb`, `lcsc`, `datasheets`, `emc`, `spice`.
 
-### docs/agents 是什麼
+### What docs/agents is
 
-`docs/agents/` 是給 [mattpocock/skills](https://github.com/mattpocock/skills) 那套工程類 skill（`triage`、`to-tickets`、`to-spec` 等）讀的設定：issue 記在哪裡、triage 標籤叫什麼。沒安裝那套 skill 就用不到，可以忽略。
+`docs/agents/` holds settings read by the engineering skills from [mattpocock/skills](https://github.com/mattpocock/skills) (`triage`, `to-tickets`, `to-spec`, etc.): where issues are tracked and what the triage labels are called. If you haven't installed those skills, you don't need it and can ignore it.
 
-### Codex 與 Claude Code 交接
+### Handoff between Codex and Claude Code
 
-兩個 agent 輪流接手同一個任務時，交接格式見 [John-owo/codex-cc-handoff](https://github.com/John-owo/codex-cc-handoff)。
+When two agents take turns on the same task, see [John-owo/codex-cc-handoff](https://github.com/John-owo/codex-cc-handoff) for the handoff format.
 
-## 核心原則
+## Core principles
 
-- **一個工作目錄同時只有一位寫入者。** 換手時在 WORKLOG 記錄 owner 與停止點。
-- **改 PCB 前先保全完整備份。** 雜湊清單只能識別檔案，不能還原。
-- **ERC／DRC 通過，不等於電氣正確、板廠接受或實板能動。**
-- **付款、送單、寄信、確認生產稿，每一次都等使用者同意。** agent 做到起草和準備為止。唯一的例外是催辦與純技術澄清：使用者可以說明範圍和期限，事先授權。
-- **固定發行包與動態進度分開。** 交給工廠的版本不再改；訂單進度另外記。
+- **One writer per working directory at a time.** On handoff, record the owner and stopping point in the WORKLOG.
+- **Secure a complete backup before modifying the PCB.** A hash manifest only identifies files; it can't restore them.
+- **Passing ERC/DRC does not mean electrically correct, accepted by the fab, or a working real board.**
+- **Payment, order submission, sending email, and confirming production files each wait for the user's consent every time.** The agent stops at drafting and preparing. The only exception is status chases and pure technical clarifications: the user can pre-authorize them by stating a scope and deadline.
+- **Keep the release package separate from changing progress.** The version handed to the factory is not changed again; order progress is recorded separately.
 
-## 限制
+## Limitations
 
-- 範例板完成了 ERC／DRC 與 agent 審查，也實際送單了，但還沒有實板測試。範例是送單時的發行包；工廠 CAM 之後做的微調不在裡面。實測程序與結果見 [examples/max-m10s-breakout-revc-tests](examples/max-m10s-breakout-revc-tests/README.md)。
-- JLC 的期限、價格、料庫狀態是 2026-09 的觀察，以當下的網站和信件為準。
-- 流程以 Windows、KiCad 10、JLCPCB 為主要環境。其他板廠可以參考溝通原則，但網站流程不同。
+- The example board passed ERC/DRC and agent review and was actually ordered, but has not yet been tested as a real board. The example is the release package as submitted; fine adjustments the factory made in CAM afterward are not in it. See [examples/max-m10s-breakout-revc-tests](examples/max-m10s-breakout-revc-tests/README.md) for the bench test procedure and results.
+- JLC deadlines, prices, and parts library status are as observed 2026-09; the current website and emails take precedence.
+- The workflow targets Windows, KiCad 10, and JLCPCB. Other fabs can use the communication principles, but their website flows differ.
 
-## 支援範圍
+## Support scope
 
-這套流程只在下面的環境驗證過：
+This workflow has been verified only in the environment below:
 
-| 項目 | 支援 |
+| Item | Supported |
 |---|---|
-| 作業系統 | Windows |
+| Operating system | Windows |
 | EDA | KiCad 10 |
-| agent | Claude Code、Codex（兩者都要能用）。plugin 安裝在 Claude Code 2.1.299、Codex CLI 0.163 測過 |
-| 板廠 | JLCPCB |
-| 收貨地 | 台灣（順豐） |
+| agent | Claude Code, Codex (both must work). Plugin install tested on Claude Code 2.1.299 and Codex CLI 0.163 |
+| Fab | JLCPCB |
+| Shipping destination | Taiwan (SF Express) |
 
-SKILL.md 與腳本是兩個 agent 共用的基準。只有 Claude Code 驗證過的加強功能另外標明：目前只有 `jlc-send-guard` hook。拿掉它，skill 一樣完整，硬規則照樣適用。
+SKILL.md and the scripts are the shared baseline for both agents. Enhancements verified only on Claude Code are marked separately: currently only the `jlc-send-guard` hook. Without it, the skills are just as complete and the hard rules still apply.
 
-其他環境（macOS、Linux、其他 KiCad 版本、PCBWay 等其他板廠）可能可以用，但沒有驗證。這類 issue 會標成 `wontfix`，回覆「可能可用，未驗證」；溝通原則不受板廠限制，可以照用。
+Other environments (macOS, Linux, other KiCad versions, other fabs such as PCBWay) may work but are unverified. Such issues are labeled `wontfix` with the reply "may work, unverified"; the communication principles are not fab-specific and can be used as is.
 
-## 授權
+## License
 
-MIT，見 [LICENSE](LICENSE)。範例中改自 KiCad 官方元件庫的 footprint 與 symbol，以及其他第三方內容的來源，見 [NOTICE](NOTICE)。原廠 datasheet 不隨附，範例 README 列有原廠連結。
+MIT, see [LICENSE](LICENSE). For footprints and symbols in the example adapted from the official KiCad libraries, and the sources of other third-party content, see [NOTICE](NOTICE). Vendor datasheets are not included; the example README lists vendor links.
