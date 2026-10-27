@@ -1,190 +1,190 @@
-# 新手入門：從零做出第一塊 PCB
+# Getting started: your first PCB from scratch
 
-給第一次做 PCB 的人。照這份走，會從安裝 KiCad 一路做到在 JLCPCB 下單。每一步寫三件事：你要做什麼、可以請 agent（Claude Code 或 Codex）做什麼、怎麼確認做對了。
+For people making their first PCB. Follow this and you will go from installing KiCad all the way to ordering at JLCPCB. Each step covers three things: what you do, what you can ask the agent (Claude Code or Codex) to do, and how to confirm you got it right.
 
-先說清楚這份指南的範圍：
+First, the scope of this guide:
 
-- **走到下單為止。** 這套流程來自一塊已經下單、但還沒有實板測試的 GNSS 板（見 [examples/](../examples/max-m10s-breakout-revc/README.md)）。到板後的上電與測試，目前有範例板的 [實測程序](../examples/max-m10s-breakout-revc-tests/README.md)，但還沒在實板上跑過。
-- **那塊範例板不適合當第一塊板來模仿。** 它是 4 層、含 RF 天線，屬於進階設計。讀它是為了看完整發行包長什麼樣子，不是照著畫。
-- **agent 是助手，不是設計者。** 它能查資料、解釋錯誤、檢查檔案、起草文件；結論要對照原廠 datasheet，按下付款或送單的一定是你。
-- 看不懂的詞查 [術語表](glossary.md)。
+- **It stops at ordering.** This workflow comes from a GNSS board that has been ordered but not yet tested as a real board (see [examples/](../examples/max-m10s-breakout-revc/README.md)). For power-up and testing after the board arrives, there is a [bench test procedure](../examples/max-m10s-breakout-revc-tests/README.md) for the example board, but it has not yet been run on a real board.
+- **That example board is not a good model for a first board.** It is 4 layers with an RF antenna, which makes it an advanced design. Read it to see what a complete release package looks like, not to copy it.
+- **The agent is an assistant, not the designer.** It can look things up, explain errors, check files, and draft documents; check its conclusions against the manufacturer's datasheet, and you are always the one who clicks pay or submit.
+- Look up unfamiliar terms in the [glossary](glossary.md).
 
-## 0. 先把第一塊板的範圍縮小
+## 0. Keep the first board small
 
-第一塊板的目標是「完整走過一次流程、拿到能用的板子」，不是做出最厲害的功能。建議：
+The goal of a first board is "go through the whole workflow once and get a working board", not to build the most impressive feature. Recommendations:
 
-| 項目 | 第一塊板建議 | 原因 |
+| Item | First-board recommendation | Why |
 |---|---|---|
-| 層數 | 雙層 | 便宜，KiCad 預設就是雙層，規則簡單 |
-| 尺寸 | 一張名片以內 | 便宜；太小反而會遇到組裝尺寸限制 |
-| 元件 | 0805 以上的電阻電容，或直插件 | 好手焊，出錯好修 |
-| 料號 | 優先用 JLC 的 Basic 料 | Extended 料每種另收換料費（2026-10 觀察） |
-| 組裝 | 只做 PCB 自己焊，或只貼單面 | 雙面貼裝要選 Standard 組裝，較貴（2026-09 觀察，見 [jlc-ordering.md](workflow/jlc-ordering.md)） |
-| 避開 | RF／天線、高速訊號、鋰電池充電、市電（AC 220 V／110 V） | 這些需要經驗，出錯可能危險 |
+| Layer count | 2 layers | Cheap, KiCad defaults to 2 layers, simple rules |
+| Size | Within a business card | Cheap; too small actually runs into assembly size limits |
+| Components | 0805 or larger resistors and capacitors, or through-hole parts | Easy to hand-solder, easy to rework |
+| Part numbers | Prefer JLC Basic parts | Each Extended part type carries an extra feeder loading fee (observed 2026-10) |
+| Assembly | PCB only and solder it yourself, or single-side assembly only | Double-sided assembly requires Standard assembly, which costs more (observed 2026-09, see [jlc-ordering.md](workflow/jlc-ordering.md)) |
+| Avoid | RF/antennas, high-speed signals, lithium battery charging, mains (AC 220 V/110 V) | These need experience, and mistakes can be dangerous |
 
-範例題目：USB-C 供電＋LED＋按鍵、某顆感測器模組的轉接板、Arduino／Pico 的擴充板。
+Example projects: USB-C power + LED + button, a breakout board for a sensor module, an expansion board for Arduino/Pico.
 
-**可以請 agent：**
+**You can ask the agent:**
 
-> 我想做一塊 <功能> 的板子，第一版只用雙層、JLC Basic 料、單面貼裝。先幫我列出需要哪些功能區塊，以及每一塊可以參考哪份原廠 datasheet 或參考設計。不要開始畫，也不要改任何檔案。
+> I want to make a board that <function>. The first version uses only 2 layers, JLC Basic parts, and single-side assembly. List the functional blocks I need, and which manufacturer datasheet or reference design to consult for each. Don't start drawing, and don't change any files.
 
-## 1. 準備環境
+## 1. Set up your environment
 
-| 工具 | 必要性 | 用途 |
+| Tool | Required? | Purpose |
 |---|---|---|
-| [KiCad](https://www.kicad.org/download/) 10 | 必要 | 畫原理圖與 PCB、匯出製造檔。本 repo 在 10.0.6 驗證過指令 |
-| Git | 強烈建議 | 每完成一步就 commit，改壞了可以回到上一步 |
-| Claude Code 或 Codex | 建議 | 本 repo 的流程是寫給 agent 協作用的 |
-| Python 3.12 | 讓 JLC 貼裝時必要 | 跑 BOM／CPL 檢查腳本（第 7 步）。只做 PCB 自己焊可以不裝 |
-| [kicad-happy](https://github.com/aklofas/kicad-happy) skills | 選用 | 讓 agent 分析原理圖、BOM、DRC |
-| Konnect MCP | **新手不需要** | 讓 agent 直接操作 KiCad，目前是 beta，見 [kicad-tools.md](workflow/kicad-tools.md) |
+| [KiCad](https://www.kicad.org/download/) 10 | Required | Draw the schematic and PCB, export manufacturing files. This repo verified its commands on 10.0.6 |
+| Git | Strongly recommended | Commit after each step so you can go back if something breaks |
+| Claude Code or Codex | Recommended | This repo's workflow is written for collaborating with an agent |
+| Python 3.12 | Required for JLC assembly | Runs the BOM/CPL check script (step 7). Not needed if you only order PCBs and solder yourself |
+| [kicad-happy](https://github.com/aklofas/kicad-happy) skills | Optional | Lets the agent analyze schematics, BOMs, DRC |
+| Konnect MCP | **Not needed for beginners** | Lets the agent operate KiCad directly; currently beta, see [kicad-tools.md](workflow/kicad-tools.md) |
 
-再把本 repo 下載到電腦上，放在**你的 PCB 專案資料夾之外**，例如兩者並排：
+Then download this repo to your computer, **outside your PCB project folder**, for example side by side:
 
 ```bash
 git clone https://github.com/John-owo/pcb-agent-workflow.git
 ```
 
-沒有裝 Git 的話，也可以在 GitHub 頁面用 Code → Download ZIP 下載後解壓縮。下面寫 `<pcb-agent-workflow>` 的地方，代表這個資料夾的路徑。
+Without Git, you can also use Code → Download ZIP on the GitHub page and unzip it. Wherever `<pcb-agent-workflow>` appears below, it means the path to this folder.
 
-**確認做對了：** 終端機執行 `kicad-cli version` 能印出版本號。Windows 若找不到指令，KiCad 的 `bin` 資料夾可能沒有加進 PATH，可以請 agent 協助找出安裝位置。
+**Confirm it's right:** running `kicad-cli version` in a terminal prints a version number. If Windows can't find the command, KiCad's `bin` folder may not be on PATH; you can ask the agent to help find the install location.
 
-## 2. 開新專案
+## 2. Start a new project
 
-1. KiCad：File → New Project，選一個**只放這個專案**的資料夾。
-2. 把 `<pcb-agent-workflow>/templates/` 裡的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md` 複製進去，`<...>` 換成自己的內容；把 `templates/kicad-project.gitignore` 複製進去並改名成 `.gitignore`。
-3. 在資料夾裡執行 `git init`，做第一個 commit。
+1. KiCad: File → New Project, and pick a folder that holds **only this project**.
+2. Copy `AGENTS.md`, `CLAUDE.md`, `WORKLOG.md`, `README.md` from `<pcb-agent-workflow>/templates/` into it and replace the `<...>` placeholders with your own content; copy `templates/kicad-project.gitignore` into it and rename it to `.gitignore`.
+3. Run `git init` in the folder and make your first commit.
 
-之後每次開新的 agent 對話，它會從 `README.md` 和 `WORKLOG.md` 讀起，知道做到哪裡。
+From then on, each new agent conversation starts by reading `README.md` and `WORKLOG.md`, so it knows where you left off.
 
-## 3. 畫原理圖
+## 3. Draw the schematic
 
-1. **每一塊電路都從原廠資料開始。** IC 的 datasheet 通常有「Typical Application」電路，列出需要的外部元件和數值。照它畫，不要憑印象。
-2. 放 symbol、拉線、標網路名稱。電源與 GND 用 power symbol。
-3. 每顆要貼裝的零件，在 symbol 加一個名為 `LCSC` 的欄位，填 LCSC 料號（例如 `C25804`）。第 7 步匯出 BOM 時會用到這個欄位名稱。
-4. 不貼的零件（例如測試點）設成 DNP（Do Not Populate）。
-5. 執行 ERC（Inspect → Electrical Rules Checker），每個錯誤都要看懂再處理。
+1. **Start every circuit block from the manufacturer's documentation.** An IC datasheet usually has a "Typical Application" circuit listing the external components and values needed. Follow it, not your memory.
+2. Place symbols, draw wires, label nets. Use power symbols for power and GND.
+3. For each part to be assembled, add a field named `LCSC` to the symbol and fill in the LCSC part number (for example `C25804`). Step 7 uses this field name when exporting the BOM.
+4. Set parts that won't be populated (for example test points) to DNP (Do Not Populate).
+5. Run ERC (Inspect → Electrical Rules Checker), and understand every error before dealing with it.
 
-**可以請 agent：**
+**You can ask the agent:**
 
-> <MPN> 的 datasheet 典型應用電路需要哪些外部元件？列出數值、用途和 datasheet 的頁碼。
+> What external components does the typical application circuit in the <MPN> datasheet need? List the values, their purpose, and the datasheet page numbers.
 
-> 跑 `kicad-cli sch erc`，把每個錯誤用白話解釋給我聽，說明可能的修法，先不要改檔。
+> Run `kicad-cli sch erc`, explain each error in plain language, and describe possible fixes. Don't change any files yet.
 
-**確認做對了：** ERC 沒有錯誤；每個 IC 的電源腳都有去耦電容；你能說出每顆零件的數值是從哪份資料來的。
+**Confirm it's right:** ERC has no errors; every IC power pin has a decoupling capacitor; you can say which document each part value came from.
 
-## 4. 選料與 footprint
+## 4. Choose parts and footprints
 
-1. 在 [LCSC](https://www.lcsc.com/) 或 JLC 的零件庫搜尋，記下 C 開頭的料號（C-code）。看三件事：封裝尺寸、庫存、是 Basic 還是 Extended。
-2. 每顆零件的 footprint 要和**買的那顆料**的 datasheet 尺寸一致。同樣叫 SOT-23，不同廠商的腳位定義可能不同；排針、接頭的方向也要對。
-3. KiCad 內建庫找不到的 footprint，可以從原廠或 LCSC 頁面取得，放進**專案自己的**元件庫（路徑用 `${KIPRJMOD}`），不要只放在本機全域庫。
+1. Search [LCSC](https://www.lcsc.com/) or JLC's parts library and note the part number starting with C (the C-code). Check three things: package size, stock, and whether it is Basic or Extended.
+2. Each part's footprint must match the dimensions in the datasheet of **the exact part you are buying**. Two parts both called SOT-23 may have different pinouts from different manufacturers; headers and connectors must also face the right way.
+3. Footprints not in KiCad's built-in libraries can be obtained from the manufacturer or the LCSC page. Put them in the **project's own** library (with a `${KIPRJMOD}` path), not only in a global library on your machine.
 
-**可以請 agent：**
+**You can ask the agent:**
 
-> 幫我在 LCSC 找 0805、10 kΩ、1% 的 Basic 料，列出 C-code、庫存與查詢日期。
+> Find 0805, 10 kΩ, 1% Basic parts on LCSC and list the C-code, stock, and lookup date.
 
-> 比對 U1 的 footprint 腳位和 <MPN> datasheet 的 pinout，逐腳列出是否一致，附 datasheet 頁碼。
+> Compare U1's footprint pins with the pinout in the <MPN> datasheet, list pin by pin whether they match, and include the datasheet page numbers.
 
-**確認做對了：** 每顆貼裝零件都有 C-code；pin 1、極性元件（二極體、LED、電解電容）的方向，你自己對照過 datasheet。
+**Confirm it's right:** every assembled part has a C-code; you have personally checked pin 1 and the orientation of polarized parts (diodes, LEDs, electrolytic capacitors) against the datasheet.
 
-## 5. 設定板子規則
+## 5. Set board rules
 
-在 PCB Editor 開啟 File → Board Setup（板子設定），在 Design Rules 的 Constraints 與 Net Classes 填入下表。選單名稱以你安裝的版本為準。
+In the PCB Editor, open File → Board Setup, and fill in the table below under Design Rules → Constraints and Net Classes. Menu names may differ in the version you installed.
 
-| 項目 | 新手建議值 | JLC 雙層能力頁（2026-10 觀察） |
+| Item | Beginner value | JLC 2-layer capabilities page (observed 2026-10) |
 |---|---|---|
-| 訊號線寬 | 0.25 mm | 最小 0.10 mm |
-| 線距（clearance） | 0.2 mm | 最小 0.10 mm |
-| 電源線寬 | 依電流用 KiCad 內建 Calculator Tools 的 Track Width 計算，至少 0.5 mm | — |
-| Via 鑽孔／外徑 | 0.3 mm／0.6 mm | 鑽孔 0.2–0.25 mm 搭配外徑小於 0.45 mm，或鑽孔 0.15 mm 以下，會加價 |
-| 銅到板邊 | 0.5 mm | 最小 0.2 mm |
-| 絲印字高／線寬 | 1.0 mm／0.15 mm | 字高 1.0 mm、線寬 0.15 mm 以上 |
+| Signal track width | 0.25 mm | Min 0.10 mm |
+| Clearance | 0.2 mm | Min 0.10 mm |
+| Power track width | Calculate from current with Track Width in KiCad's built-in Calculator Tools, at least 0.5 mm | — |
+| Via drill/diameter | 0.3 mm/0.6 mm | Drill 0.2–0.25 mm with diameter under 0.45 mm, or drill 0.15 mm or less, costs extra |
+| Copper to board edge | 0.5 mm | Min 0.2 mm |
+| Silkscreen text height/line width | 1.0 mm/0.15 mm | Text height 1.0 mm, line width 0.15 mm or more |
 
-建議值刻意比能力頁寬鬆：第一塊板優先好做、好修，不追求極限。能力會變動，下單前以 [JLC PCB 能力頁](https://jlcpcb.com/capabilities/pcb-capabilities) 為準。
+The recommended values are deliberately looser than the capabilities page: a first board should be easy to make and easy to rework, not push the limits. Capabilities change; before ordering, go by the [JLC PCB capabilities page](https://jlcpcb.com/capabilities/pcb-capabilities).
 
-## 6. 擺件與佈線
+## 6. Placement and routing
 
-1. 先畫板框（Edge.Cuts），放固定位置的東西：接頭、按鍵、安裝孔。
-2. 再放 IC，去耦電容貼近 IC 的電源腳。
-3. 手動佈線：先拉電源，再拉訊號。雙層板常見做法是底層大面積鋪 GND。
-4. 絲印標上板名、版本、接腳名稱與 pin 1。
-5. 執行 DRC（Inspect → Design Rules Checker），沒有錯誤、沒有未連線。
+1. Draw the board outline (Edge.Cuts) first, then place things with fixed positions: connectors, buttons, mounting holes.
+2. Then place ICs, with decoupling capacitors close to the IC power pins.
+3. Route by hand: power first, then signals. A common approach on 2-layer boards is a large GND pour on the bottom layer.
+4. Put the board name, version, pin names, and pin 1 on the silkscreen.
+5. Run DRC (Inspect → Design Rules Checker): no errors, no unconnected items.
 
-自動佈局、自動佈線在這套流程裡**沒有驗證過**的方案，第一塊板請自己拉線。
+Auto-placement and autorouting have **no verified** solution in this workflow; route your first board yourself.
 
-**可以請 agent：**
+**You can ask the agent:**
 
-> 依 <pcb-agent-workflow>/docs/first-board-checklist.md 審查目前的原理圖和 PCB，每一項寫「通過／未通過／無法判斷」並附證據，不要改檔。
+> Review the current schematic and PCB against <pcb-agent-workflow>/docs/first-board-checklist.md. For each item write "pass/fail/can't tell" with evidence. Don't change any files.
 
-> 跑 `kicad-cli pcb drc`，解釋每個違規，先不要改檔。
+> Run `kicad-cli pcb drc` and explain each violation. Don't change any files yet.
 
-**確認做對了：** [第一塊板檢查清單](first-board-checklist.md) 每一項都看過；ERC、DRC 都沒有錯誤。記得 ERC／DRC 通過不代表電路正確，只代表沒有違反規則。
+**Confirm it's right:** you have gone through every item in the [first-board checklist](first-board-checklist.md); ERC and DRC have no errors. Remember that passing ERC/DRC does not mean the circuit is correct, only that it breaks no rules.
 
-## 7. 匯出製造檔
+## 7. Export manufacturing files
 
-Gerber、鑽孔、CPL 的匯出指令見 [kicad-tools.md 第 5 節](workflow/kicad-tools.md#5-kicad-cli-指令)；雙層板把 Gerber 層清單裡的 `In1.Cu`、`In2.Cu` 拿掉。輸出放在專案裡的 `out/` 之類的資料夾，不要覆蓋設計檔。匯出後把 Gerber 與鑽孔檔所在的資料夾壓成一個 zip，這就是要上傳的 Gerber zip。
+For the Gerber, drill, and CPL export commands, see [kicad-tools.md section 5](workflow/kicad-tools.md#5-kicad-cli-commands); for a 2-layer board, remove `In1.Cu` and `In2.Cu` from the Gerber layer list. Put output in a folder such as `out/` inside the project, and don't overwrite design files. After exporting, zip the folder containing the Gerber and drill files; that is the Gerber zip you upload.
 
-要讓 JLC 貼裝的話，還需要 BOM 與 CPL，而且欄名要用 JLC 的格式：
+For JLC assembly you also need a BOM and CPL, with column names in JLC's format:
 
-| 檔案 | JLC 欄名 | KiCad 的來源 |
+| File | JLC column names | Source in KiCad |
 |---|---|---|
-| BOM | `Comment`、`Designator`、`Footprint`、`LCSC Part #` | Value、Reference、Footprint、第 3 步加的 `LCSC` 欄位 |
-| CPL | `Designator`、`Mid X`、`Mid Y`、`Layer`、`Rotation` | 位置檔（pos）的 Ref、PosX、PosY、Side、Rot |
+| BOM | `Comment`, `Designator`, `Footprint`, `LCSC Part #` | Value, Reference, Footprint, the `LCSC` field added in step 3 |
+| CPL | `Designator`, `Mid X`, `Mid Y`, `Layer`, `Rotation` | Ref, PosX, PosY, Side, Rot from the position file (pos) |
 
-BOM 可以直接用 JLC 欄名匯出，並把料號列入分組，避免料號不同的同值零件被併在一起：
+The BOM can be exported directly with JLC column names, with the part number included in the grouping so parts with the same value but different part numbers are not merged:
 
 ```bash
-kicad-cli sch export bom --fields "Value,Reference,Footprint,LCSC" --labels "Comment,Designator,Footprint,LCSC Part #" --group-by "Value,Footprint,LCSC" --ref-range-delimiter "" --exclude-dnp -o out/bom-jlc.csv <專案>.kicad_sch
+kicad-cli sch export bom --fields "Value,Reference,Footprint,LCSC" --labels "Comment,Designator,Footprint,LCSC Part #" --group-by "Value,Footprint,LCSC" --ref-range-delimiter "" --exclude-dnp -o out/bom-jlc.csv <project>.kicad_sch
 ```
 
-這行指令還沒在 KiCad 10 實測，先執行 `kicad-cli sch export bom --help`，確認這些旗標都存在。`--ref-range-delimiter ""` 是為了關掉連號縮寫：KiCad 預設會把 `R1,R2,R3` 寫成 `R1-R3`，JLC 需要逐一列出，檢查腳本也會擋下縮寫。Windows PowerShell 5.1 不會把空字串 `""` 傳給程式，請改在 Git Bash 或 PowerShell 7.3 以後的版本執行。
+This command has not yet been tested on KiCad 10; first run `kicad-cli sch export bom --help` to confirm all these flags exist. `--ref-range-delimiter ""` turns off range abbreviation: by default KiCad writes `R1,R2,R3` as `R1-R3`, but JLC needs each one listed, and the check script also rejects abbreviations. Windows PowerShell 5.1 does not pass the empty string `""` to programs, so run it in Git Bash or PowerShell 7.3 or later.
 
-CPL 用位置檔匯出後，欄名要改成 JLC 的格式，座標加上單位，例如 `12.5mm`，可以請 agent 轉換。
+After exporting the CPL from the position file, rename the columns to JLC's format and add units to the coordinates, for example `12.5mm`. You can ask the agent to do the conversion.
 
-改好之後執行檢查腳本：
+Then run the check script:
 
 ```bash
 python <pcb-agent-workflow>/skills/jlc-production-review/scripts/check_bom_cpl.py --bom out/bom-jlc.csv --cpl out/cpl-jlc.csv
 ```
 
-它檢查 BOM 與 CPL 的位號是否完全一致、有沒有重複、料號格式、座標與面別。結果是 `PASS`（退出碼 0）、`WARNING`（1，要人看過）、`INCOMPLETE` 或 `ERROR`（2，不能下單）。它**不**檢查旋轉角度、極性、庫存與 footprint 是否正確；這些要在 JLC 的預覽畫面確認。
+It checks that the BOM and CPL designators match exactly, for duplicates, part number format, coordinates, and side. The result is `PASS` (exit code 0), `WARNING` (1, needs a human to look), or `INCOMPLETE` or `ERROR` (2, do not order). It does **not** check rotation, polarity, stock, or whether footprints are correct; confirm those in JLC's preview.
 
-**可以請 agent：**
+**You can ask the agent:**
 
-> 把 out/ 裡 KiCad 匯出的位置檔改成 JLC 的 CPL 欄名與格式，另存成 cpl-jlc.csv，不要覆蓋原檔，然後跑 <pcb-agent-workflow>/skills/jlc-production-review/scripts/check_bom_cpl.py 並解釋結果。
+> Convert the position file KiCad exported in out/ to JLC's CPL column names and format, save it as cpl-jlc.csv without overwriting the original, then run <pcb-agent-workflow>/skills/jlc-production-review/scripts/check_bom_cpl.py and explain the result.
 
-**確認做對了：** 用 KiCad 的 Gerber Viewer 打開匯出的 Gerber，每一層都看一次；檢查腳本是 `PASS`，或每個 `WARNING` 都說得出原因。
+**Confirm it's right:** open the exported Gerbers in KiCad's Gerber Viewer and look at every layer once; the check script reports `PASS`, or you can explain the reason for each `WARNING`.
 
-## 8. 下單
+## 8. Order
 
-第一塊板有兩條路：
+There are two routes for a first board:
 
-| 路線 | 做法 | 適合 |
+| Route | How | Suits |
 |---|---|---|
-| A. 只做 PCB | 上傳 Gerber zip，收到空板自己焊 | 元件都是直插或 0805 以上、會用烙鐵 |
-| B. Economic PCBA | 再上傳 BOM 與 CPL，JLC 貼單面 | 有小顆 SMD、想省焊接時間 |
+| A. PCB only | Upload the Gerber zip, receive bare boards, solder them yourself | All parts are through-hole or 0805 and larger, and you can use a soldering iron |
+| B. Economic PCBA | Also upload the BOM and CPL; JLC assembles one side | You have small SMD parts or want to save soldering time |
 
-下單細節（服務等級、配料核對、送單設定、付款後流程）見 [jlc-ordering.md](workflow/jlc-ordering.md)。幾個新手常踩的點：
+For ordering details (service level, parts matching, submission settings, post-payment process), see [jlc-ordering.md](workflow/jlc-ordering.md). Common beginner pitfalls:
 
-- 上傳後在預覽畫面逐顆看 pin 1 與極性方向。
-- **Confirm Production file** 選 Yes，工廠改稿前會先給你確認。走路線 B 時，**Confirm Parts Placement** 也選 Yes。
-- 上傳、接受條款、送單、付款、下載工廠檔案、確認生產稿或貼裝確認、寄信，每一次都由你決定、你自己按（完整規則見 [jlc-ordering.md](workflow/jlc-ordering.md) 開頭的「誰決定」）。agent 可以幫你核對、起草要問客服的訊息，停在按下按鈕之前。
+- After uploading, check pin 1 and polarity of each part in the preview.
+- Set **Confirm Production file** to Yes so the factory asks you before changing your files. On route B, also set **Confirm Parts Placement** to Yes.
+- Uploading, accepting terms, submitting, paying, downloading factory files, confirming the production file or parts placement, and sending messages are each decided and clicked by you (full rules in "Who decides" at the top of [jlc-ordering.md](workflow/jlc-ordering.md)). The agent can help you check things and draft messages to customer service, stopping before any button is pressed.
 
-下單前，把要交給工廠的那一份檔案固定下來（見 [release-package.md](workflow/release-package.md)），之後的問題才對得上版本。
+Before ordering, freeze the set of files you hand to the factory (see [release-package.md](workflow/release-package.md)) so later questions can be traced to a version.
 
-## 9. 等板子與到板後
+## 9. Waiting for boards and after they arrive
 
-- 工廠寄來生產稿時，由你下載檔案，再請 agent 依 [jlc-production-review skill](../skills/jlc-production-review/SKILL.md) 協助比對。確認生產稿仍由你決定。
-- 到板後的上電與測試，照範例板的 [實測程序](../examples/max-m10s-breakout-revc-tests/README.md) 做。你的板子不同時，至少保留它的前三步：目視檢查短路或錫橋、上電前量電源對地不是短路、第一次上電用有限流功能的電源。
+- When the factory sends the production file, you download it, then ask the agent to help compare it following the [jlc-production-review skill](../skills/jlc-production-review/SKILL.md). Confirming the production file is still your decision.
+- For power-up and testing after the boards arrive, follow the example board's [bench test procedure](../examples/max-m10s-breakout-revc-tests/README.md). If your board differs, keep at least its first three steps: visually inspect for shorts or solder bridges, measure that power is not shorted to ground before powering up, and use a current-limited supply for the first power-up.
 
-## 接下來讀什麼
+## What to read next
 
-| 想知道 | 讀 |
+| To learn about | Read |
 |---|---|
-| 名詞是什麼意思 | [glossary.md](glossary.md) |
-| 送廠前要檢查什麼 | [first-board-checklist.md](first-board-checklist.md) |
-| 跟 agent 協作、交接 | [collaboration.md](workflow/collaboration.md) |
-| JLC 下單細節 | [jlc-ordering.md](workflow/jlc-ordering.md) |
-| 跟 JLC 客服溝通 | [jlc-support skill](../skills/jlc-support/SKILL.md) |
-| 把原理圖畫得好讀、好除錯 | [readable-schematic-layout skill](../skills/readable-schematic-layout/SKILL.md) |
-| 讓 agent 直接操作 KiCad（進階） | [kicad-tools.md](workflow/kicad-tools.md) |
+| What terms mean | [glossary.md](glossary.md) |
+| What to check before sending to the fab | [first-board-checklist.md](first-board-checklist.md) |
+| Collaborating with and handing off to agents | [collaboration.md](workflow/collaboration.md) |
+| JLC ordering details | [jlc-ordering.md](workflow/jlc-ordering.md) |
+| Communicating with JLC customer service | [jlc-support skill](../skills/jlc-support/SKILL.md) |
+| Drawing readable, debuggable schematics | [readable-schematic-layout skill](../skills/readable-schematic-layout/SKILL.md) |
+| Letting the agent operate KiCad directly (advanced) | [kicad-tools.md](workflow/kicad-tools.md) |

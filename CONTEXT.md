@@ -1,57 +1,57 @@
 # pcb-agent-workflow
 
-一套「人＋agent 設計 PCB、交 JLCPCB 製造」的工作流程。本檔只收這套流程自己定義的用詞，給 agent 統一用語；一般 PCB 術語見 [docs/glossary.md](docs/glossary.md)。
+A workflow for "people plus agents designing PCBs and having JLCPCB manufacture them". This file holds only the terms this workflow defines itself, so agents use consistent wording; general PCB terms are in [docs/glossary.md](docs/glossary.md).
 
-## 版本
+## Versions
 
-**固定發行包**：
-送廠的那一版設計與製造檔。交出後內容不再修改，要修正就開新版本。
-_Avoid_: 正式版、最終版、release（單獨使用時）
+**Release package**:
+The design and manufacturing files of the version sent to the factory. Once handed over, its contents are not modified; fixes go into a new version.
+_Avoid_: official version, final version, release (on its own)
 
-**工作副本**：
-可以修改的設計副本。含 `--save-board` 之類會寫檔的命令只在這裡執行。
-_Avoid_: 測試版
+**Working copy**:
+A design copy that may be modified. Commands that write files, such as anything with `--save-board`, run only here.
+_Avoid_: test version
 
-**候選版本**：
-修改中、尚未定案的版本，可能被採用成下一個固定發行包，也可能被丟棄。
-_Avoid_: 新版、最新版
+**Candidate version**:
+A version being modified and not yet settled; it may become the next release package or be discarded.
+_Avoid_: new version, latest version
 
-**驗證**：
-發行前對檔案做的檢查（ERC、DRC、差異核對、agent 審查），結果隨固定發行包一起凍結。
-_Avoid_: 測試（容易和實測混淆）
+**Verification**:
+Checks run on the files before release (ERC, DRC, diff checks, agent review); the results are frozen together with the release package.
+_Avoid_: testing (easily confused with bench testing)
 
-**實測紀錄**：
-實板到貨後的上電與功能測試結果，以及因此發現的勘誤。放在固定發行包之外，會持續增加。
-_Avoid_: verification、測試報告（放進發行包的那種）
+**Bench test record**:
+Power-on and functional test results after real boards arrive, plus any errata found as a result. Kept outside the release package and keeps growing.
+_Avoid_: verification, test report (the kind put in a release package)
 
-## 付款後的確認
+## Confirmation after payment
 
-**確認稿**：
-付款後工廠請客戶確認的東西的總稱，包含生產稿與貼裝確認。
-_Avoid_: DFM（DFM 是工廠的審查，不是要你確認的東西）
+**Confirmation items**:
+Umbrella term for what the factory asks the customer to confirm after payment, including the production file and parts placement confirmation.
+_Avoid_: DFM (DFM is the factory's review, not something you are asked to confirm)
 
-**生產稿**：
-只指 PCB 的 CAM 檔（Confirm Production file），工廠處理過、可能加了工藝邊。
-_Avoid_: 用「生產稿」泛指 PCBA 的確認
+**Production file**:
+Refers only to the PCB CAM file (Confirm Production file), processed by the factory and possibly with rails added.
+_Avoid_: using "production file" to mean PCBA confirmation in general
 
-**貼裝確認**：
-只指 PCBA 的元件位置、角度與極性確認（Confirm Parts Placement）；逾期會自動投產。
-_Avoid_: 貼裝稿、placement 稿
+**Parts placement confirmation**:
+Refers only to confirming PCBA component position, rotation, and polarity (Confirm Parts Placement); if overdue, it goes into production automatically.
+_Avoid_: placement file, placement draft
 
-## 與工廠溝通
+## Communicating with the factory
 
-**催辦**：
-詢問進度、要求負責人與下次更新時間的訊息，不包含任何同意或選擇。
-_Avoid_: 跟進（太籠統）
+**Status chase**:
+A message asking about progress and requesting a responsible person and the next update time; it contains no agreement or choice of any kind.
+_Avoid_: follow-up (too vague)
 
-**純技術澄清**：
-只問原因、要求附圖或說明讀數意義的訊息，不包含任何同意、選擇或修改要求。回覆「同意工廠改動」不屬於純技術澄清。
-_Avoid_: 技術回覆、工程確認
+**Pure technical clarification**:
+A message that only asks for the reason, requests images, or asks what a reading means; it contains no agreement, choice, or modification request. Replying "we agree to the factory's changes" is not a pure technical clarification.
+_Avoid_: technical reply, engineering confirmation
 
-**接受工廠改動**：
-對工廠提出的 CAM 修改、加費、補償或改期表示同意。每次都要使用者明確同意。
-_Avoid_: 確認（會和確認稿混淆）
+**Accepting factory changes**:
+Agreeing to CAM changes, extra fees, compensation, or rescheduling proposed by the factory. Requires the user's explicit consent every time.
+_Avoid_: confirm (confused with confirmation items)
 
-**界線句**：
-每則對外訊息結尾聲明「這不是批准任何改動或費用、請保留人工確認」的句子。
-_Avoid_: 免責聲明
+**Boundary statement**:
+The sentence at the end of every outgoing message stating "this does not approve any change or fee; please keep manual confirmation".
+_Avoid_: disclaimer

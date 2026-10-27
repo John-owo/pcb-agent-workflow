@@ -1,24 +1,24 @@
-# 協作工作紀錄
+# Collaboration work log
 
 <!--
-最新的寫在最上面。每一筆都要能回答：
-  誰（owner）、改了哪個範圍、改了什麼、怎麼驗證、結果、停在哪裡、下一步。
-規則：
-  - 時間寫絕對時間與時區，例如 2026-09-29 16:20 +08:00。
-  - 較晚的更正覆蓋較早的敘述；更正時直接說「更正 <日期> 那筆的 …」。
-  - 「下一步」只是當時的計畫，不是給下一位的執行授權。
-  - 沒做的事明確寫出來（未燒錄、未實測、SPICE 逾時記為 SKIP）。
-  - 訂單、客服這類持續變化的事，寫進 reports/ 下的專屬檔案，這裡只放一行摘要和連結。
-  - 不寫密碼、證號、完整地址；寄出的信只記主旨、時間與存檔位置。
+Newest at the top. Every entry must answer:
+  who (owner), which scope, what changed, how it was verified, the result, where it stopped, next step.
+Rules:
+  - Write absolute times with time zone, e.g. 2026-09-29 16:20 +08:00.
+  - Later corrections override earlier statements; when correcting, say directly "correcting the <date> entry: …".
+  - "Next step" is only the plan at the time, not authorization for the next person to act.
+  - State explicitly what was not done (not flashed, not bench tested, SPICE timeout recorded as SKIP).
+  - Ongoing matters such as orders and customer service go in dedicated files under reports/; here keep only a one-line summary and a link.
+  - Do not write passwords, ID numbers, or full addresses; for sent emails record only subject, time, and archive location.
 -->
 
-- 2026-09-29 16:20 +08:00：**生產稿比對完成，等待工程回覆。** Owner：<agent 或人>；範圍：<子案／版本>，只讀工廠生產稿，未改設計與製造包。比對結果：<摘要，例如 via 微移 0.061 mm、銅與走線同步補接，未判成斷路>。驗證：<用了什麼腳本或命令，結果>。已寄出一封技術澄清（使用者已同意），存檔 <路徑>。未確認生產稿、未接受任何費用。停止點：等工程回覆；PCBA 貼裝確認於 <絕對時間> 到期。下一步：收到回覆後由使用者決定是否確認。
+- 2026-09-29 16:20 +08:00: **Production file comparison done, awaiting engineering reply.** Owner: <agent or person>; scope: <subproject/version>, read-only on the factory production file, design and manufacturing package unchanged. Comparison result: <summary, e.g. via shifted 0.061 mm, copper and traces reconnected accordingly, not judged an open circuit>. Verification: <which script or command was used, result>. Sent one technical clarification (user consented), archived at <path>. Production file not confirmed, no fees accepted. Stopping point: waiting for engineering reply; PCBA parts placement confirmation due <absolute time>. Next step: after the reply, the user decides whether to confirm.
 
-## <YYYY-MM-DD>：交接 <A> → <B>
+## <YYYY-MM-DD>: handoff <A> → <B>
 
-- 狀態：READY／<A> 已釋放工作區；接手目標 <B>，尚未宣稱 <B> 已接受。
-- 工作區：<路徑>；branch <名稱>；HEAD <完整 SHA>；staged／unstaged／untracked 的檔案與歸屬。
-- 目標：<這次要做什麼>。
-- 先讀：<文件清單>。
-- 已知限制與避免重犯：<列點>。
-- 下一步：<具體步驟>。付費、送單、不可逆操作仍需使用者授權。
+- Status: READY / <A> has released the workspace; handoff target <B>, not yet claiming <B> has accepted.
+- Workspace: <path>; branch <name>; HEAD <full SHA>; staged/unstaged/untracked files and who they belong to.
+- Goal: <what to do this time>.
+- Read first: <list of docs>.
+- Known limitations and mistakes to avoid repeating: <bullets>.
+- Next step: <concrete steps>. Payment, order submission, and irreversible actions still require user authorization.

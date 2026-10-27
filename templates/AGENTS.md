@@ -1,35 +1,35 @@
-# <專案名稱>：agent 協作規則
+# <Project name>: agent collaboration rules
 
-<!-- 複製到專案根目錄。<...> 換成自己的內容，用不到的段落刪掉。流程說明見 pcb-agent-workflow 的 docs/workflow/。 -->
+<!-- Copy to the project root. Replace <...> with your own content and delete sections you don't need. See docs/workflow/ in pcb-agent-workflow for the workflow. -->
 
-## 接手入口
+## Taking over
 
-1. 先讀根目錄 [README.md](README.md)，依使用者這次的任務選定子案與目前版本。
-2. 讀 [WORKLOG.md](WORKLOG.md) 頂部，以及跟這次任務相關的最新紀錄，核對停止點、owner、還在等使用者確認的事項。歷史紀錄裡的「下一步」不構成新的執行授權。
-3. 修改前核對實際目標檔與 git 未提交的修改。能明確說出子案、設計路徑、版本、工作範圍之後才開始寫入。對應不到子案就先問。
+1. First read the root [README.md](README.md) and, based on the user's current task, pick the subproject and current version.
+2. Read the top of [WORKLOG.md](WORKLOG.md) and the latest entries relevant to this task; check the stopping point, owner, and items still awaiting the user's confirmation. A "next step" in past entries does not grant new authorization to act.
+3. Before modifying, check the actual target files and uncommitted git changes. Start writing only once you can clearly state the subproject, design path, version, and scope of work. If the task maps to no subproject, ask first.
 
-按任務讀取：
+Read by task:
 
-- **<子案 A，例如 GNSS 測試板>**：由 README 的「目前製造基準」進入。<列出容易混淆的版本資料夾，說明哪個才是現行版>
-- **<下單／客服>**：由 README 的訂單進度入口進入；發行包內的報價只是發行當天的快照。
-- **<韌體>**：讀 <子案 README 路徑>。
-- **KiCad 工具**：讀 <工具流程文件路徑>。
+- **<Subproject A, e.g. GNSS test board>**: enter from "Current manufacturing baseline" in the README. <List easily confused version folders and say which one is current>
+- **<Ordering / customer service>**: enter from the order progress entry in the README; quotes inside a release package are only a snapshot from the release date.
+- **<Firmware>**: read <subproject README path>.
+- **KiCad tools**: read <tool workflow doc path>.
 
-設計基準或接續入口改變時，同步更新 README；修改、驗證、停止點記入 WORKLOG。
+When the design baseline or the takeover entry changes, update the README too; record changes, verification, and stopping points in the WORKLOG.
 
-## 協作規則
+## Collaboration rules
 
-- 同一個工作目錄、同一個 KiCad GUI，同時只有一位寫入者。換手時在 WORKLOG 記錄 owner、版本、修改、測試與下一步。並行開發用獨立 worktree，並寫清楚範圍。
-- 審查前先保全完整的設計與相依元件庫（快照或經過檢查的 commit）。雜湊清單只能識別檔案，不能代替備份。普通 worktree 不包含未提交的修改。
-- 完整功能、跨模組修改、重要的 PCB 修改、交付里程碑，交給另一個 agent 審查固定版本，最多兩輪。審查者提出證據，owner 判斷並修改。失敗、額度不足、空白或只有部分內容的報告，標示為未完成審查。
-- 自動審查者只開讀檔與搜尋工具，禁用 MCP 寫入、未審核的 hooks 與 shell。不要用跳過權限的選項，也不要讓 agent 無限互相呼叫。
+- One working directory, one KiCad GUI, one writer at a time. When handing off, record owner, version, changes, tests, and next step in the WORKLOG. For parallel development, use separate worktrees and state the scope clearly.
+- Before review, secure the complete design and dependent libraries (a snapshot or a checked commit). A hash manifest only identifies files; it does not replace a backup. A plain worktree does not include uncommitted changes.
+- For complete features, cross-module changes, significant PCB changes, and delivery milestones, have another agent review a fixed version, at most two rounds. The reviewer provides evidence; the owner decides and makes changes. Mark failed, out-of-quota, empty, or partial reports as incomplete reviews.
+- Automated reviewers get only file-reading and search tools; MCP writes, unreviewed hooks, and shell are disabled. Do not use permission-skipping options, and do not let agents call each other indefinitely.
 
-## 設計規則
+## Design rules
 
-- KiCad 原生 CLI 用於 ERC、DRC、匯出與製造檔。先看已安裝版本的 `--help`。
-- 修改 PCB 前保全可恢復的版本；修改後核對 netlist、ERC／DRC 與差異。GUI、板子與外部硬體都只由一位 owner 控制。
-- <已佈線的正式板>的初始建板腳本會重建整塊板子，不能對正式成品執行。
-- pinout、RF、電源與元件值的結論，要對照原廠資料。ERC／DRC 通過不等於電氣正確、板廠接受或實板測試通過。
-- 保存備份與檔案時，沿用專案相對的元件庫路徑（`${KIPRJMOD}`）。
-- 付費、送單、寄信、確認生產稿、發布、推送與其他不可逆操作，每一次都要使用者明確同意，不能從先前的同意類推。
-- 客服訊息的唯一限定例外：使用者可以明確指定範圍與期限，事先授權「催辦」或「純技術澄清」。依 `jlc-support` 的硬規則把授權記入 WORKLOG；每則訊息帶界線句，寄出後記錄時間與全文。範圍不清或期限已過就逐次確認。此例外不包含確認生產／貼裝確認、費用、補償、訂單、上傳、下載或設計修改，也不授權發布或推送。
+- Use the native KiCad CLI for ERC, DRC, exports, and manufacturing files. Check the installed version's `--help` first.
+- Before modifying the PCB, secure a recoverable version; after modifying, check the netlist, ERC/DRC, and diffs. The GUI, the board, and external hardware are each controlled by one owner only.
+- The initial board-creation script for <the routed production board> rebuilds the whole board and must not be run on the finished production board.
+- Conclusions about pinout, RF, power, and component values must be checked against vendor documentation. Passing ERC/DRC does not mean electrically correct, accepted by the fab, or passing real-board testing.
+- When saving backups and files, keep project-relative library paths (`${KIPRJMOD}`).
+- Payment, order submission, sending email, confirming production files, publishing, pushing, and other irreversible actions each require the user's explicit consent every time; consent cannot be inferred from earlier consent.
+- The only limited exception for customer service messages: the user may explicitly specify a scope and deadline to pre-authorize "status chase" or "pure technical clarification" messages. Record the authorization in the WORKLOG per the `jlc-support` hard rules; every message carries the boundary statement, and after sending, record the time and full text. If the scope is unclear or the deadline has passed, confirm each time. This exception does not cover confirming production files / parts placement confirmation, fees, compensation, orders, uploads, downloads, or design changes, and does not authorize publishing or pushing.

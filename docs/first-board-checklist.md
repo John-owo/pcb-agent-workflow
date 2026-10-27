@@ -1,54 +1,54 @@
-# 第一塊板檢查清單
+# First-board checklist
 
-送廠前逐項打勾。給人看，也可以交給 agent 審查：請它每一項回答「通過／未通過／無法判斷」並附證據（檔案位置、命令輸出、datasheet 頁碼），沒有證據的「通過」不算數。
+Tick each item before sending to the fab. It's for people to read, and you can also hand it to an agent for review: ask it to answer "pass/fail/can't tell" for each item with evidence (file location, command output, datasheet page number). A "pass" without evidence doesn't count.
 
-這份清單抓的是新手常見的錯，不是完整的設計審查。全部打勾不代表電路正確或實板能動。
+This list catches common beginner mistakes; it is not a full design review. Ticking everything does not mean the circuit is correct or that the real board will work.
 
-## 範圍
+## Scope
 
-- [ ] 寫得出這塊板要做什麼、怎麼供電、接到什麼東西。
-- [ ] 沒有碰到 RF／天線、高速訊號、鋰電池充電或市電；有的話先找有經驗的人看過。
+- [ ] You can state what this board does, how it is powered, and what it connects to.
+- [ ] It doesn't involve RF/antennas, high-speed signals, lithium battery charging, or mains; if it does, have someone experienced look at it first.
 
-## 原理圖
+## Schematic
 
-- [ ] 每顆 IC 的接法對照過原廠 datasheet 的典型應用電路，記得出處頁碼。
-- [ ] 每顆 IC 的每個電源腳都有去耦電容，數值依 datasheet。
-- [ ] 沒用到的腳位依 datasheet 處理（接地、上拉或懸空），不是憑感覺。
-- [ ] 電源電壓和每顆零件的耐壓相符；3.3 V 的零件沒有直接接到 5 V 訊號。
-- [ ] LED 有限流電阻；按鍵、開關的接法和程式預期一致（上拉或下拉）。
-- [ ] 電源輸入有反接或過流的考量，或者明確決定不做。
-- [ ] ERC 沒有錯誤；被忽略的項目都寫得出原因。
+- [ ] Each IC's connections were checked against the typical application circuit in the manufacturer's datasheet, with the source page numbers noted.
+- [ ] Every power pin of every IC has a decoupling capacitor, with values per the datasheet.
+- [ ] Unused pins are handled per the datasheet (grounded, pulled up, or left floating), not by guesswork.
+- [ ] Supply voltages match each part's voltage rating; 3.3 V parts are not connected directly to 5 V signals.
+- [ ] LEDs have current-limiting resistors; buttons and switches are wired the way the firmware expects (pull-up or pull-down).
+- [ ] The power input has reverse-polarity or overcurrent protection considered, or an explicit decision not to add it.
+- [ ] ERC has no errors; you can state the reason for every ignored item.
 
-## 選料與 footprint
+## Parts and footprints
 
-- [ ] 每顆貼裝零件都有 LCSC 料號，查過庫存，並記下查詢日期。
-- [ ] 知道哪些是 Extended 料，以及會多付多少換料費。
-- [ ] 每個 footprint 的尺寸與腳位和**買的那顆料**的 datasheet 一致。
-- [ ] 極性元件（二極體、LED、電解電容、IC）的 pin 1 或極性在 symbol、footprint、絲印三處一致。
-- [ ] 接頭的腳位順序、公母、方向和要接的東西一致（最好拿實物或對方的 pinout 對過）。
+- [ ] Every assembled part has an LCSC part number, with stock checked and the lookup date recorded.
+- [ ] You know which parts are Extended, and how much extra feeder loading fee you'll pay.
+- [ ] Every footprint's dimensions and pins match the datasheet of **the exact part you are buying**.
+- [ ] Pin 1 or polarity of polarized parts (diodes, LEDs, electrolytic capacitors, ICs) is consistent across symbol, footprint, and silkscreen.
+- [ ] Connector pin order, gender, and orientation match what they connect to (ideally checked against the real part or the mating side's pinout).
 
 ## PCB
 
-- [ ] 板子設定用了 [新手入門](getting-started.md#5-設定板子規則) 的建議值，或更寬鬆的值。
-- [ ] 去耦電容放在對應電源腳旁邊。
-- [ ] 電源線寬依電流算過。
-- [ ] GND 是連續的鋪銅，沒有被切成孤島。
-- [ ] 接頭、按鍵、安裝孔的位置符合外殼或對接的板子。
-- [ ] 絲印有板名、版本、日期或版次、接腳名稱，沒有被焊盤蓋住。
-- [ ] DRC 沒有錯誤、沒有未連線；被忽略的項目都寫得出原因。
-- [ ] 用 3D Viewer 看過一次，零件沒有重疊、方向合理。
+- [ ] Board setup uses the recommended values from [Getting started](getting-started.md#5-set-board-rules), or looser values.
+- [ ] Decoupling capacitors are next to their corresponding power pins.
+- [ ] Power track widths were calculated from current.
+- [ ] GND is a continuous copper pour, not cut into islands.
+- [ ] Connector, button, and mounting hole positions fit the enclosure or mating board.
+- [ ] Silkscreen has the board name, version, date or revision, and pin names, and is not covered by pads.
+- [ ] DRC has no errors and no unconnected items; you can state the reason for every ignored item.
+- [ ] You've looked at it once in the 3D Viewer: no overlapping parts, sensible orientations.
 
-## 製造檔
+## Manufacturing files
 
-- [ ] Gerber、鑽孔、BOM、CPL 是同一次、同一版本匯出的。
-- [ ] 用 Gerber Viewer 看過每一層：板框完整、銅層正確、沒有多餘或缺少的層。
-- [ ] BOM 與 CPL 用 JLC 欄名，pcb-agent-workflow 的 `skills/jlc-production-review/scripts/check_bom_cpl.py` 結果是 PASS，或每個 WARNING 都有原因。
-- [ ] DNP、測試點、安裝孔沒有混進 BOM 與 CPL。
-- [ ] 交出去的檔案已經固定成一份，記錄在專案的 README 或 WORKLOG。
+- [ ] Gerber, drill, BOM, and CPL were exported at the same time, from the same version.
+- [ ] Every layer was checked in the Gerber Viewer: board outline complete, copper layers correct, no extra or missing layers.
+- [ ] BOM and CPL use JLC column names, and pcb-agent-workflow's `skills/jlc-production-review/scripts/check_bom_cpl.py` reports PASS, or every WARNING has a reason.
+- [ ] DNP parts, test points, and mounting holes are not mixed into the BOM and CPL.
+- [ ] The files handed over are frozen as one set and recorded in the project's README or WORKLOG.
 
-## 下單前
+## Before ordering
 
-- [ ] 在 JLC 預覽畫面逐顆看過 pin 1、極性、旋轉角度。
-- [ ] Confirm Production file 選 Yes；有 JLC 貼裝時，Confirm Parts Placement 也選 Yes。
-- [ ] 看過報價裡未含在總價的項目。
-- [ ] 上傳、接受條款、送單、付款、下載工廠檔案、確認生產稿或貼裝確認、寄信，都由自己決定並按下；agent 只做到核對與起草。完整規則見 jlc-ordering.md 的「誰決定」。
+- [ ] Pin 1, polarity, and rotation of each part were checked in JLC's preview.
+- [ ] Confirm Production file is set to Yes; with JLC assembly, Confirm Parts Placement is also set to Yes.
+- [ ] You've reviewed the items in the quote that are not included in the total.
+- [ ] Uploading, accepting terms, submitting, paying, downloading factory files, confirming the production file or parts placement, and sending messages are all decided and clicked by you; the agent only goes as far as checking and drafting. Full rules are in "Who decides" in jlc-ordering.md.

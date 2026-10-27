@@ -1,34 +1,34 @@
-# <專案名稱>｜專案入口
+# <Project name> | Project entry
 
-<!-- 這頁只寫「現在」：目前看哪一版、還剩什麼事。歷史放 WORKLOG。 -->
+<!-- This page covers only "now": which version to look at and what's left. History goes in the WORKLOG. -->
 
-整理日期：<YYYY-MM-DD>。<一兩句說明這個專案在做什麼、目前有哪幾條開發線、整體做到哪裡。沒有實測過的就寫沒有實測。>
+Updated: <YYYY-MM-DD>. <One or two sentences on what this project does, which development lines exist, and overall progress. If something hasn't been bench tested, say so.>
 
-## 平常只需看這些
+## Usually all you need
 
-| 想做的事 | 正確入口 | 目前狀態 |
+| What you want to do | Where to go | Current status |
 |---|---|---|
-| 查看目前要製造的板子 | [<版本> 發行包](<路徑>/README.md) | <尺寸、層數、組裝方式> |
-| 查看下單／送審進度 | [<訂單報告>](<路徑>) | <最新狀態與日期；停在哪裡、等誰> |
-| 繼續 <其他子案> | [<入口文件>](<路徑>) | <狀態> |
-| 使用 KiCad 自動化工具 | [工具工作流程](<路徑>) | <已驗證到哪裡> |
+| See the board currently being manufactured | [<version> release package](<path>/README.md) | <size, layer count, assembly method> |
+| Check ordering / review progress | [<order report>](<path>) | <latest status and date; where it stopped, who it's waiting on> |
+| Continue <other subproject> | [<entry doc>](<path>) | <status> |
+| Use KiCad automation tools | [Tool workflow](<path>) | <how far verified> |
 
-## 版本不要混用
+## Don't mix versions
 
-| 版本／位置 | 用途 | 現在如何看待 |
+| Version / location | Purpose | How to treat it now |
 |---|---|---|
-| `<releases/board-revC/>` | <說明> | **目前製造基準** |
-| `<board-revB/>` | <說明> | 舊設計保留，不是目前製造版 |
-| `<reports/.../candidate/>` | 修改過程的候選版本 | 過程副本，不是目前的固定發行包 |
+| `<releases/board-revC/>` | <description> | **Current manufacturing baseline** |
+| `<board-revB/>` | <description> | Old design kept for reference, not the current manufacturing version |
+| `<reports/.../candidate/>` | Candidate version from the modification process | Intermediate copy, not the current release package |
 
-## 剩下的工作
+## Remaining work
 
-1. **<子案>：** <還沒完成的事，以及卡在哪裡>
-2. **<子案>：** <…>
+1. **<Subproject>:** <what isn't done yet, and where it's stuck>
+2. **<Subproject>:** <…>
 
-這是待辦索引，不會自動恢復其他工作、下單或操作 GUI。
+This is a to-do index; it does not automatically resume other work, place orders, or operate the GUI.
 
-## 其他資料放在哪裡
+## Where other material lives
 
-- [WORKLOG.md](WORKLOG.md)：按時間追查決策與交接；平常先讀本頁。
-- [AGENTS.md](AGENTS.md)：協作與設計修改規則。
+- [WORKLOG.md](WORKLOG.md): trace decisions and handoffs chronologically; normally read this page first.
+- [AGENTS.md](AGENTS.md): collaboration and design change rules.

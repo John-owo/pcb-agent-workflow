@@ -1,65 +1,65 @@
-name: 試用回饋
-description: 試用這套流程時卡住、看不懂或發現錯誤，從這裡回報。
-title: "[試用] "
+name: Pilot feedback
+description: Report here when you got stuck, found something unclear, or found an error while trying this workflow.
+title: "[Pilot] "
 labels: ["pilot-feedback", "needs-triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        謝謝試用。請**不要**貼出：姓名、email、電話、地址、身分證字號、JLC 訂單號或購物車號、GNSS 定位座標、含這些資料的截圖。需要舉例時用 `<訂單號>` 這類代稱。
+        Thanks for trying it. Please do **not** post: names, emails, phone numbers, addresses, national ID numbers, JLC order or cart numbers, GNSS position coordinates, or screenshots containing any of these. When you need an example, use a placeholder such as `<order number>`.
   - type: dropdown
     id: task
     attributes:
-      label: 你在做哪個任務
+      label: Which task were you doing
       options:
-        - 照 getting-started 走到匯出製造檔
-        - 用 jlc-support 起草一封客服信
-        - 其他（寫在下面）
+        - Following getting-started up to exporting manufacturing files
+        - Drafting a customer service email with jlc-support
+        - Other (describe below)
     validations:
       required: true
   - type: dropdown
     id: level
     attributes:
-      label: 你的程度
+      label: Your experience level
       options:
-        - 沒做過板子
-        - 會用 KiCad，沒用過 agent
-        - 會用 KiCad，也用過 agent
+        - Never made a board
+        - Can use KiCad, never used an agent
+        - Can use KiCad and have used an agent
     validations:
       required: true
   - type: input
     id: env
     attributes:
-      label: 環境
-      description: 作業系統、KiCad 版本、用的 agent（Claude Code 或 Codex）
-      placeholder: Windows 11、KiCad 10.0.6、Claude Code
+      label: Environment
+      description: Operating system, KiCad version, agent used (Claude Code or Codex)
+      placeholder: Windows 11, KiCad 10.0.6, Claude Code
     validations:
       required: true
   - type: textarea
     id: where
     attributes:
-      label: 卡在哪裡
-      description: 哪份文件、哪一步、你做了什麼、看到什麼。錯誤訊息直接貼文字。
+      label: Where you got stuck
+      description: Which doc, which step, what you did, what you saw. Paste error messages as text.
     validations:
       required: true
   - type: dropdown
     id: blocking
     attributes:
-      label: 會不會擋住你完成任務
+      label: Does it block you from finishing the task
       options:
-        - 會，我沒辦法繼續
-        - 不會，但很困惑或很花時間
-        - 不會，只是建議
+        - Yes, I can't continue
+        - No, but it was confusing or time-consuming
+        - No, just a suggestion
     validations:
       required: true
   - type: textarea
     id: suggestion
     attributes:
-      label: 你覺得應該怎麼改（選填）
+      label: How do you think it should change (optional)
   - type: checkboxes
     id: privacy
     attributes:
-      label: 確認
+      label: Confirm
       options:
-        - label: 我沒有貼出個人資料、訂單號或定位座標
+        - label: I have not posted personal data, order numbers, or position coordinates
           required: true

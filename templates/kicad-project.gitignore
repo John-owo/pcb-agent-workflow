@@ -1,7 +1,6 @@
-# 複製到 KiCad 專案根目錄後改名為 .gitignore。
 # Copy to the KiCad project root and rename to .gitignore.
 
-# KiCad 自動備份與暫存
+# KiCad automatic backups and temporary files
 *-backups/
 _autosave-*
 \#auto_saved_files\#
@@ -16,9 +15,9 @@ _autosave-*
 *.lck
 *.tmp
 
-# 個人 UI 狀態與快取，不屬於設計
+# Personal UI state and caches, not part of the design
 *.kicad_prl
 fp-info-cache
 
-# 匯出結果；要交給工廠的固定版本另外保存，見 release-package.md
+# Export output; the fixed version handed to the factory is kept separately, see release-package.md
 out/

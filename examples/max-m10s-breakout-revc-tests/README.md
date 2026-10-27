@@ -1,123 +1,123 @@
-# MAX-M10S Rev C 實測程序
+# MAX-M10S Rev C Bench Test Procedure
 
-這裡是 [max-m10s-breakout-revc](../max-m10s-breakout-revc/README.md) 的**實測紀錄**：板子到貨後的上電與功能測試程序、結果與勘誤。範例包本身是固定發行包，不放這些內容；用詞見 [CONTEXT.md](../../CONTEXT.md)。
+This is the **bench test record** for [max-m10s-breakout-revc](../max-m10s-breakout-revc/README.md): the power-up and functional test procedure, results and errata after the boards arrive. The example package itself is a release package and does not hold this content; for terminology see [CONTEXT.md](../../CONTEXT.md).
 
-- **狀態：尚未實測。** 板子還在運送中。
-- **結果：** [results.md](results.md)
-- **勘誤：** 目前沒有。實測發現的設計問題會列在本頁最下面，連同修正方式。
+- **Status: not yet tested.** The boards are still in transit.
+- **Results:** [results.md](results.md)
+- **Errata:** none so far. Design problems found during testing will be listed at the bottom of this page, along with their fixes.
 
-## 分工
+## Roles
 
-- 實板、電源與量測儀器只由一位 owner（板子的主人）操作。
-- agent 負責準備程序、整理 owner 回報的數據、更新 `results.md`，不操作硬體。
+- The physical boards, power supply and measurement instruments are operated only by one owner (the owner of the boards).
+- The agent prepares the procedure, organizes the data the owner reports, and updates `results.md`; it does not operate hardware.
 
-## 通過條件
+## Pass criteria
 
-兩片組裝板**各自**完成下面第 3–7 步，才算實測通過。第 1、2 步是上電前提，沒過就不上電。第 8 步是選做。
+Each of the two assembled boards must **individually** complete steps 3–7 below for the bench test to pass. Steps 1 and 2 are prerequisites for power-up; if they fail, do not power up. Step 8 is optional.
 
-| 步驟 | 項目 | 通過 |
+| Step | Item | Pass |
 |---|---|---|
-| 3 | 3.3 V 上電 | 電流沒有碰到限流、沒有過熱，數值落在 datasheet 電流表的合理範圍 |
-| 4 | UART | 9600 8N1 收到校驗和正確的 NMEA，送出的 UBX 查詢有回應 |
-| 5 | 戶外定位 | 取得 3D fix；三次 TTFF 都記錄下來（不設門檻，只做紀錄與比較） |
-| 6 | PPS | 定位後 TP6 有 1 Hz 脈衝，PPS LED 跟著閃 |
-| 7 | I2C | 位址 0x42 有 ACK，讀得到資料 |
+| 3 | 3.3 V power-up | Current does not hit the current limit, no overheating, value within a reasonable range of the datasheet current table |
+| 4 | UART | NMEA with correct checksums received at 9600 8N1, and UBX queries sent get a response |
+| 5 | Outdoor fix | Obtains a 3D fix; all three TTFF values recorded (no threshold, for record and comparison only) |
+| 6 | PPS | After fix, TP6 shows a 1 Hz pulse and the PPS LED blinks along with it |
+| 7 | I2C | ACK at address 0x42, data can be read |
 
-## 隱私
+## Privacy
 
-定位後的 NMEA 與 UBX 資料含**經緯度**，也就是測試地點。
+NMEA and UBX data after a fix contain **latitude and longitude**, i.e. the test location.
 
-- 原始 log 不提交到 repo。
-- `results.md` 只記定位狀態、衛星數、最大 C/N0、TTFF；地點只寫「戶外空曠處」這類描述。
-- 截圖只存在自己電腦的私有資料夾，不提交到 repo。公開紀錄一律用文字描述。
+- Do not commit raw logs to the repo.
+- `results.md` records only fix status, satellite count, max C/N0 and TTFF; describe the location only in terms like "open outdoor area".
+- Keep screenshots only in a private folder on your own computer; do not commit them to the repo. Public records always use text descriptions.
 
-## 需要的東西
+## What you need
 
-- 可調電源，能設 3.3 V 與限流
-- 電錶
-- 3.3 V 邏輯的 USB-UART 轉接器（不要用 5 V 的）
-- 被動 GNSS 天線，50 Ω，接頭要和 MHF I（I-PEX 20279）相容
-- 選用：示波器或邏輯分析儀（量 PPS）、3.3 V 的 I2C 主機（例如 3.3 V 的 MCU 開發板或 USB-I2C 轉接器）
-- 選用：u-center 2，或任何序列埠終端機
+- Adjustable power supply that can be set to 3.3 V with a current limit
+- Multimeter
+- USB-UART adapter with 3.3 V logic (do not use a 5 V one)
+- Passive GNSS antenna, 50 Ω, with a connector compatible with MHF I (I-PEX 20279)
+- Optional: oscilloscope or logic analyzer (to measure PPS), a 3.3 V I2C host (e.g. a 3.3 V MCU dev board or USB-I2C adapter)
+- Optional: u-center 2, or any serial terminal
 
-## 這塊板子的前提
+## Assumptions for this board
 
-依範例 README，測試前先記住這幾點：
+Per the example README, keep these points in mind before testing:
 
-- **只接 3.3 V。** 電源與邏輯都不耐 5 V。
-- **板子不供天線電源。** 要用被動天線；接主動天線也不會被供電。
-- **沒有備援電源**（V_BCKP 不接）。每次完全斷電後再上電，模組都沒有保存的星曆與時間，所以每次量到的都是冷啟動 TTFF。
-- **PPS LED 閃爍不代表已定位。** 定位狀態以 NMEA 為準。
-- **板子沒電時，任何訊號線都不能帶電。** USB-UART 的 TX、I2C 主機的上拉或輸出，都會從 IO 腳倒灌進沒有供電的模組。MAX-M10S datasheet 規定斷電時不可驅動 IO，輸入電壓上限是 V_IO + 0.3 V；範例原理圖也註明移除 GNSS 電源前要先斷開主控訊號。所以一律：**先接 GND、板子上電，再接訊號線；任何一次斷電前，都先拔掉當時接著的所有訊號線。**
-- 排針腳位，由天線端往下：
-  - J2：3V3 / GND / TX / RX / PPS / EXTINT
-  - J3：GND / SCL / SDA / RESET_N / SAFEBOOT_N / GND
+- **3.3 V only.** Neither the supply nor the logic is 5 V tolerant.
+- **The board does not power the antenna.** Use a passive antenna; an active antenna will not be powered either.
+- **No backup supply** (V_BCKP unconnected). After every full power-down and power-up, the module has no saved ephemeris or time, so every TTFF you measure is a cold start TTFF.
+- **A blinking PPS LED does not mean a fix.** Use NMEA to determine fix status.
+- **No signal line may be live while the board is unpowered.** The USB-UART TX and the I2C host's pull-ups or outputs will all back-feed through the IO pins into the unpowered module. The MAX-M10S datasheet specifies that IO must not be driven while powered down, with a maximum input voltage of V_IO + 0.3 V; the example schematic also notes that host signals must be disconnected before removing GNSS power. So always: **connect GND first, power up the board, then connect signal lines; before any power-down, first unplug every signal line connected at the time.**
+- Header pins, from the antenna end down:
+  - J2: 3V3 / GND / TX / RX / PPS / EXTINT
+  - J3: GND / SCL / SDA / RESET_N / SAFEBOOT_N / GND
 
-## 步驟
+## Steps
 
-### 1. 目視檢查（不上電）
+### 1. Visual inspection (unpowered)
 
-- U1 四周、D1（0.4 mm pitch，兩焊盤間距很小）、J1 有沒有錫橋或偏移。
-- D2、D3、Q1、U1 的方向，對照範例的 `manufacturing/assembly-orientation.pdf`。
-- J2、J3 排針從板底插入、焊在頂面，腳位順序如上。
-- 記錄：有沒有異常，哪一片、哪個位號。
+- Check around U1, D1 (0.4 mm pitch, very small gap between the two pads) and J1 for solder bridges or misalignment.
+- Check the orientation of D2, D3, Q1 and U1 against the example's `manufacturing/assembly-orientation.pdf`.
+- J2 and J3 headers inserted from the board bottom and soldered on the top side, pin order as above.
+- Record: any anomalies, which board, which designator.
 
-### 2. 短路檢查（不上電）
+### 2. Short-circuit check (unpowered)
 
-- 電錶量 TP1（3V3）對 TP2（GND）的電阻。C3 是 10 µF，讀數會從低往上爬；只要不是一直停在接近 0 Ω，就不是短路。
-- 也量 3V3 對 TX、RX、SDA、SCL，確認沒有直接短到電源。
-- 記錄：最後穩定的讀數。
+- Measure the resistance from TP1 (3V3) to TP2 (GND) with the multimeter. C3 is 10 µF, so the reading will climb from low; as long as it does not stay near 0 Ω, it is not a short.
+- Also measure 3V3 to TX, RX, SDA and SCL to confirm none is shorted directly to the supply.
+- Record: the final settled reading.
 
-### 3. 首次上電
+### 3. First power-up
 
-1. 電源先設 3.3 V，限流設 100 mA。這個值是保護用，不是通過標準。
-2. 接 J2 的 3V3 與 GND，**先不接**天線以外的任何訊號線。
-3. 上電後看電流與 PWR LED（D2）。電流一碰到限流就立刻斷電，回到第 1、2 步。
-4. 等 10 秒，記下電流；用手背靠近 U1，確認沒有明顯發燙。
-5. 對照 MAX-M10S datasheet 的電流表（擷取與追蹤兩種狀態）。兩顆 LED 各串 2.2 kΩ，加起來大約 1 mA，其餘幾乎都是模組本身。
+1. Set the supply to 3.3 V first, with a 100 mA current limit. This value is for protection, not a pass criterion.
+2. Connect 3V3 and GND on J2, and **do not yet connect** any signal lines other than the antenna.
+3. After power-up, watch the current and the PWR LED (D2). If the current hits the limit, power off immediately and go back to steps 1 and 2.
+4. Wait 10 seconds and record the current; hold the back of your hand near U1 to confirm it is not noticeably hot.
+5. Compare against the current table in the MAX-M10S datasheet (acquisition and tracking states). The two LEDs each have 2.2 kΩ in series, about 1 mA combined; nearly all the rest is the module itself.
 
 ### 4. UART
 
-1. 板子依第 3 步上電。USB-UART 先只接 GND。
-2. 確認板子有電之後，再接訊號線：模組 TX（J2 由天線端數來第 3 支）→ 轉接器 RX，模組 RX（第 4 支）→ 轉接器 TX。接之前用電錶或原理圖 PDF 再對一次腳位。
-3. 終端機設 9600 8N1。幾秒內應該看到 `$G...` 開頭的 NMEA 句子。
-4. 驗證校驗和：用 u-center 2（會標出校驗和錯誤），或其他能檢查 NMEA checksum 的工具。手算時，把 `$` 與 `*` 之間的字元逐一做 XOR，結果要等於 `*` 後面的兩位十六進位數。畫面沒有亂碼不等於校驗和正確；沒有驗證就記「未驗證」。
-5. 測 RX 方向：用 u-center 2 送 UBX-MON-VER 查詢，應該收到版本回覆。
-6. 記錄：看到的句子種類、校驗和是否驗證通過（或「未驗證」）、MON-VER 有沒有回應。
-7. 要斷電時，先拔掉所有訊號線（UART 的 TX、RX，I2C 的 SDA、SCL，以及其他外接的訊號線；GND 可以留著），再關電源。
+1. Power up the board as in step 3. Connect only GND of the USB-UART at first.
+2. After confirming the board is powered, connect the signal lines: module TX (pin 3 of J2 counting from the antenna end) → adapter RX, module RX (pin 4) → adapter TX. Before connecting, check the pinout once more with the multimeter or schematic PDF.
+3. Set the terminal to 9600 8N1. Within a few seconds you should see NMEA sentences starting with `$G...`.
+4. Verify checksums: use u-center 2 (which flags checksum errors), or another tool that can check NMEA checksums. To compute by hand, XOR each character between `$` and `*`; the result must equal the two hex digits after `*`. No garbled characters on screen does not mean checksums are correct; if not verified, record "not verified".
+5. Test the RX direction: send a UBX-MON-VER query with u-center 2; you should receive a version reply.
+6. Record: sentence types seen, whether checksums verified (or "not verified"), whether MON-VER responded.
+7. To power down, first unplug all signal lines (UART TX and RX, I2C SDA and SCL, and any other external signal lines; GND may stay connected), then turn off the supply.
 
-### 5. 戶外定位與 TTFF
+### 5. Outdoor fix and TTFF
 
-1. 接被動天線，到戶外空曠、看得到大片天空的地方。
-2. 先拔掉所有訊號線（UART 的 TX、RX，I2C 的 SDA、SCL，以及其他外接的訊號線；GND 可以留著），再完全斷電至少 10 秒。上電並開始計時，確認板子有電後再接回訊號線。
-3. 計到第一次 3D fix：GGA 的定位品質大於 0，**而且** GSA 的 navMode 是 3。RMC 狀態 A 也可能是 2D 定位，不能當成 3D fix。
-4. 記錄：TTFF、使用中的衛星數、GSV 裡最大的 C/N0。
-5. 每片重複 3 次。
+1. Connect the passive antenna and go outdoors to an open spot with a wide view of the sky.
+2. First unplug all signal lines (UART TX and RX, I2C SDA and SCL, and any other external signal lines; GND may stay connected), then fully power down for at least 10 seconds. Power up and start timing; reconnect the signal lines after confirming the board is powered.
+3. Time until the first 3D fix: GGA fix quality greater than 0, **and** GSA navMode equal to 3. RMC status A may also be a 2D fix and cannot be taken as a 3D fix.
+4. Record: TTFF, number of satellites in use, max C/N0 in GSV.
+5. Repeat 3 times per board.
 
-TTFF 和 datasheet 的冷啟動數字比較即可，不當成通過門檻。被動天線、天線擺放與周圍遮蔽都會影響結果，紀錄裡寫明天線型號與擺放方式。
+Just compare TTFF with the datasheet cold start figure; it is not a pass threshold. The passive antenna, antenna placement and surrounding obstructions all affect the result, so record the antenna model and placement.
 
 ### 6. PPS
 
-1. 定位後，用示波器或邏輯分析儀量 TP6（PPS）。
-2. 確認是 1 Hz，記下脈衝寬度。PPS LED（D3）應該跟著閃。
-3. 沒有示波器時，至少確認 D3 在定位後以 1 Hz 閃爍，並在紀錄裡註明「只目視」。
+1. After a fix, measure TP6 (PPS) with an oscilloscope or logic analyzer.
+2. Confirm it is 1 Hz and record the pulse width. The PPS LED (D3) should blink along with it.
+3. Without an oscilloscope, at least confirm D3 blinks at 1 Hz after a fix, and note "visual only" in the record.
 
 ### 7. I2C
 
-1. 板子先上電，I2C 主機先只接 GND。主機必須是 3.3 V 邏輯。
-2. 確認板子有電之後，再接 SDA、SCL 到 J3。板上已有 4.7 kΩ 上拉（R4、R5）；主機那邊如果也有上拉，確認它接的是 3.3 V。
-3. 掃描 I2C，應該在 **0x42** 看到 ACK。
-4. 讀暫存器 0xFD、0xFE（可讀的位元組數，0xFD 是高位），再從 0xFF 讀資料流，應該讀到 NMEA 或 UBX 內容。
-5. 記錄：ACK 是否出現、讀到的位元組數、資料是否可解析。
-6. 要斷電時，先拔掉所有訊號線（UART 的 TX、RX，I2C 的 SDA、SCL，以及其他外接的訊號線；GND 可以留著），再關電源。
+1. Power up the board first, and connect only GND of the I2C host at first. The host must use 3.3 V logic.
+2. After confirming the board is powered, connect SDA and SCL to J3. The board already has 4.7 kΩ pull-ups (R4, R5); if the host also has pull-ups, confirm they go to 3.3 V.
+3. Scan I2C; you should see an ACK at **0x42**.
+4. Read registers 0xFD and 0xFE (number of bytes available, 0xFD is the high byte), then read the data stream from 0xFF; you should get NMEA or UBX content.
+5. Record: whether ACK appears, the number of bytes read, whether the data parses.
+6. To power down, first unplug all signal lines (UART TX and RX, I2C SDA and SCL, and any other external signal lines; GND may stay connected), then turn off the supply.
 
-### 8. 控制腳（選做）
+### 8. Control pins (optional)
 
-- 把 RESET_N 短暫拉低再放開，NMEA 應該中斷後重新開始。
-- **不要動 SAFEBOOT_N**，除非你知道要進安全開機模式做什麼。
+- Briefly pull RESET_N low and release it; NMEA should stop and then restart.
+- **Do not touch SAFEBOOT_N** unless you know what you want to do in safe boot mode.
 
-## 勘誤
+## Errata
 
-目前沒有。
+None so far.
 
-實測發現設計問題時，在這裡依序列出：現象、哪一片、原因判斷、證據、修正方式（例如換料、跳線，或下一版要改的地方）。範例包本身不改；若要出新版本，另開資料夾。
+When testing finds a design problem, list it here in order: symptom, which board, suspected cause, evidence, fix (e.g. part swap, jumper wire, or what to change in the next revision). The example package itself is not changed; a new version goes in a separate folder.

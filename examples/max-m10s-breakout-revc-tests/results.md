@@ -1,35 +1,35 @@
-# MAX-M10S Rev C 實測結果
+# MAX-M10S Rev C Bench Test Results
 
-程序與通過條件見 [README.md](README.md)。由板子的 owner 量測，agent 依回報填寫。不記錄經緯度或精確地點。
+For the procedure and pass criteria, see [README.md](README.md). Measured by the board owner; filled in by the agent from the owner's reports. Latitude/longitude and precise locations are not recorded.
 
-## 環境
+## Environment
 
-| 項目 | 內容 |
+| Item | Details |
 |---|---|
-| 測試日期 | 尚未測試 |
-| 測試者 | （角色，例如「板子 owner」） |
-| 電源 | |
+| Test date | Not yet tested |
+| Tester | (role, e.g. "board owner") |
+| Power supply | |
 | USB-UART | |
-| 天線 | （型號、被動、擺放方式） |
-| 地點描述 | （例如「頂樓空曠處」，不寫地址或座標） |
-| 模組韌體 | （UBX-MON-VER 回覆的版本） |
+| Antenna | (model, passive, placement) |
+| Location description | (e.g. "open rooftop", no address or coordinates) |
+| Module firmware | (version from the UBX-MON-VER reply) |
 
-## 結果
+## Results
 
-| 步驟 | 項目 | 板 A | 板 B |
+| Step | Item | Board A | Board B |
 |---|---|---|---|
-| 1 | 目視檢查 | 未測 | 未測 |
-| 2 | 3V3–GND 電阻 | 未測 | 未測 |
-| 3 | 上電電流（10 秒後）／是否發燙 | 未測 | 未測 |
-| 4 | NMEA 校驗和／MON-VER 回應 | 未測 | 未測 |
-| 5 | 3D fix／TTFF 第 1 次 | 未測 | 未測 |
-| 5 | TTFF 第 2 次 | 未測 | 未測 |
-| 5 | TTFF 第 3 次 | 未測 | 未測 |
-| 5 | 使用衛星數／最大 C/N0 | 未測 | 未測 |
-| 6 | PPS 頻率／脈寬（或「只目視」） | 未測 | 未測 |
-| 7 | I2C 0x42 ACK／讀到資料 | 未測 | 未測 |
-| 8 | RESET_N（選做） | 未測 | 未測 |
+| 1 | Visual inspection | Not tested | Not tested |
+| 2 | 3V3–GND resistance | Not tested | Not tested |
+| 3 | Power-up current (after 10 s) / hot or not | Not tested | Not tested |
+| 4 | NMEA checksum / MON-VER response | Not tested | Not tested |
+| 5 | 3D fix / TTFF run 1 | Not tested | Not tested |
+| 5 | TTFF run 2 | Not tested | Not tested |
+| 5 | TTFF run 3 | Not tested | Not tested |
+| 5 | Satellites in use / max C/N0 | Not tested | Not tested |
+| 6 | PPS frequency / pulse width (or "visual only") | Not tested | Not tested |
+| 7 | I2C 0x42 ACK / data read | Not tested | Not tested |
+| 8 | RESET_N (optional) | Not tested | Not tested |
 
-## 結論
+## Conclusion
 
-尚未實測。兩片都完成第 3–7 步並通過，才把範例 README 的「尚未做實板測試」改成實測結果的連結與摘要。
+Not yet tested. Only after both boards complete and pass steps 3–7 will "No physical board testing has been done yet" in the example README be replaced with a link to and summary of the bench test results.

@@ -1,67 +1,67 @@
-# 協作與交接
+# Collaboration and handoff
 
-適用情境：一個人搭配一個或多個 agent（Claude Code、Codex）做同一塊板子，工作會跨好幾天、換好幾次手。
+Applies when one person works with one or more agents (Claude Code, Codex) on the same board, with the work spanning several days and changing hands several times.
 
-## 一個工作目錄只有一位寫入者
+## One writer per working directory
 
-- 同一個工作目錄、同一個 KiCad GUI，同一時間只有一位寫入者（人或 agent）。
-- 換手時，交出的一方先停止寫入、記錄停止點，接手的一方核對後才開始寫。
-- 要並行開發，就開獨立的 git worktree，並寫清楚各自負責的範圍。
-- 外部硬體（開發板、序列埠、量測儀器）同樣只由一位 owner 操作。
+- A working directory and a KiCad GUI have only one writer (person or agent) at a time.
+- At handoff, the side handing over stops writing first and records the stopping point; the side taking over checks it before starting to write.
+- For parallel development, open separate git worktrees and write down clearly what each one is responsible for.
+- External hardware (dev boards, serial ports, measurement instruments) is likewise operated by a single owner.
 
-Codex 與 Claude Code 之間的交接格式見 [codex-cc-handoff](https://github.com/John-owo/codex-cc-handoff)。
+For the handoff format between Codex and Claude Code, see [codex-cc-handoff](https://github.com/John-owo/codex-cc-handoff).
 
-## 入口文件與 WORKLOG
+## Entry documents and WORKLOG
 
-每個專案有兩個入口：
+Each project has two entry points:
 
-- **README.md**：現在的狀態。目前該看哪個版本、哪些事還沒完成、各種資料在哪裡。設計基準或接續入口一改變，就同步更新。
-- **WORKLOG.md**：按時間記錄的工作紀錄，最新的寫在最上面。每一筆記錄 owner、範圍、修改了什麼、怎麼驗證、停在哪裡、下一步。
+- **README.md**: the current state. Which version to look at now, what is still unfinished, where each kind of material lives. Update it whenever the design baseline or the resume point changes.
+- **WORKLOG.md**: a chronological work log, newest at the top. Each entry records the owner, scope, what was changed, how it was verified, where it stopped, and the next step.
 
-範本見 [templates/README.md](../../templates/README.md) 與 [templates/WORKLOG.md](../../templates/WORKLOG.md)。
+See the templates [templates/README.md](../../templates/README.md) and [templates/WORKLOG.md](../../templates/WORKLOG.md).
 
-WORKLOG 的讀法：
+How to read the WORKLOG:
 
-- 較晚的更正覆蓋較早的敘述。
-- 歷史紀錄裡的「下一步」只是當時的計畫，不構成新的執行授權。接手後要做什麼，以使用者這一次的要求為準。
-- 狀態有變化的事（訂單、審查），寫進專屬的報告檔，WORKLOG 只放一行摘要和連結。
+- Later corrections override earlier statements.
+- A "next step" in the history was only the plan at the time and does not grant new authorization to act. What to do after taking over is set by the user's current request.
+- Things whose status changes (orders, reviews) go in a dedicated report file; the WORKLOG only gets a one-line summary and a link.
 
-## 接手順序
+## Takeover order
 
-1. 讀 README，依使用者這次的任務選定子案與版本。
-2. 讀 WORKLOG 頂部，以及跟這次任務相關的最新紀錄；核對 owner、停止點、還在等使用者確認的事項。
-3. 核對實際的目標檔與 git 未提交的修改。能明確說出子案、檔案路徑、版本、工作範圍之後才開始寫入。對應不到子案就先問。
+1. Read the README and pick the sub-project and version based on the user's current task.
+2. Read the top of the WORKLOG and the latest entries relevant to this task; check the owner, the stopping point, and anything still waiting for the user's confirmation.
+3. Check the actual target files and uncommitted git changes. Start writing only once you can clearly state the sub-project, file paths, version, and scope of work. If you can't map it to a sub-project, ask first.
 
-## 修改設計前
+## Before changing a design
 
-- **先保全一份可以恢復的版本。** 完整複製設計與它依賴的元件庫，或建立經過檢查的 commit。雜湊清單只能識別檔案，不能拿來還原。
-- **改完之後核對：** netlist、ERC、DRC，以及跟修改前的差異。
-- **不要對完成品執行初始建板腳本。** 這類腳本會重建整塊板子，把佈線清掉。
+- **First secure a recoverable version.** Make a complete copy of the design and the libraries it depends on, or create a checked commit. A hash list only identifies files; it cannot be used to restore them.
+- **After changing, check:** netlist, ERC, DRC, and the diff against the version before the change.
+- **Don't run the initial board-generation script on a finished board.** Such scripts rebuild the whole board and wipe the routing.
 
-## 需要使用者明確同意的動作
+## Actions that require the user's explicit consent
 
-以下每一次都要使用者在對話中同意，不能從之前的同意類推：
+Each of the following requires the user's consent in the conversation every time; consent cannot be inferred from earlier consent:
 
-- 付款、提交訂單、送審
-- 寄出信件或客服訊息
-- 確認生產稿或貼裝確認
-- 推送、發布、任何不可逆的操作
-- 接受加費、補償、設計修改
+- Paying, submitting an order, submitting for review
+- Sending emails or customer service messages
+- Confirming the production file or parts placement
+- Pushing, publishing, any irreversible operation
+- Accepting extra charges, compensation, or design changes
 
-agent 可以先做分析、寫草稿、準備上傳檔，停在按下按鈕之前。
+The agent can do the analysis, write drafts, and prepare upload files first, stopping before any button is pressed.
 
-唯一的例外是催辦與純技術澄清：使用者可以明確說出範圍和期限，事先授權這兩種訊息。細節見 [jlc-support 的硬規則](../../skills/jlc-support/SKILL.md)。
+The only exception is status chases and pure technical clarifications: the user can authorize these two kinds of messages in advance by explicitly stating the scope and time limit. For details see [jlc-support's hard rules](../../skills/jlc-support/SKILL.md).
 
-## 審查
+## Review
 
-- 完整功能、跨模組修改、重要的 PCB 修改、交付里程碑，交給另一個 agent 審查**固定版本**（快照或 commit）。
-- 最多兩輪。審查者提出證據，owner 判斷並修改；不要讓兩個 agent 無限互相審查。
-- 審查者只開讀檔與搜尋工具，禁用 MCP 寫入、未審核的 hooks 與 shell。不要用跳過權限的選項。
-- 審查失敗、額度不足、報告空白或只有部分內容，都標示「未完成審查」，不要當成通過。
+- For complete features, cross-module changes, significant PCB changes, and delivery milestones, have another agent review a **fixed version** (snapshot or commit).
+- Two rounds at most. The reviewer presents evidence; the owner judges and makes changes. Don't let two agents review each other endlessly.
+- The reviewer gets only file-reading and search tools; MCP writes, unreviewed hooks, and shell are disabled. Don't use options that skip permissions.
+- If a review fails, runs out of quota, or produces a blank or partial report, mark it "review incomplete"; don't treat it as passed.
 
-## 判斷結論的規則
+## Rules for drawing conclusions
 
-- ERC／DRC 通過，不等於電氣正確、板廠接受，也不等於實板能動。
-- pinout、RF、電源、元件值的結論，要對照原廠 datasheet 或參考設計。
-- agent 寫的摘要不是證據。證據是原始檔、命令輸出、原文紀錄。
-- 明確寫出沒做的事，例如「SPICE 逾時，標為 SKIP，不算 PASS」。
+- Passing ERC/DRC does not mean electrically correct, accepted by the fab, or that the real board works.
+- Conclusions about pinouts, RF, power, and component values must be checked against the manufacturer's datasheet or reference design.
+- A summary written by an agent is not evidence. Evidence is the original files, command output, and verbatim records.
+- State explicitly what was not done, for example "SPICE timed out, marked SKIP, does not count as PASS".

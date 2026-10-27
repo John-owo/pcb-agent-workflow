@@ -1,61 +1,61 @@
-# pcb-agent-workflow：agent 工作規則
+# pcb-agent-workflow: agent rules
 
-這個 repo 收錄一套 PCB 工作流程：用 Claude Code 或 Codex 搭配 KiCad 10 設計，交 JLCPCB 製造。內容包括流程文件、專案範本、skill、輔助腳本，以及一份實際下單過的範例設計。
+This repo holds a PCB workflow: design in KiCad 10 with Claude Code or Codex, then manufacture at JLCPCB. It includes workflow docs, project templates, skills, helper scripts, and an example design that was actually ordered.
 
-Claude Code 透過 `CLAUDE.md` 匯入本檔；Codex 直接讀本檔。兩邊的規則只寫在這裡。
+Claude Code imports this file through `CLAUDE.md`; Codex reads it directly. Rules for both live only here.
 
-## 目錄
+## Layout
 
-| 路徑 | 內容 |
+| Path | Contents |
 |---|---|
-| `docs/` | 新手入門、術語表、第一塊板檢查清單 |
-| `docs/workflow/` | 流程文件：協作、KiCad 工具、發行包、JLC 下單（生產稿比對已併入 `skills/jlc-production-review/`） |
-| `templates/` | 給新 PCB 專案複製使用的 `AGENTS.md`、`CLAUDE.md`、`WORKLOG.md`、`README.md`、`kicad-project.gitignore` |
-| `.claude-plugin/marketplace.json` | Claude Code 與 Codex 共用的 plugin marketplace，每個 skill 一個 plugin entry |
-| `plugins/` | 不屬於 skill 的 plugin，目前只有選用的 `jlc-send-guard` hook |
-| `skills/` | Claude Code 與 Codex 共用的 skill，每個資料夾一個 `SKILL.md`；skill 用到的腳本放在該 skill 的 `scripts/`，跟著 skill 一起安裝 |
-| `scripts/` | 不屬於單一 skill 的流程工具（發行包、Konnect 呼叫器），以及本 repo 的隱私掃描與 skill 檢查；各自在檔頭說明用法 |
-| `examples/` | 固定發行包形式的範例設計，以及旁邊的 `*-tests/` 實測紀錄 |
-| `CONTEXT.md` | 這套流程自己定義的用詞（給 agent 統一用語）；一般術語見 `docs/glossary.md` |
-| `docs/agents/` | 工程類 skill 讀取的設定：issue tracker、triage 標籤、domain docs |
+| `docs/` | Getting started, glossary, first-board checklist |
+| `docs/workflow/` | Workflow docs: collaboration, KiCad tools, release package, JLC ordering (production file comparison has moved into `skills/jlc-production-review/`) |
+| `templates/` | `AGENTS.md`, `CLAUDE.md`, `WORKLOG.md`, `README.md`, `kicad-project.gitignore` to copy into a new PCB project |
+| `.claude-plugin/marketplace.json` | Plugin marketplace shared by Claude Code and Codex, one plugin entry per skill |
+| `plugins/` | Plugins that are not skills; currently only the optional `jlc-send-guard` hook |
+| `skills/` | Skills shared by Claude Code and Codex, one `SKILL.md` per folder; scripts a skill uses go in that skill's `scripts/` and are installed with it |
+| `scripts/` | Workflow tools not tied to a single skill (release package, Konnect caller), plus this repo's privacy scan and skill check; each explains its usage in its header |
+| `examples/` | Example designs in release package form, with `*-tests/` bench test records alongside |
+| `CONTEXT.md` | Terms defined by this workflow itself (so agents use consistent wording); general terms are in `docs/glossary.md` |
+| `docs/agents/` | Settings read by engineering skills: issue tracker, triage labels, domain docs |
 
-## 修改規則
+## Editing rules
 
-- **不放個人資料。** 姓名、email、電話、地址、訂單號、購物車號、客戶代碼、本機絕對路徑、Windows 使用者名稱都不能出現。人員一律寫角色，例如「線上客服」「PCB 工程」。新增或修改內容後，提交前用規則檔掃一次（CI 也會跑；它會解開 zip 一起掃）：
+- **No personal data.** Names, emails, phone numbers, addresses, order numbers, cart numbers, customer codes, local absolute paths, and Windows usernames must never appear. Always refer to people by role, e.g. "online customer service", "PCB engineering". After adding or changing content, scan with the rules file before committing (CI runs it too; it also unpacks zips and scans them):
 
   ```bash
   python -I scripts/check_privacy.py
   ```
 
-  結果要是 `CLEAN`。環境變數名稱 `%LOCALAPPDATA%` 已列為允許，不算命中。新加的測試資料不要直接寫出會命中的字串，用拼接組出來（見 `tests/test_repo_checks.py`）。另外對照自己的姓名、帳號、信箱、客戶代碼再搜一次；掃描結果列出的圖片和 PDF 要打開來看。
-- **不放截圖。** 截圖幾乎都含帳號資訊。需要圖示時，用重新繪製的示意圖或板圖。
-- **不放原廠 datasheet。** 放原廠連結。第三方工具與 skill 寫來源、版本與授權，不附上本體。
-- **範例設計包是固定發行包。** 不要用工具重新生成、重新填銅或另存檔案，也不要在裡面新增檔案。要修正就另開新版本資料夾，並在 README 說明差異。換行字元不轉換的設定見 `.gitattributes`。
-  - 例外：範例的 `README.md` 是公開時重寫的說明，不是發行檔，可以更新（例如加上實測紀錄的連結、更正說明文字）。
-  - 實板到貨後的**實測紀錄**與勘誤，放在範例包旁邊的 `examples/<範例>-tests/`，不寫進範例包的 `verification/`。`verification/` 只保存發行時的驗證。用詞見 `CONTEXT.md`。
-  - 外殼設計用的 3D 檔（含零件的 STEP、匯出設定、自畫模型）放在 `examples/<範例>-cad/`，由 `skills/kicad-enclosure-step` 從範例包的板檔產生；範例包本身不動。下載自 LCSC、GrabCAD 等網站的模型不放進 repo。
-- **時效性資訊要標快照日期。** JLC 的期限、價格、料庫狀態都會變，寫成「YYYY-MM 觀察」，並提醒讀者以當下的網站和信件為準。
-- **skill 格式。** `SKILL.md` 的 frontmatter 要有 `name`（與資料夾同名）和 `description`（1024 字元內），description 同時寫中文與英文觸發詞。Codex 用的介面資訊放在 `agents/openai.yaml`。參考資料放 `references/`、腳本放 `scripts/`，從 `SKILL.md` 用相對路徑連過去；不要用只有某個 agent 會展開的變數。只在特定情境才需要的長段落移到 `references/`。
-- **plugin 與版本。** 新增 skill 時，在 `.claude-plugin/marketplace.json` 加一個 `source` 為 `./`、`skills` 只列該 skill 的 entry。改了 skill 或腳本，就升該 entry 的 `version`（有 `plugin.json` 的 plugin 兩邊一起改），已安裝的使用者才會收到更新。改完用 `claude plugin validate .` 檢查。
-- **工具搭配。** skill 提到 MCP 或外部工具時，只點名實際驗證過的工具與版本，其他寫類別並註明未驗證；同時寫出沒有該工具時的退路。原則是 MCP 看狀態與操作，腳本與 `kicad-cli` 判定。
-- **語言。** 文件以繁體中文為主；寄給 JLC 的訊息範本用英文。
+  The result must be `CLEAN`. The environment variable name `%LOCALAPPDATA%` is allowlisted and does not count as a hit. In new test data, do not write strings that would hit directly; build them by concatenation (see `tests/test_repo_checks.py`). Also search again for your own name, account, email, and customer code; open and look at any images and PDFs the scan lists.
+- **No screenshots.** Screenshots almost always contain account information. When you need a picture, use a redrawn diagram or a board plot.
+- **No vendor datasheets.** Link to the vendor instead. For third-party tools and skills, give source, version, and license; do not include the tool itself.
+- **Example design packages are fixed release packages.** Do not regenerate them with tools, refill zones, or re-save files, and do not add files inside them. To fix something, open a new version folder and explain the differences in its README. See `.gitattributes` for the setting that keeps line endings unconverted.
+  - Exception: an example's `README.md` is a description rewritten for publication, not a release file, and may be updated (e.g. to add a link to bench test records or correct wording).
+  - **Bench test records** and errata after real boards arrive go in `examples/<example>-tests/` next to the example package, not in the package's `verification/`. `verification/` holds only verification done at release. See `CONTEXT.md` for terms.
+  - 3D files for enclosure design (STEP with parts, export settings, self-drawn models) go in `examples/<example>-cad/`, generated by `skills/kicad-enclosure-step` from the example package's board file; the example package itself is not touched. Models downloaded from sites like LCSC or GrabCAD are not put in the repo.
+- **Time-sensitive information gets a snapshot date.** JLC deadlines, prices, and parts library status change; write "observed YYYY-MM" and remind readers that the current website and emails take precedence.
+- **Skill format.** `SKILL.md` frontmatter must have `name` (same as the folder) and `description` (within 1024 characters); the description is written in English, with English trigger phrases. Interface information for Codex goes in `agents/openai.yaml`. Reference material goes in `references/`, scripts in `scripts/`, linked from `SKILL.md` by relative path; do not use variables that only one agent expands. Move long sections needed only in specific situations to `references/`.
+- **Plugins and versions.** When adding a skill, add an entry to `.claude-plugin/marketplace.json` with `source` set to `./` and `skills` listing only that skill. When you change a skill or script, bump that entry's `version` (for plugins with a `plugin.json`, change both), so installed users get the update. Check with `claude plugin validate .` afterward.
+- **Tool pairing.** When a skill mentions MCP or external tools, name only tools and versions that were actually verified; describe others by category and mark them unverified. Also give the fallback when the tool is absent. The principle: MCP for viewing state and operating, scripts and `kicad-cli` for judging.
+- **Language.** Docs are written in English; message templates sent to JLC are in English.
 
-## 驗證
+## Verification
 
-- 改了腳本：至少跑過 `--help`；能用範例資料測的就實際測一次。新腳本要附 `tests/` 測試，並加進 CI 的 `--help` 檢查。
-- 改了範例設計包：用 KiCad CLI 在工作副本上重跑 ERC／DRC，結果寫進該版本的 `verification/`。
-- 改了 skill：讀一遍 `SKILL.md`，確認硬規則裡要使用者同意的動作沒有被放寬；跑 `python -I scripts/check_skills.py`（也檢查全 repo 的 Markdown 相對連結）。
+- Changed a script: at least run `--help`; if it can be tested with example data, actually test it once. New scripts need tests in `tests/` and must be added to CI's `--help` check.
+- Changed an example design package: rerun ERC/DRC with the KiCad CLI on a working copy and write the results into that version's `verification/`.
+- Changed a skill: read through `SKILL.md` and confirm that hard rules requiring user consent have not been relaxed; run `python -I scripts/check_skills.py` (it also checks relative Markdown links across the repo).
 
 ## Agent skills
 
 ### Issue tracker
 
-Issues 記在本 repo 的 GitHub Issues，用 `gh` CLI 操作。See `docs/agents/issue-tracker.md`.
+Issues are tracked in this repo's GitHub Issues, managed with the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
-沿用預設五個標籤：`needs-triage`、`needs-info`、`ready-for-agent`、`ready-for-human`、`wontfix`。See `docs/agents/triage-labels.md`.
+Uses the default five labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context：根目錄一份 `CONTEXT.md`，決策記在 `docs/adr/`，需要時才建立。See `docs/agents/domain.md`.
+Single-context: one `CONTEXT.md` at the root; decisions are recorded in `docs/adr/`, created when needed. See `docs/agents/domain.md`.

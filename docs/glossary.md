@@ -1,71 +1,71 @@
-# 術語表
+# Glossary
 
-這個 repo 常出現的名詞。依流程順序排列：設計、製造檔、板廠與下單。英文縮寫保留原樣，因為 KiCad 與 JLC 的介面都用英文。
+Terms that come up often in this repo, in workflow order: design, manufacturing files, fab and ordering. English abbreviations are kept as is, because both the KiCad and JLC interfaces use English.
 
-## 設計
+## Design
 
-| 名詞 | 意思 |
+| Term | Meaning |
 |---|---|
-| 原理圖（schematic） | 畫「哪些零件、怎麼連」的圖，不管實際位置。KiCad 檔案 `.kicad_sch` |
-| PCB 佈局（layout） | 把零件擺到板子上、畫出銅線。KiCad 檔案 `.kicad_pcb` |
-| symbol | 零件在原理圖上的符號 |
-| footprint | 零件在 PCB 上的焊盤圖形。尺寸必須和實際買的料一致 |
-| net／網路 | 電氣上連在一起的一組接腳，例如 `GND`、`3V3` |
-| netlist | 所有網路的清單；修改前後比對它，可以看出連線有沒有被改到 |
-| ERC | Electrical Rules Check，檢查原理圖的連線規則（例如輸出接輸出、腳位沒接） |
-| DRC | Design Rules Check，檢查 PCB 的線寬、間距、未連線等規則 |
-| 去耦電容（decoupling） | 放在 IC 電源腳旁邊的小電容，穩定電源 |
-| via | 連接不同銅層的小孔 |
-| 環寬（annular ring） | 孔周圍一圈銅的寬度 |
-| 鋪銅（zone／pour） | 大面積的銅，通常接 GND |
-| 板框（Edge.Cuts） | 板子外形的那一層 |
-| 疊構（stackup） | 多層板每一層的材料與厚度 |
-| DNP | Do Not Populate，畫在設計裡但不貼裝的零件 |
-| 測試點（test point） | 留給量測用的焊盤 |
+| Schematic | The drawing of "which parts and how they connect", regardless of physical position. KiCad file `.kicad_sch` |
+| PCB layout | Placing parts on the board and drawing copper traces. KiCad file `.kicad_pcb` |
+| symbol | A part's symbol on the schematic |
+| footprint | A part's pad pattern on the PCB. Its dimensions must match the part you actually buy |
+| net | A group of pins electrically connected together, e.g. `GND`, `3V3` |
+| netlist | The list of all nets; comparing it before and after a change shows whether connections were altered |
+| ERC | Electrical Rules Check, checks the schematic's connection rules (e.g. output tied to output, unconnected pins) |
+| DRC | Design Rules Check, checks PCB rules such as trace width, clearance, and unrouted connections |
+| Decoupling capacitor | A small capacitor placed next to an IC's power pin to stabilize the supply |
+| via | A small hole connecting different copper layers |
+| Annular ring | The width of the copper ring around a hole |
+| Copper pour (zone) | A large copper area, usually tied to GND |
+| Board outline (Edge.Cuts) | The layer defining the board's shape |
+| Stackup | The material and thickness of each layer in a multilayer board |
+| DNP | Do Not Populate, a part drawn in the design but not assembled |
+| Test point | A pad left for measurement |
 
-## 製造檔
+## Manufacturing files
 
-| 名詞 | 意思 |
+| Term | Meaning |
 |---|---|
-| Gerber | 板廠用的製造檔格式，每一層一個檔案，通常打包成 zip |
-| 鑽孔檔（drill、Excellon） | 記錄每個孔的位置與孔徑 |
-| PTH／NPTH | 孔壁有鍍銅（可導電）／沒有鍍銅（例如安裝孔） |
-| 阻焊（solder mask） | 板子表面的綠漆（或其他顏色），防止焊錫流到不該去的地方 |
-| 絲印（silkscreen） | 印在板上的文字與標記 |
-| 錫膏層（paste）／鋼網（stencil） | 貼裝時刷錫膏用的開孔圖形 |
-| BOM | Bill of Materials，零件清單：數值、位號、封裝、料號 |
-| CPL | Component Placement List，每顆零件的座標、旋轉、面別。也叫 pick-and-place 或 position file |
-| 位號（designator、reference） | 零件編號，例如 R1、C3、U1 |
-| pin 1 | 零件的第一腳，用來判斷方向 |
+| Gerber | The manufacturing file format fabs use, one file per layer, usually packed into a zip |
+| Drill file (Excellon) | Records the position and diameter of every hole |
+| PTH/NPTH | Hole walls plated with copper (conductive) / not plated (e.g. mounting holes) |
+| Solder mask | The green (or other color) coating on the board surface that keeps solder from flowing where it shouldn't |
+| Silkscreen | Text and markings printed on the board |
+| Paste layer / stencil | The opening pattern used to print solder paste during assembly |
+| BOM | Bill of Materials, the parts list: value, designator, package, part number |
+| CPL | Component Placement List, each part's coordinates, rotation, and side. Also called pick-and-place or position file |
+| Designator (reference) | A part's identifier, e.g. R1, C3, U1 |
+| pin 1 | A part's first pin, used to determine orientation |
 
-## 板廠與下單
+## Fab and ordering
 
-| 名詞 | 意思 |
+| Term | Meaning |
 |---|---|
-| PCB／PCBA | 空板／貼好零件的板子（Assembly） |
-| SMT／THT | 表面貼裝元件／直插元件 |
-| LCSC 料號、C-code | JLC 與 LCSC 共用的零件編號，例如 `C14663` |
-| MPN | Manufacturer Part Number，原廠料號 |
-| Basic／Extended 料 | Basic 料長期裝在貼片機上；Extended 料需要換料，每種另收費用。Preferred Extended 在 Economic 組裝可免換料費（2026-10 觀察，以 JLC 網站為準） |
-| Economic／Standard 組裝 | JLC 的兩種組裝服務等級，差在可貼的面、最小元件與尺寸限制，見 [jlc-ordering.md](workflow/jlc-ordering.md) |
-| DFM | Design for Manufacturing，板廠檢查設計能不能做 |
-| 確認稿 | 付款後工廠請你確認的東西的總稱，分成下面兩種 |
-| 生產稿（production file） | 只指 PCB：工廠依你的 Gerber 做 CAM 處理後、準備投產的版本，需要你確認 |
-| 貼裝確認（parts placement） | 只指 PCBA：每顆元件的位置、角度、極性，需要你確認；JLC 逾期會自動投產 |
-| 工藝邊（rails） | 加在板子外圍、讓機器夾持的邊條，貼裝後可拆 |
-| 拼板（panel） | 多片板子排在一起生產 |
-| V-cut | 拼板之間的 V 形切槽，方便折斷分板 |
-| fiducial／定位點 | 讓貼片機對位的圓形銅點 |
-| 表面處理 | 焊盤表面的處理方式：HASL（噴錫，便宜但不平）、ENIG（沉金，平整、較貴）、OSP（有機保護膜，便宜、拆封後要盡快焊） |
+| PCB/PCBA | Bare board / board with parts assembled (Assembly) |
+| SMT/THT | Surface-mount parts / through-hole parts |
+| LCSC part number, C-code | Part number shared by JLC and LCSC, e.g. `C14663` |
+| MPN | Manufacturer Part Number, the original manufacturer's part number |
+| Basic/Extended parts | Basic parts stay loaded on the pick-and-place machines; Extended parts require a feeder change, with a fee per part type. Preferred Extended parts avoid the feeder change fee with Economic assembly (observed 2026-10; the JLC website takes precedence) |
+| Economic/Standard assembly | JLC's two assembly service levels, differing in which sides can be assembled, minimum component size, and size limits; see [jlc-ordering.md](workflow/jlc-ordering.md) |
+| DFM | Design for Manufacturing, the fab's check of whether the design can be made |
+| Confirmation items | Umbrella term for what the factory asks you to confirm after payment, split into the two kinds below |
+| Production file | PCB only: the version the factory prepares for production after CAM processing of your Gerbers; you need to confirm it |
+| Parts placement confirmation | PCBA only: each component's position, rotation, and polarity; you need to confirm it, and JLC puts it into production automatically when overdue |
+| Rails | Strips added around the board edge for machine clamping, removable after assembly |
+| Panel | Multiple boards arranged together for production |
+| V-cut | V-shaped grooves between panel boards so they can be snapped apart |
+| Fiducial | Round copper marks the pick-and-place machine uses for alignment |
+| Surface finish | How the pad surfaces are treated: HASL (hot-air solder leveling, cheap but uneven), ENIG (immersion gold, flat, more expensive), OSP (organic protective coating, cheap, solder soon after opening the package) |
 
-## 這個 repo 的用語
+## Terms specific to this repo
 
-這一節的正式定義在根目錄的 [CONTEXT.md](../CONTEXT.md)，兩邊不一致時以 CONTEXT.md 為準。
+The authoritative definitions for this section are in [CONTEXT.md](../CONTEXT.md) at the repo root; where the two disagree, CONTEXT.md wins.
 
-| 名詞 | 意思 |
+| Term | Meaning |
 |---|---|
-| 固定發行包（release package） | 交給工廠的那一份檔案，之後不再修改，見 [release-package.md](workflow/release-package.md) |
-| 實測紀錄 | 板子到貨後的上電與功能測試結果，放在固定發行包之外 |
-| WORKLOG | 按時間記錄誰做了什麼、停在哪裡的工作紀錄 |
-| 寫入者（writer） | 同一時間唯一可以修改設計檔的人或 agent |
-| PASS／WARNING／INCOMPLETE／ERROR | 本 repo 腳本的結果狀態。只有 PASS 代表該腳本的檢查範圍全部通過；其他都需要處理或審查 |
+| Release package | The set of files handed to the factory, not modified afterward; see [release-package.md](workflow/release-package.md) |
+| Bench test record | Power-on and functional test results after the boards arrive, kept outside the release package |
+| WORKLOG | A chronological work log of who did what and where things stopped |
+| Writer | The only person or agent allowed to modify the design files at a given time |
+| PASS/WARNING/INCOMPLETE/ERROR | Result states of this repo's scripts. Only PASS means everything in that script's check scope passed; the others all need handling or review |

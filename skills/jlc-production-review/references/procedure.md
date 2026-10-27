@@ -1,152 +1,152 @@
-# 工廠生產稿與貼裝確認審查
+# Factory Production File and Parts Placement Review
 
-付款後，JLCPCB 這類代工廠會請你確認兩份東西：PCB 生產稿，以及 PCBA 貼裝位置。本頁說明怎麼把工廠改過的檔案和你送出的版本逐項比對，判斷哪些改動正常、哪些要問，以及哪些動作必須等使用者決定。
+After payment, contract manufacturers such as JLCPCB ask you to confirm two things: the PCB production file and the PCBA parts placement. This page explains how to diff the factory-modified files item by item against the version you submitted, decide which changes are normal and which need questions, and which actions must wait for the user to decide.
 
-和工廠溝通的規則與範本在 [jlc-support skill](../../jlc-support/SKILL.md)。比對腳本的說明在 [cam-diff.md](cam-diff.md)，腳本本身在本 skill 的 `scripts/`。
+Rules and templates for communicating with the factory are in the [jlc-support skill](../../jlc-support/SKILL.md). The diff scripts are described in [cam-diff.md](cam-diff.md); the scripts themselves are in this skill's `scripts/`.
 
-## 什麼時候用
+## When to use
 
-| 確認項目 | 內容 | 觀察到的期限 |
+| Confirmation item | Content | Observed deadline |
 |---|---|---|
-| PCB 生產稿（Production file / Confirm Production） | 工廠 CAM 處理後的 Gerber：銅、孔、阻焊、絲印、外形，常放進加了工藝邊的工藝框 | 信中請 48 小時內確認「以免延誤」，未寫逾期自動投產 |
-| PCBA 貼裝確認（Confirm Parts Placement） | 每顆元件的料號、位置、角度、極性 | 信中寫 72 小時未確認就直接投產 |
+| PCB production file (Production file / Confirm Production) | Gerbers after factory CAM processing: copper, holes, solder mask, silkscreen, outline, often placed in a process frame with added rails | The email asks for confirmation within 48 hours "to avoid delay"; it does not say production starts automatically when overdue |
+| PCBA parts placement confirmation (Confirm Parts Placement) | Part number, position, rotation and polarity of every component | The email says production starts directly if not confirmed within 72 hours |
 
-- 兩者分開審查、分開確認。裸板正確不代表元件方向正確。
-- **收信當下就算出絕對到期時間**：收信時間加上期限，寫明時區。例如週一 16:02（UTC+8）收到 72 小時的通知，到期是週四 16:02（UTC+8）。寫進 WORKLOG，並立刻告訴使用者。
-- 期限以當次信件與網站為準；過去的觀察見 [deadlines.md](../../jlc-support/references/deadlines.md)。
-- 網站確認頁的選項可能一打開就呈選取狀態，這不代表已提交。不要改動它，也不要按 Submit。
+- Review and confirm the two separately. A correct bare board does not mean the component orientations are correct.
+- **Compute the absolute deadline the moment the email arrives**: received time plus the deadline period, with the time zone stated. For example, a 72-hour notice received Monday 16:02 (UTC+8) expires Thursday 16:02 (UTC+8). Write it into WORKLOG and tell the user right away.
+- The deadline in the current email and on the website governs; past observations are in [deadlines.md](../../jlc-support/references/deadlines.md).
+- Options on the website confirmation page may appear selected as soon as it opens. That does not mean they have been submitted. Do not change them, and do not click Submit.
 
-## 準備
+## Preparation
 
-1. **鎖定比較基準。** 用你實際送出的固定製造包（Gerber、鑽孔、CPL、BOM、裝配圖）。不要拿較新的設計或歷史版本來比。
-2. **取得工廠檔。** 下載需要使用者同意，或由使用者下載後提供路徑。保存原始 ZIP，記下 SHA-256，放在私有目錄。
-3. **認清 ZIP 結構。** JLCPCB 的例子：`YG` 是你原送件的副本，`ok` 是工程處理後的 CAM 稿（[官方說明](https://jlcpcb.com/help/article/how-to-confirm-the-production-file)）。有時另附 ODB++（`.tgz`）。要審的是 `ok`，不能只看網站的小預覽圖。
-4. **先確認工廠拿到對的版本。** 比對原送件副本與固定包每個成員檔的 SHA-256（`render_compare.py --check-upload`）。比的是解壓後的成員，不是 ZIP 本身。
+1. **Lock the comparison baseline.** Use the fixed release package you actually submitted (Gerbers, drill, CPL, BOM, assembly drawing). Do not compare against a newer design or a historical version.
+2. **Obtain the factory files.** Downloading requires the user's consent, or the user downloads them and provides the path. Keep the original ZIP, record its SHA-256, and store it in a private directory.
+3. **Understand the ZIP structure.** JLCPCB example: `YG` is a copy of your original submission, `ok` is the CAM file after engineering processing ([official explanation](https://jlcpcb.com/help/article/how-to-confirm-the-production-file)). Sometimes ODB++ (`.tgz`) is included too. What you review is `ok`; do not rely on the small preview on the website.
+4. **First confirm the factory received the right version.** Compare the SHA-256 of every member file of the original submission copy against the fixed package (`render_compare.py --check-upload`). Compare the extracted members, not the ZIP itself.
 
-## 圖層對照
+## Layer mapping
 
-以下是一份 JLCPCB 生產稿的檔名，其他工廠或其他訂單可能不同。
+These are the file names of one JLCPCB production file; other factories or other orders may differ.
 
-| 檔名 | 意義 | 看什麼 |
+| File name | Meaning | What to look at |
 |---|---|---|
-| `tl` / `bl` | 頂／底銅 | 焊盤、走線有沒有消失、移動或碰在一起 |
-| `l2` / `l3`（6 層再加 `l4` `l5`） | 內銅層 | 平面、隔離空隙、孔周圍的焊盤處理 |
-| `ts` / `bs` | 頂／底阻焊 | 圖形是「露銅的開窗」，不是綠漆本身 |
-| `to` / `bo` | 頂／底絲印 | 位號、pin 1、極性與排針標示 |
-| `drl` | 鑽孔 | 數量、位置、孔徑；這份雖叫 drl，內容是 Gerber，不是 Excellon |
-| `ko` | 外形 | 成品板框與工藝框；不是每條線都是刀路 |
-| `vcut` | V 割工程圖 | 只有標了 V-CUT 的線是切割線，尺寸線和外框不是 |
-| `sk` | 孔處理標記 | 不是另一份鑽孔清單，處理方式以工程說明為準 |
+| `tl` / `bl` | Top/bottom copper | Whether pads or traces disappeared, moved or touch each other |
+| `l2` / `l3` (plus `l4` `l5` for 6 layers) | Inner copper layers | Planes, clearance gaps, pad treatment around holes |
+| `ts` / `bs` | Top/bottom solder mask | The graphics are "openings that expose copper", not the green mask itself |
+| `to` / `bo` | Top/bottom silkscreen | Designators, pin 1, polarity and header markings |
+| `drl` | Drill | Count, position, diameter; although named drl, this file is Gerber, not Excellon |
+| `ko` | Outline | Finished board outline and process frame; not every line is a cutter path |
+| `vcut` | V-cut engineering drawing | Only lines marked V-CUT are cut lines; dimension lines and the outer frame are not |
+| `sk` | Hole treatment markings | Not another drill list; the treatment is per the engineering notes |
 
-檔案常沒有副檔名，單位常是英寸（例如 2.6 格式）。用 KiCad 的 Gerber Viewer 開檔時，副檔名空白就改成顯示所有檔案。
+Files often have no extension, and units are often inches (e.g. 2.6 format). When opening them in KiCad's Gerber Viewer, switch the file filter to show all files if the extension is blank.
 
-## 步驟
+## Steps
 
-### 1. 找出座標轉換
+### 1. Find the coordinate transform
 
-工廠稿通常用工藝框座標：單板被平移，有時旋轉，旁邊加上工藝邊、定位孔、光學點。
+Factory files usually use process frame coordinates: the single board is translated, sometimes rotated, with rails, tooling holes and fiducials added around it.
 
-- 先量單板尺寸與工藝框尺寸。大框是加工用的，不是成品尺寸。
-- 找平移量：鑽孔最準，`render_compare.py --offset auto` 會用孔位估算。也可以在 `ko` 裡找單板輪廓的角點。例：原單板座標加 (+23, +17) mm，沒有旋轉或鏡像。
-- 拼板有多片相同單板時，每個位置各比一次。圖面上只有一個加工單元，不能證明交貨數量或每片都會拆邊。
-- 之後記錄的每個座標都寫明框架：「原單板 (x, y) mm，平移 (+dx, +dy)」。
+- First measure the single board size and the process frame size. The large frame is for processing, not the finished size.
+- Find the offset: drill holes are the most accurate; `render_compare.py --offset auto` estimates it from hole positions. You can also find the corners of the single board outline in `ko`. Example: original single-board coordinates plus (+23, +17) mm, no rotation or mirroring.
+- When a panel has several identical single boards, compare each position once. A drawing that shows only one processing unit cannot prove the delivered quantity or that every board will have its rails removed.
+- Every coordinate recorded afterwards states its frame: "original single board (x, y) mm, offset (+dx, +dy)".
 
-### 2. 逐層比較
+### 2. Compare layer by layer
 
-每次使用新的私有輸出目錄；執行後檢查退出碼與 JSON `status`。WARNING 必須分類與追問，INCOMPLETE／ERROR 必須補足資料或修正後重跑；不可因部分圖層成功、沒有差異框或產生了報告就寫 PASS。`render_compare` 的 PASS 只涵蓋輸入與 rendering，不能代替後續比對或使用者批准。狀態契約、缺錫膏層的排除記錄與相對路徑配對方式見 [cam-diff.md](cam-diff.md#結果與停止條件)。
+Use a new private output directory every time; after running, check the exit code and JSON `status`. WARNINGs must be classified and followed up; INCOMPLETE/ERROR must have the missing data supplied or be fixed and rerun. Do not write PASS because some layers succeeded, there are no difference boxes, or a report was generated. A `render_compare` PASS only covers input and rendering; it does not replace the later diffs or the user's approval. The status contract, how to record an excluded missing paste layer, and relative-path pairing are in [cam-diff.md](cam-diff.md#results-and-stop-conditions).
 
 ```
-python scripts/render_compare.py --original <固定包 gerbers.zip> --factory <工廠生產稿> --offset auto --out <私有目錄>
-python scripts/pixel_compare.py --renders <私有目錄>
-python scripts/check_inner_removals.py --renders <私有目錄>
+python scripts/render_compare.py --original <fixed package gerbers.zip> --factory <factory production file> --offset auto --out <private directory>
+python scripts/pixel_compare.py --renders <private directory>
+python scripts/check_inner_removals.py --renders <private directory>
 ```
 
-再用 Gerber Viewer 目視複查：先只開 `ko` 和 `drl`，再一層一層開銅、阻焊、絲印，不要一次疊滿。切到從板底觀看時左右會翻轉，差異一律用頂視座標描述，避免誤判鏡像。
+Then visually recheck in a Gerber viewer: first open only `ko` and `drl`, then open copper, solder mask and silkscreen one layer at a time; do not stack everything at once. Switching to a bottom view flips left and right, so always describe differences in top-view coordinates to avoid misreading a mirror.
 
-每層要回答的問題：
+Questions to answer for each layer:
 
-- **銅**：原有的焊盤、走線、鋪銅都還在嗎？有沒有東西移動？
-- **阻焊**：原本的開窗有沒有被蓋住？開窗變大、多出板邊開窗屬常見處理。
-- **錫膏**：生產稿常不含錫膏層。工廠另給鋼網檔時，用 `--pair` 一起比。
-- **絲印**：位號、pin 1、極性標記還在嗎？避開焊盤的修剪屬常見處理。
-- **鑽孔**：孔數相同嗎？有沒有孔移動？成品孔徑和加工孔徑可能不同（例如成品 1.0 mm 的金屬化孔以 1.15 mm 鑽出），要看工廠標示的是哪一種。新增的孔是否都在成品外？
-- **外形**：成品尺寸對嗎？哪些線真的是 V-cut？靠近切割或銑邊的元件安全嗎？
+- **Copper**: Are all original pads, traces and copper pours still there? Has anything moved?
+- **Solder mask**: Has any original opening been covered? Enlarged openings and added openings at the board edge are routine processing.
+- **Paste**: Production files often do not include the paste layer. When the factory provides a separate stencil file, compare it too with `--pair`.
+- **Silkscreen**: Are designators, pin 1 and polarity markings still there? Trimming to avoid pads is routine processing.
+- **Drill**: Is the hole count the same? Has any hole moved? Finished hole size and drilled hole size may differ (for example, a 1.0 mm finished plated hole drilled at 1.15 mm); check which one the factory is labeling. Are all added holes outside the finished board?
+- **Outline**: Is the finished size correct? Which lines are actually V-cut? Are components near cuts or milled edges safe?
 
-### 3. 分類每個差異
+### 3. Classify every difference
 
-| 常見的 CAM 處理（仍要記錄） | 可疑，需要詢問或要求修正 |
+| Routine CAM processing (still record it) | Suspicious, ask about it or request a fix |
 |---|---|
-| 工藝邊、成品外的定位孔、光學點、拼板 V-cut 或郵票孔 | 原有焊盤、走線、鋪銅消失 |
-| 工藝邊上的鋪銅 | 不同網路的銅碰在一起 |
-| 銅箔補償（線寬、焊盤略為變大） | 焊盤或元件移動；孔偏離自己的焊盤 |
-| 淚滴 | 原有的孔不見，或成品內多出孔 |
-| 內層刪除未使用的孤立焊盤（非功能焊盤） | 平面網路（如 GND）的孔失去內層連接 |
-| 阻焊開窗放大、板邊開窗 | 阻焊蓋住原本的開窗 |
-| 絲印避開焊盤而修剪 | 位號、pin 1 或極性標記被刪 |
-| 過孔微移並同步補線（例如移 0.06 mm 以避開與焊盤阻焊開窗重疊） | 成品尺寸或外形改變；拆邊方式危及靠邊元件 |
-| 鑽孔加大作孔壁補償 | 說不出原因的任何改動 |
+| Rails, tooling holes outside the finished board, fiducials, panel V-cut or mouse bites | Original pads, traces or copper pour disappeared |
+| Copper pour on the rails | Copper of different nets touching |
+| Copper compensation (trace width and pads slightly enlarged) | Pads or components moved; a hole offset from its own pad |
+| Teardrops | An original hole missing, or an extra hole inside the finished board |
+| Unused isolated pads (non-functional pads) removed on inner layers | A hole on a plane net (such as GND) losing its inner-layer connection |
+| Enlarged solder mask openings, board-edge openings | Solder mask covering an original opening |
+| Silkscreen trimmed to avoid pads | Designator, pin 1 or polarity marking deleted |
+| Via moved slightly with matching rerouting (e.g. moved 0.06 mm to avoid overlapping a pad's solder mask opening) | Finished size or outline changed; depanelization method endangering edge components |
+| Drill enlarged for hole wall compensation | Any change without an explanation |
 
-「常見」不等於「這次沒問題」。過孔微移這類改動，即使看起來合理，也要記下位置與幅度，請工廠說明原因並確認網表比對結果。
+"Routine" does not mean "no problem this time". For changes like a slightly moved via, even if they look reasonable, record the position and magnitude, ask the factory to explain why, and confirm their netlist comparison result.
 
-### 4. 銅有改動的地方，核對連通
+### 4. Where copper changed, check connectivity
 
-- **移動的孔**：孔和每一層的對應焊盤要一起移，頂底層要有新的補接線把它接回原走線。只有孔動、焊盤沒動，或補線不見，才是斷路的跡象。也看移動後和相鄰銅的間距。
-- **內層去銅**：用 `check_inner_removals.py` 確認被刪的只有未連接的孤立焊盤。用 KiCad 匯出帶網路名稱的孔清單（見 [cam-diff.md](cam-diff.md#用-kicad-產生帶網路名稱的-holesjson)），加 `--plane-nets GND`，確認平面網路的孔都保留連接。
-- **光柵比對不是網表證明。** 解析度約 0.025 mm/像素，適合找差異，不適合證明製造公差。請工廠回覆他們原始檔與 CAM 稿的網表比對結果；電測是另一回事。
+- **Moved holes**: the hole and its pad on every layer must move together, and the top and bottom layers must have new connecting traces that join it back to the original trace. Only the hole moving without the pad, or a missing connecting trace, indicates an open circuit. Also check clearance to adjacent copper after the move.
+- **Inner-layer copper removal**: use `check_inner_removals.py` to confirm only unconnected isolated pads were removed. Export a hole list with net names from KiCad (see [cam-diff.md](cam-diff.md#generating-holesjson-with-net-names-from-kicad)), add `--plane-nets GND`, and confirm holes on plane nets keep their connections.
+- **A raster diff is not a netlist proof.** The resolution is about 0.025 mm/pixel, suited to finding differences, not to proving manufacturing tolerances. Ask the factory for their netlist comparison result between the original files and the CAM file; electrical testing is a separate matter.
 
-### 5. 核對 PCBA 貼裝
+### 5. Check PCBA placement
 
-在貼裝確認頁選 Top（或 Bottom）、2D，開啟 Show Components 與 Show Designator。點表格的位號會放大該元件。3D 適合認位置，極性以 2D 標記為準，並對照裝配圖。
+On the parts placement confirmation page, choose Top (or Bottom) and 2D, and turn on Show Components and Show Designator. Clicking a designator in the table zooms to that component. 3D is good for recognizing positions; for polarity, the 2D markings govern, checked against the assembly drawing.
 
-- **數量與料號**：貼裝數量、料號種類與 BOM 一致；不貼件（DNP）沒有出現在貼裝清單。
-- **位置**：預期位置是 CPL 的單板座標加上同一個平移量。如果裝配資料裡有沿用舊拼板的座標，不要直接使用，改用單板座標重算。
-- **角度與 pin 1**：對照絲印、裝配圖與 datasheet 的腳位圖。二極體看 K／A；雙向 ESD 元件沒有正負，不能用整流二極體的規則判斷；MOSFET 對照 G／S／D；模組看 pin 1 標記。
-- **工程修改標記**：開啟 Show Revised Items 之類的選項，逐一確認被修改的元件改了什麼。
-- **DFM 結果欄空白**不代表工廠做過完整檢查。
-- **網站讀數不一定是貼裝中心。** 選取元件後顯示的 X／Y 可能是游標、元件庫原點或拾取點。有的接頭機械中心和訊號焊盤中心本來就不同。讀數和 CPL 相差（例如 0.9 mm）時，不要直接說成元件偏移，也不要為了讓數字對齊而要求移動元件；先請工程師說明那個數字代表什麼，並在圖上標出實際的焊接接點。
+- **Count and part numbers**: placement count and part number types match the BOM; do-not-place (DNP) parts do not appear in the placement list.
+- **Position**: the expected position is the CPL single-board coordinate plus the common offset. If the assembly data contains coordinates carried over from an old panel, do not use them directly; recompute from single-board coordinates.
+- **Rotation and pin 1**: check against the silkscreen, the assembly drawing and the datasheet pinout. For diodes look at K/A; bidirectional ESD parts have no polarity and cannot be judged by rectifier diode rules; check MOSFETs against G/S/D; for modules look at the pin 1 marking.
+- **Engineering change markers**: turn on an option such as Show Revised Items and confirm one by one what was changed on each modified component.
+- **A blank DFM result column** does not mean the factory did a full check.
+- **The website reading is not necessarily the placement center.** The X/Y shown after selecting a component may be the cursor, the library origin or the pick point. Some connectors have a mechanical center that differs from the signal pad center by design. When the reading differs from the CPL (e.g. by 0.9 mm), do not call it a component offset, and do not ask to move the component just to make the numbers match; first ask the engineer what that number represents, and mark the actual solder joints on the drawing.
 
-## 寫澄清給工廠
+## Writing clarifications to the factory
 
-範本用 [templates.md 的範本 C（生產稿技術澄清）](../../jlc-support/references/templates.md)，這裡不重複。要點：
+Use [template C (production file technical clarification) in templates.md](../../jlc-support/references/templates.md); it is not repeated here. Key points:
 
-- 座標寫明框架：原單板座標 (x, y) mm、平移 (+dx, +dy) mm、在工廠稿看到的座標。
-- 主動說明「並非指稱缺陷」，只問改動原因和核對結果（例如網表比對是否通過）。
-- 請對方附上標註圖。
-- 不要為了對齊顯示的數值而要求移動元件。
-- 一封信集中問待決事項；對方答完大部分後，只追問剩下的那一項。
-- 涉及數量或範圍的要求要寫具體，例如「全部 N 片都拆除工藝邊」。
-- 信尾加界線句：這是技術詢問，不是批准，請保留人工確認。
+- State the coordinate frame: original single-board coordinates (x, y) mm, offset (+dx, +dy) mm, and the coordinates seen in the factory file.
+- Say up front "this is not a claim of a defect"; only ask for the reason for the change and the check result (e.g. whether the netlist comparison passed).
+- Ask them to attach an annotated drawing.
+- Do not ask to move components to make the displayed values line up.
+- Put all open items in one message; once they have answered most of them, follow up only on what remains.
+- Be specific about requests involving quantity or scope, e.g. "remove the rails from all N boards".
+- End with a boundary statement: this is a technical inquiry, not an approval; please keep manual confirmation.
 
-## 誰可以做什麼
+## Who may do what
 
-| 動作 | 誰決定 |
+| Action | Who decides |
 |---|---|
-| 算出到期時間、寫進 WORKLOG、提醒使用者 | agent 自行處理 |
-| 讀信件與網站狀態（不改任何選項） | agent 自行處理 |
-| 跑比對腳本、做差異圖、分類、寫審查報告 | agent 自行處理 |
-| 起草澄清信 | agent 自行處理 |
-| 下載工廠檔案 | 使用者同意，或使用者自行下載 |
-| 寄信或送出聊天訊息 | 使用者每次在聊天中明確同意；催辦與純技術澄清可依 jlc-support 硬規則的限定例外事先授權 |
-| 按 Confirm Production、Confirm Parts Placement、Submit，或改動網站上的確認選項 | 使用者每次在聊天中明確同意 |
-| 接受工廠的改動、加費、補償或改期 | 使用者明確同意 |
-| 要求工廠移動元件或修改 CAM | 使用者明確同意 |
-| 修改設計或固定製造包 | 使用者明確同意，並另開版本 |
+| Compute the deadline, write it into WORKLOG, remind the user | Agent handles on its own |
+| Read emails and website status (without changing any option) | Agent handles on its own |
+| Run diff scripts, make difference images, classify, write the review report | Agent handles on its own |
+| Draft clarification messages | Agent handles on its own |
+| Download factory files | User consents, or the user downloads them |
+| Send an email or chat message | User's explicit consent in chat every time; status chases and pure technical clarifications may be pre-authorized under the limited exception in jlc-support's hard rules |
+| Click Confirm Production, Confirm Parts Placement, Submit, or change confirmation options on the website | User's explicit consent in chat every time |
+| Accept factory changes, extra charges, compensation or rescheduling | User's explicit consent |
+| Ask the factory to move components or modify CAM | User's explicit consent |
+| Modify the design or the fixed release package | User's explicit consent, and open a new version |
 
-期限快到而使用者還沒決定時，再提醒一次，不代為確認。不回覆、不按確認，都不能保證工廠不會在期限後自動投產。
+When the deadline is approaching and the user has not decided, remind once more; do not confirm on their behalf. Neither not replying nor not clicking confirm guarantees the factory will not start production automatically after the deadline.
 
-## 記錄
+## Records
 
-- WORKLOG 記下：收信時間與到期時間、比較基準與其雜湊、座標轉換、每個差異的分類、已寄出的問題、待決事項。
-- 截圖與信件常含姓名、信箱、地址，放私有目錄；要公開時先去除。
-- 結論的寫法：「未發現明確的錯版、漏孔或極性錯誤；以下 N 項待工廠說明」。是否投產由使用者決定，agent 不寫「可以投產」。
+- Record in WORKLOG: received time and deadline, comparison baseline and its hash, coordinate transform, the classification of every difference, questions sent, and open items.
+- Screenshots and emails often contain names, email addresses and addresses; keep them in a private directory and scrub them before publishing.
+- How to word the conclusion: "No clear wrong version, missing holes or polarity errors found; the following N items await factory explanation". Whether to go into production is the user's decision; the agent never writes "ready for production".
 
-## 限制
+## Limitations
 
-- 這套比對看的是圖形差異，不是重新做 ERC／DRC，也不是電氣、RF 或 EMC 評估。
-- 工廠的拆邊順序、刀具補償、孔處理工藝、實際貼裝中心，都無法只從圖面證實，要靠工程書面回覆。
-- 審查只能說明檔案，不能驗證尚未製成的實板。
+- This diff looks at graphical differences; it does not redo ERC/DRC, nor is it an electrical, RF or EMC assessment.
+- The factory's depanelization order, tool compensation, hole treatment process and actual placement centers cannot be proven from drawings alone; they need written engineering replies.
+- The review can only speak to the files; it cannot verify boards not yet made.
 
-## 參考
+## References
 
-- [JLCPCB：How to confirm the production file](https://jlcpcb.com/help/article/how-to-confirm-the-production-file)
-- [嘉立創：刪除內層獨立 PAD 的說明](https://www.jlc.com/portal/server_guide_39501.html)（解釋內層去除非功能焊盤的用途）
+- [JLCPCB: How to confirm the production file](https://jlcpcb.com/help/article/how-to-confirm-the-production-file)
+- [JLC (Jialichuang): notes on removing isolated inner-layer pads](https://www.jlc.com/portal/server_guide_39501.html) (explains the purpose of removing non-functional pads on inner layers)

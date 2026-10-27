@@ -1,65 +1,65 @@
-# 固定發行包
+# Fixed release package
 
-製造檔交出去之後，板廠的問題、客服往返、補費都會指向「當時交出去的那一份」。所以送廠的版本要做成固定發行包：內容不再改，進度另外記。
+Once manufacturing files are handed over, the fab's questions, customer service exchanges, and extra charges all refer to "the set that was handed over at the time". So the version sent to the fab is made into a fixed release package: its contents no longer change, and progress is recorded elsewhere.
 
-## 固定內容與動態進度分開
+## Keep fixed contents and changing progress separate
 
-| 類型 | 放哪裡 | 會不會再改 |
+| Type | Where it goes | Does it change? |
 |---|---|---|
-| 固定發行包：原生設計、元件庫、製造檔、驗證結果 | `releases/<版本>/` 或專案約定的固定位置 | 不改。要修正就開新版本 |
-| 實測紀錄：到板後的上電、功能測試結果與勘誤 | 發行包外，例如 `releases/<版本>-tests/` | 持續增加 |
-| 訂單、審稿、客服進度 | 發行包外的報告檔，例如 `reports/<訂單>-<日期>/` | 持續更新 |
-| 目前該用哪一版 | 根目錄 README 的入口表 | 基準改變時更新 |
+| Fixed release package: native design, libraries, manufacturing files, verification results | `releases/<version>/` or the fixed location agreed for the project | No. To fix something, open a new version |
+| Bench test record: power-up and functional test results and errata after boards arrive | Outside the release package, for example `releases/<version>-tests/` | Keeps growing |
+| Order, review, and customer service progress | Report files outside the release package, for example `reports/<order>-<date>/` | Keeps being updated |
+| Which version to use now | The entry table in the root README | Updated when the baseline changes |
 
-發行包內的 README 若寫了報價或交期，那只是發行當天的快照。
+If the README inside a release package mentions a quote or lead time, that is only a snapshot from the release date.
 
-## 發行包要有什麼
+## What a release package contains
 
 ```
 <board>-<rev>/
 ├── <board>.kicad_pro / .kicad_sch / .kicad_pcb / .kicad_dru
-├── fp-lib-table、sym-lib-table      # 用 ${KIPRJMOD} 相對路徑
-├── footprints/、symbols/            # 這個版本用到的元件庫，成套保留
-├── manufacturing/                   # Gerber＋鑽孔 zip、BOM、CPL、裝配圖、原理圖 PDF
-├── verification/                    # ERC、DRC、release-checks.json、審查紀錄
-└── README.md                        # 用哪些檔案製造、驗證過什麼、沒驗證什麼
+├── fp-lib-table, sym-lib-table      # ${KIPRJMOD} relative paths
+├── footprints/, symbols/            # libraries used by this version, kept as a complete set
+├── manufacturing/                   # Gerber + drill zip, BOM, CPL, assembly drawing, schematic PDF
+├── verification/                    # ERC, DRC, release-checks.json, review records
+└── README.md                        # which files to manufacture from, what was verified, what wasn't
 ```
 
-- **元件庫用相對路徑。** 整個資料夾搬到別台電腦也能開。
-- **不放** `.kicad_prl`（個人 UI 狀態）、自動備份、原廠 datasheet。
-- 製造檔要**成套**使用：同一版的 Gerber、鑽孔、BOM、CPL、裝配圖。
+- **Libraries use relative paths.** The whole folder still opens when moved to another computer.
+- **Do not include** `.kicad_prl` (personal UI state), automatic backups, or manufacturer datasheets.
+- Manufacturing files are used **as a set**: Gerber, drill, BOM, CPL, and assembly drawing from the same version.
 
-## 雜湊清單與封裝
+## Hash list and packaging
 
-[scripts/package_release.py](../../scripts/package_release.py) 做四件事：
+[scripts/package_release.py](../../scripts/package_release.py) does four things:
 
-1. 對發行包內每個檔案算 SHA-256，寫成 `SHA256-files.json`。
-2. 把整個資料夾和清單打包成 zip。
-3. 重新打開 zip，逐一比對每個檔案的雜湊。
-4. 寫出 zip 本身的 `.sha256.txt`。
+1. Computes SHA-256 for every file in the release package and writes `SHA256-files.json`.
+2. Packs the whole folder and the list into a zip.
+3. Reopens the zip and compares each file's hash one by one.
+4. Writes `.sha256.txt` for the zip itself.
 
 ```bash
 python scripts/package_release.py --src releases/my-board-revC --out dist
 ```
 
-雜湊清單用來確認「這就是當時那一份」，不能拿來還原。要能還原，就保留完整的 zip 或 commit。
+The hash list confirms "this is the set from that time"; it cannot be used to restore anything. To be able to restore, keep the complete zip or commit.
 
-`SHA256-files.json` 識別相對路徑與檔案內容；相同內容重新封裝時，清單應相同。zip 的 `.sha256.txt` 則只識別**這次產生的封裝檔**，不保證 deterministic rebuild（相同內容重建會得到逐位元相同的 zip）：ZIP 會保留來源檔的時間、權限等 metadata，產生的清單也有當次時間，Python／壓縮函式庫版本也可能影響封裝。要驗證收到的發行包，使用該包隨附的 ZIP 雜湊；要跨次重建比較內容，逐項比較檔案清單。不要把重建 ZIP 的雜湊不同直接解讀為製造檔改變。
+`SHA256-files.json` identifies relative paths and file contents; repackaging identical contents should give an identical list. The zip's `.sha256.txt`, however, only identifies **the package file produced this time** and does not guarantee a deterministic rebuild (rebuilding identical contents producing a bit-for-bit identical zip): ZIP keeps metadata such as source file times and permissions, the generated list also carries the time of that run, and the Python/compression library version may affect packaging too. To verify a release package you received, use the ZIP hash that came with it; to compare contents across rebuilds, compare the file lists entry by entry. Don't read a different hash on a rebuilt ZIP as a change in the manufacturing files.
 
-腳本的 `all_entries_verified: true` 只表示封裝後的內容雜湊檢查完成；它不表示 ERC／DRC、CAM／Gerber 完整性、板廠接受或實板驗證通過。
+The script's `all_entries_verified: true` only means the content hash check after packaging completed; it does not mean ERC/DRC, CAM/Gerber completeness, fab acceptance, or real-board verification passed.
 
 ## release-checks.json
 
-把發行前的檢查寫成機器可讀的檔案，之後比對、審查都方便。建議的欄位：
+Write the pre-release checks as a machine-readable file so later comparisons and reviews are easy. Suggested fields:
 
 ```json
 {
   "revision": "C",
   "checked_at": "2026-09-21T18:00:00+08:00",
   "design_file_checks_pass": true,
-  "order_readiness": "READY | BLOCKED_<原因>",
+  "order_readiness": "READY | BLOCKED_<reason>",
   "hardware_validation": "NOT_RUN",
-  "blockers": ["還沒解決、會擋住下單的事，用角色描述，不寫人名"],
+  "blockers": ["unresolved issues that block ordering, described by role, not by name"],
   "checks": [
     { "check": "ERC no violations or ignored checks", "pass": true, "detail": null },
     { "check": "DRC: no violations, unconnected items, parity issues", "pass": true, "detail": null },
@@ -69,18 +69,18 @@ python scripts/package_release.py --src releases/my-board-revC --out dist
 }
 ```
 
-- `hardware_validation` 在實板測過之前一律是 `NOT_RUN`。
-- 庫存、耗損這類會變的事，寫進 `detail` 並標日期，不要算成通過。
+- `hardware_validation` is always `NOT_RUN` until the real board has been tested.
+- Things that change, such as stock and attrition, go in `detail` with a date and are not counted as passing.
 
-## 版本資料夾命名
+## Naming version folders
 
-過程中常會留下好幾份相似的副本。名字要能看出用途：
+The process often leaves several similar copies behind. Names should make their purpose clear:
 
-| 名稱 | 意思 |
+| Name | Meaning |
 |---|---|
-| `before-complete.zip` | 修改前的完整備份 |
-| `candidate/` | 修改中的候選版本 |
-| `review-snapshot.zip`、`review-r1-fixed.zip` | 交給審查的固定版本，以及第一輪修正後的版本 |
-| `<board>-<rev>-<YYYYMMDD>.zip` | 正式發行包 |
+| `before-complete.zip` | Complete backup before the change |
+| `candidate/` | Candidate version being modified |
+| `review-snapshot.zip`, `review-r1-fixed.zip` | Fixed version handed over for review, and the version after first-round fixes |
+| `<board>-<rev>-<YYYYMMDD>.zip` | Official release package |
 
-`candidate`、`review`、`fixtures` 裡也有同名的 PCB，但它們不是目前的固定發行包，也不能只因檔名重複就刪除。目前該用哪一版，以 README 入口表為準。
+`candidate`, `review`, and `fixtures` also contain PCBs with the same name, but they are not the current fixed release package, and they must not be deleted just because the file names repeat. Which version to use now is set by the README entry table.
