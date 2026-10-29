@@ -1,5 +1,7 @@
 # pcb-agent-workflow
 
+**繁體中文** | [English](README.en.md)
+
 用 Claude Code 或 Codex 當助手，在 KiCad 10 設計 PCB、交 JLCPCB 製造的一套工作流程。
 
 這套流程來自一塊 4 層 GNSS 測試板（u-blox MAX-M10S，25 × 36.5 mm）從設計、審查、報價、送審、客服往返到確認生產稿的實際經驗。重複有用的做法寫成文件和 skill；踩過的雷寫成檢查項目。
