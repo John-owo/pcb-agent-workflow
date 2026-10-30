@@ -155,7 +155,7 @@ Copy-Item -Recurse -Force pcb-agent-workflow\skills\jlc-support "$HOME\.claude\s
 
 ## 限制
 
-- 範例板完成了 ERC／DRC 與 agent 審查，也實際送單了，但還沒有實板測試。範例是送單時的發行包；工廠 CAM 之後做的微調不在裡面。實測程序與結果見 [examples/max-m10s-breakout-revc-tests](examples/max-m10s-breakout-revc-tests/README.md)。
+- 範例板完成了 ERC／DRC 與 agent 審查，並由 JLCPCB 製造與 SMT 組裝。兩片組裝板已完成實測：上電、UART、被動天線 3D 定位、PPS 1 Hz 與 I2C 皆通過；回灌 A-GNSS 輔助資料後，定位時間約縮短為冷啟動的 1/8。範例是送單時的發行包；工廠 CAM 之後做的微調不在裡面。實測程序與結果見 [examples/max-m10s-breakout-revc-tests](examples/max-m10s-breakout-revc-tests/README.md)。
 - JLC 的期限、價格、料庫狀態是 2026-09 的觀察，以當下的網站和信件為準。
 - 流程以 Windows、KiCad 10、JLCPCB 為主要環境。其他板廠可以參考溝通原則，但網站流程不同。
 
