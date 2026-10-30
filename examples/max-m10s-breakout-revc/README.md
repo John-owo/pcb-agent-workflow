@@ -73,7 +73,7 @@
 - SPICE：自動模擬因本機模擬器逾時而跳過，沒有 SPICE 通過的結果。
 - 這一版只核對交付差異，不是重新做的完整電氣／EMC 驗證。
 - 板廠 DFM 審核與貼片確認的結果不在本套件內。板廠的最終生產稿與元件方向須另行確認。
-- 尚未做實板測試，也尚未驗證 M10S 輔助定位韌體。實測程序與結果見 [max-m10s-breakout-revc-tests](../max-m10s-breakout-revc-tests/README.md)。先前在 NEO-6M 上做的 ALP／AOP 測試，不能當作 M10S 的結果。
+- 兩片組裝板已通過實測程序第 3–7 步；M10S 輔助定位只在實板試過一次回灌（MGA-DBD＋位置）。實測程序與結果見 [max-m10s-breakout-revc-tests](../max-m10s-breakout-revc-tests/README.md)。先前在 NEO-6M 上做的 ALP／AOP 測試，不能當作 M10S 的結果。
 
 ## 已知注意事項
 

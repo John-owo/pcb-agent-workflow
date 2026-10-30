@@ -157,7 +157,7 @@ When the two agents take turns working on the same task, use the handoff format 
 
 ## Limitations
 
-- The example board passed ERC/DRC and agent review and was submitted for manufacturing, but has not yet been tested on hardware. The example is the release package submitted with the order; subsequent factory CAM adjustments are not included. See [examples/max-m10s-breakout-revc-tests](examples/max-m10s-breakout-revc-tests/README.md) for hardware-test procedures and results.
+- The example board passed ERC/DRC and agent review and was manufactured and SMT-assembled by JLCPCB. Both assembled boards passed hardware testing: power-up, UART, passive-antenna 3D fix, 1 Hz PPS and I2C. With injected A-GNSS aiding data, time to first fix was roughly one-eighth of a cold start. The example is the release package submitted with the order; subsequent factory CAM adjustments are not included. See [examples/max-m10s-breakout-revc-tests](examples/max-m10s-breakout-revc-tests/README.md) for hardware-test procedures and results.
 - JLCPCB deadlines, prices, and parts-library availability reflect observations from September 2026. Check the current website and correspondence for your order.
 - The workflow primarily targets Windows, KiCad 10, and JLCPCB. The communication principles may help with other manufacturers, but their website processes differ.
 
